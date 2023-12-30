@@ -3,16 +3,20 @@ defmodule Umwelt do
   Documentation for `Umwelt`.
   """
 
-  @doc """
-  Hello world.
+  alias Umwelt.Files
+  alias Umwelt.Parser
 
-  ## Examples
-
-      iex> Umwelt.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def parse_source(project) do
+    Files.list_from_root(project)
+    |> Enum.map(fn
+      filename ->
+        filename
+        |> File.read()
+        |> Parser.read_ast()
+        |> Parser.parse()
+    end)
+    |> Enum.reduce(%{}, fn map, acc ->
+      Map.merge(map, acc)
+    end)
   end
 end
