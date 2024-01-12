@@ -1,18 +1,18 @@
 defmodule Umwelt.Parser.When do
-  @moduledoc "Parses Method AST"
+  @moduledoc "Parses Guard AST"
 
   alias Umwelt.Parser
 
   def parse(
         {:when, _,
          [
-           {method, _, arguments},
+           {function, _, arguments},
            {_, _, _} = either
          ]},
         aliases
       ) do
     %{}
-    |> Map.put(:method, method)
+    |> Map.put(:function, function)
     |> Map.put(:args, parse_args(arguments, aliases))
     |> Map.put(:guards, parse_guards(either))
   end

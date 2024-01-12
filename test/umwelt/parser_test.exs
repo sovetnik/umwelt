@@ -5,24 +5,33 @@ defmodule Umwelt.ParserTest do
 
   setup do
     code = """
-    defmodule Foo.Bar do
-      @moduledoc "Calculator"
-      alias Foo.Jazz
-      def div(a, b) do
-        a / b
-      end
-
-      @doc "summarize two nums"
-      def sum(%Jazz.Band{} = jazz) do
-        jazz.a + jazz.b
-      end
-      defmodule Baz do
-        @moduledoc "Special"
-        def percent(a, b) do
-          a / b
+        defmodule Root do
+          @moduledoc "Foo description"
+          def root_one(once) do
+            1
+          end
+          def root_two(twice) do
+            2
+          end
+          defmodule Foo do
+            @moduledoc "Foo description"
+            def foo(bar) do
+              :baz
+            end
+            defmodule Bar do
+              @moduledoc "Bar description"
+              def bar(baz) do
+                :foo
+              end
+            end
+            defmodule Baz do
+              @moduledoc "Baz description"
+              def baz(foo) do
+                :bar
+              end
+            end
+          end
         end
-      end
-    end
     """
 
     {:ok, code: code}
@@ -39,79 +48,68 @@ defmodule Umwelt.ParserTest do
               :defmodule,
               [line: 1],
               [
-                {:__aliases__, [line: 1], [:Foo, :Bar]},
+                {:__aliases__, [line: 1], [:Root]},
                 [
                   do: {
                     :__block__,
                     [],
                     [
-                      {:@, [line: 2], [{:moduledoc, [line: 2], ["Calculator"]}]},
-                      {:alias, [line: 3], [{:__aliases__, [line: 3], [:Foo, :Jazz]}]},
-                      {:def, [line: 4],
-                       [
-                         {:div, [line: 4], [{:a, [line: 4], nil}, {:b, [line: 4], nil}]},
-                         [
-                           do:
-                             {:/, [line: 5],
-                              [
-                                {:a, [line: 5], nil},
-                                {:b, [line: 5], nil}
-                              ]}
-                         ]
-                       ]},
-                      {:@, [line: 8], [{:doc, [line: 8], ["summarize two nums"]}]},
-                      {:def, [line: 9],
-                       [
-                         {:sum, [line: 9],
+                      {:@, [line: 2], [{:moduledoc, [line: 2], ["Foo description"]}]},
+                      {:def, [line: 3],
+                       [{:root_one, [line: 3], [{:once, [line: 3], nil}]}, [do: 1]]},
+                      {:def, [line: 6],
+                       [{:root_two, [line: 6], [{:twice, [line: 6], nil}]}, [do: 2]]},
+                      {
+                        :defmodule,
+                        [line: 9],
+                        [
+                          {:__aliases__, [line: 9], [:Foo]},
                           [
-                            {:=, [line: 9],
-                             [
-                               {:%, [line: 9],
-                                [{:__aliases__, [line: 9], [:Jazz, :Band]}, {:%{}, [line: 9], []}]},
-                               {:jazz, [line: 9], nil}
-                             ]}
-                          ]},
-                         [
-                           do:
-                             {:+, [line: 10],
-                              [
-                                {{:., [line: 10], [{:jazz, [line: 10], nil}, :a]},
-                                 [no_parens: true, line: 10], []},
-                                {{:., [line: 10], [{:jazz, [line: 10], nil}, :b]},
-                                 [no_parens: true, line: 10], []}
-                              ]}
-                         ]
-                       ]},
-                      {:defmodule, [line: 12],
-                       [
-                         {:__aliases__, [line: 12], [:Baz]},
-                         [
-                           do:
-                             {:__block__, [],
-                              [
-                                {:@, [line: 13],
-                                 [
-                                   {:moduledoc, [line: 13], ["Special"]}
-                                 ]},
-                                {:def, [line: 14],
-                                 [
-                                   {:percent, [line: 14],
+                            do:
+                              {:__block__, [],
+                               [
+                                 {:@, [line: 10],
+                                  [{:moduledoc, [line: 10], ["Foo description"]}]},
+                                 {:def, [line: 11],
+                                  [{:foo, [line: 11], [{:bar, [line: 11], nil}]}, [do: :baz]]},
+                                 {:defmodule, [line: 14],
+                                  [
+                                    {:__aliases__, [line: 14], [:Bar]},
                                     [
-                                      {:a, [line: 14], nil},
-                                      {:b, [line: 14], nil}
-                                    ]},
-                                   [
-                                     do:
-                                       {:/, [line: 15],
-                                        [
-                                          {:a, [line: 15], nil},
-                                          {:b, [line: 15], nil}
-                                        ]}
-                                   ]
-                                 ]}
-                              ]}
-                         ]
-                       ]}
+                                      do:
+                                        {:__block__, [],
+                                         [
+                                           {:@, [line: 15],
+                                            [{:moduledoc, [line: 15], ["Bar description"]}]},
+                                           {:def, [line: 16],
+                                            [
+                                              {:bar, [line: 16], [{:baz, [line: 16], nil}]},
+                                              [do: :foo]
+                                            ]}
+                                         ]}
+                                    ]
+                                  ]},
+                                 {:defmodule, [line: 20],
+                                  [
+                                    {:__aliases__, [line: 20], [:Baz]},
+                                    [
+                                      do:
+                                        {:__block__, [],
+                                         [
+                                           {:@, [line: 21],
+                                            [{:moduledoc, [line: 21], ["Baz description"]}]},
+                                           {:def, [line: 22],
+                                            [
+                                              {:baz, [line: 22], [{:foo, [line: 22], nil}]},
+                                              [do: :bar]
+                                            ]}
+                                         ]}
+                                    ]
+                                  ]}
+                               ]}
+                          ]
+                        ]
+                      }
                     ]
                   }
                 ]
@@ -121,27 +119,22 @@ defmodule Umwelt.ParserTest do
 
   test "parse", %{code: code} do
     assert %{
-             [:Foo, :Bar] => [
-               %{
-                 args: [%{body: "jazz", match: [:Foo, :Jazz, :Band]}],
-                 doc: ["summarize two nums"],
-                 method: :sum
-               },
-               %{
-                 args: [%{body: "a", kind: [:Undefined]}, %{body: "b", kind: [:Undefined]}],
-                 method: :div
-               },
-               %{context: [:Foo, :Bar], moduledoc: ["Calculator"]}
+             [:Root] => [
+               %{args: [%{body: "twice", kind: [:Undefined]}], function: :root_two},
+               %{args: [%{body: "once", kind: [:Undefined]}], function: :root_one},
+               %{context: [:Root], moduledoc: ["Foo description"]}
              ],
-             [:Foo, :Bar, :Baz] => [
-               %{
-                 args: [
-                   %{body: "a", kind: [:Undefined]},
-                   %{body: "b", kind: [:Undefined]}
-                 ],
-                 method: :percent
-               },
-               %{context: [:Foo, :Bar, :Baz], moduledoc: ["Special"]}
+             [:Root, :Foo] => [
+               %{args: [%{body: "bar", kind: [:Undefined]}], function: :foo},
+               %{context: [:Root, :Foo], moduledoc: ["Foo description"]}
+             ],
+             [:Root, :Foo, :Bar] => [
+               %{args: [%{body: "baz", kind: [:Undefined]}], function: :bar},
+               %{context: [:Root, :Foo, :Bar], moduledoc: ["Bar description"]}
+             ],
+             [:Root, :Foo, :Baz] => [
+               %{args: [%{body: "foo", kind: [:Undefined]}], function: :baz},
+               %{context: [:Root, :Foo, :Baz], moduledoc: ["Baz description"]}
              ]
            } ==
              {:ok, code}

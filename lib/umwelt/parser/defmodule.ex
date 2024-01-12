@@ -14,7 +14,7 @@ defmodule Umwelt.Parser.Defmodule do
          context
        ) do
     block_children
-    |> parse_block(module)
+    |> parse_block(context ++ module)
     |> combine(%{context: context ++ module})
   end
 
@@ -30,8 +30,9 @@ defmodule Umwelt.Parser.Defmodule do
     |> Enum.reject(&is_nil(&1))
   end
 
-  defp parse_block_child({:defmodule, _, _} = ast, context, _),
-    do: parse(ast, context)
+  defp parse_block_child({:defmodule, _, _} = ast, context, _aliases) do
+    parse(ast, context)
+  end
 
   defp parse_block_child({:@, _, _} = ast, _, _),
     do: Parser.Attrs.parse(ast)
@@ -54,31 +55,22 @@ defmodule Umwelt.Parser.Defmodule do
     end)
   end
 
-  defp combine(block_children, acc) do
-    block_children
-    |> Enum.reduce([acc], fn
+  defp combine(block_children, module) do
+    Enum.reduce([[module] | block_children], fn
       %{moduledoc: value}, [head | rest] ->
-        head = head |> Map.put(:moduledoc, value)
-        [%{}, head | rest]
+        [%{}, Map.put(head, :moduledoc, value) | rest]
 
       %{doc: value}, [head | rest] ->
-        head = head |> Map.put(:doc, value)
-        [head | rest]
+        [Map.put(head, :doc, value) | rest]
 
       %{impl: value}, [head | rest] ->
-        head = head |> Map.put(:impl, value)
-        [head | rest]
+        [Map.put(head, :impl, value) | rest]
 
-      %{method: _} = child, [head | rest] ->
-        head = head |> Map.merge(child)
-        [%{}, head | rest]
+      %{function: _} = function, [head | rest] ->
+        [%{}, Map.merge(head, function) | rest]
 
-      child, list when is_list(child) ->
-        [%{}, child | list]
-
-        # other, list ->
-        #   other |> IO.inspect(label: :other_in_parse_block)
-        #   list
+      inner_module, acc when is_list(inner_module) ->
+        [inner_module | acc]
     end)
     |> Enum.reject(&Enum.empty?/1)
   end

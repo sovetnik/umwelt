@@ -9,7 +9,7 @@ defmodule Umwelt.Parser do
     do: Code.string_to_quoted(code)
 
   def parse({:ok, ast}),
-    do: parse(ast, []) |> index()
+    do: ast |> parse([]) |> index()
 
   def parse({_, _, _} = ast, aliases),
     do: Parser.Triple.parse(ast, aliases)
@@ -18,23 +18,32 @@ defmodule Umwelt.Parser do
     do: Parser.Tuple.parse(ast, aliases)
 
   def parse(ast, aliases) when is_list(ast),
-    do: ast |> Enum.map(&parse(&1, aliases))
+    do: Enum.map(ast, &parse(&1, aliases))
 
   def parse(ast, _aliases),
     do: Parser.Literal.parse(ast)
 
-  defp index(modules) do
-    [root_module(modules) | inner_modules(modules)]
-    |> Enum.reduce(%{}, fn item, result ->
-      Map.put(result, context(item), item)
-    end)
+  defp index(parsed) do
+    parsed
+    |> inner_modules()
+    |> Enum.map(&index(&1))
+    |> Enum.reduce(
+      index_root(parsed),
+      &Map.merge(&2, &1)
+    )
   end
 
-  defp root_module(modules),
-    do: modules |> Enum.filter(&is_map/1)
+  def index_root(parsed) do
+    parsed
+    |> root_module()
+    |> Enum.reduce(%{}, &Map.put(&2, context(&1), &1))
+  end
 
-  defp inner_modules(modules),
-    do: modules |> Enum.filter(&is_list/1)
+  defp root_module(parsed),
+    do: [parsed |> Enum.filter(&is_map/1)]
+
+  defp inner_modules(parsed),
+    do: parsed |> Enum.filter(&is_list/1)
 
   defp context(module) do
     module

@@ -4,27 +4,20 @@ defmodule Umwelt.Files do
   def list_from_root(project),
     do: files_in("lib/#{project}")
 
-  def files_in(path) do
-    {:ok, files} = File.ls(path)
+  # TODO: implement Access & fun calls in argument parsers before commit,
+  # for keep parser ability to parse itself
 
-    files
-    |> Enum.map(&extract("#{path}/#{&1}"))
-    |> List.flatten()
-  end
-
-  defp extract(path) do
-    if File.dir?(path) do
-      files_in(path)
-    else
-      path
-    end
-  end
-
-  # def print(result) do
-  #   IO.write(:stdio, inspect(result, pretty: true))
+  # def list_from_root(project \\ Mix.Project.config()[:app]) do
+  #   Mix.Project.config()[:elixirc_paths]
+  #   |> Enum.flat_map(&files_in(Path.join(&1, to_string(project))))
   # end
 
-  #   def save(result) do
-  #     File.write!("result.ex", inspect(result))
-  #   end
+  def files_in(path), do: path |> File.dir?() |> do_files_in(path)
+
+  defp do_files_in(false, path), do: [path]
+
+  defp do_files_in(true, path) do
+    with {:ok, files} <- File.ls(path),
+         do: Enum.flat_map(files, &files_in(Path.join(path, &1)))
+  end
 end

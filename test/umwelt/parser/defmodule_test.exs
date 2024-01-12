@@ -8,11 +8,13 @@ defmodule Umwelt.Parser.DefmoduleTest do
       """
         defmodule Foo.Bar do
           @moduledoc "Foobar description"
+          @doc "bar -> baz"
           def foo(bar) do
             :baz
           end
           defmodule Baz do
             @moduledoc "Baz description"
+            @impl true
             def bar(baz) do
               :foo
             end
@@ -23,11 +25,67 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
     assert [
              [
-               %{args: [%{body: "baz", kind: [:Undefined]}], method: :bar},
+               %{
+                 args: [%{body: "baz", kind: [:Undefined]}],
+                 function: :bar,
+                 impl: [%{body: "true", kind: [:Boolean]}]
+               },
                %{context: [:Foo, :Bar, :Baz], moduledoc: ["Baz description"]}
              ],
-             %{args: [%{body: "bar", kind: [:Undefined]}], method: :foo},
+             %{args: [%{body: "bar", kind: [:Undefined]}], function: :foo, doc: ["bar -> baz"]},
              %{context: [:Foo, :Bar], moduledoc: ["Foobar description"]}
+           ] == Defmodule.parse(ast, [])
+  end
+
+  test "deep inner module expands aliases" do
+    {:ok, ast} =
+      """
+        defmodule Root do
+          @moduledoc "Foo description"
+          def root_one(once) do
+            1
+          end
+          def root_two(twice) do
+            2
+          end
+          defmodule Foo do
+            @moduledoc "Foo description"
+            def foo(bar) do
+              :baz
+            end
+            defmodule Bar do
+              @moduledoc "Bar description"
+              def bar(baz) do
+                :foo
+              end
+            end
+            defmodule Baz do
+              @moduledoc "Baz description"
+              def baz(foo) do
+                :bar
+              end
+            end
+          end
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             [
+               [
+                 %{args: [%{body: "foo", kind: [:Undefined]}], function: :baz},
+                 %{context: [:Root, :Foo, :Baz], moduledoc: ["Baz description"]}
+               ],
+               [
+                 %{args: [%{body: "baz", kind: [:Undefined]}], function: :bar},
+                 %{context: [:Root, :Foo, :Bar], moduledoc: ["Bar description"]}
+               ],
+               %{args: [%{body: "bar", kind: [:Undefined]}], function: :foo},
+               %{context: [:Root, :Foo], moduledoc: ["Foo description"]}
+             ],
+             %{args: [%{body: "twice", kind: [:Undefined]}], function: :root_two},
+             %{args: [%{body: "once", kind: [:Undefined]}], function: :root_one},
+             %{context: [:Root], moduledoc: ["Foo description"]}
            ] == Defmodule.parse(ast, [])
   end
 
@@ -47,7 +105,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
            ] == Defmodule.parse(ast, [])
   end
 
-  test "just a module with method" do
+  test "just a module with function" do
     {:ok, ast} =
       """
         defmodule Foo.Bar do
@@ -64,7 +122,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                args: [
                  %{body: "bar", kind: [:Undefined]}
                ],
-               method: :foo
+               function: :foo
              },
              %{
                context: [:Foo, :Bar],

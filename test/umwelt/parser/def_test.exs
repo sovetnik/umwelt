@@ -14,7 +14,7 @@ defmodule Umwelt.Parser.DefTest do
 
     assert %{
              args: [],
-             method: :div
+             function: :div
            } == Def.parse(ast, [])
   end
 
@@ -32,7 +32,7 @@ defmodule Umwelt.Parser.DefTest do
                %{body: "a", kind: [:Undefined]},
                %{body: "b", kind: [:Undefined]}
              ],
-             method: :div
+             function: :div
            } == Def.parse(ast, [])
   end
 
@@ -49,7 +49,7 @@ defmodule Umwelt.Parser.DefTest do
 
     assert %{
              args: [%{body: "ast", kind: [:Undefined]}, %{body: "_aliases", kind: [:Undefined]}],
-             method: :parse_tuple_child,
+             function: :parse_tuple_child,
              guards: %{ast: [:is_float, :is_integer, :is_binary, :is_atom]}
            } == Def.parse(ast, [])
   end
@@ -75,7 +75,7 @@ defmodule Umwelt.Parser.DefTest do
                }
              ],
              guards: %{num: [:is_float, :is_integer]},
-             method: :increase
+             function: :increase
            } == Def.parse(ast, [])
   end
 end

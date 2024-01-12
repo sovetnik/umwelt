@@ -48,7 +48,7 @@ defmodule Umwelt.Parser.TripleTest do
                args: [
                  %{body: "bar", kind: [:Undefined]}
                ],
-               method: :foo
+               function: :foo
              },
              %{
                context: [:Foo, :Bar],
@@ -68,7 +68,7 @@ defmodule Umwelt.Parser.TripleTest do
 
     assert %{
              args: [],
-             method: :div
+             function: :div
            } == Triple.parse(ast, [])
   end
 

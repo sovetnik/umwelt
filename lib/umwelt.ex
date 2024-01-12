@@ -3,20 +3,12 @@ defmodule Umwelt do
   Documentation for `Umwelt`.
   """
 
-  alias Umwelt.Files
-  alias Umwelt.Parser
+  alias Umwelt.{Files, Parser}
 
   def parse_source(project) do
-    Files.list_from_root(project)
-    |> Enum.map(fn
-      filename ->
-        filename
-        |> File.read()
-        |> Parser.read_ast()
-        |> Parser.parse()
-    end)
-    |> Enum.reduce(%{}, fn map, acc ->
-      Map.merge(map, acc)
-    end)
+    project
+    |> Files.list_from_root()
+    |> Enum.map(&(&1 |> File.read() |> Parser.read_ast() |> Parser.parse()))
+    |> Enum.reduce(&Map.merge/2)
   end
 end
