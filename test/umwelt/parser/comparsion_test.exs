@@ -6,18 +6,32 @@ defmodule Umwelt.Parser.ComparsionTest do
   import Umwelt.Parser.Comparsion,
     only: [
       is_comparsion: 1,
+      is_comparsion_operator: 1,
+      is_relaxed_bool_comparsion: 1,
       is_strict_bool_comparsion: 1
     ]
 
   test "guard is_comparsion" do
-    assert is_comparsion(:==)
+    [:==, :&&, :and, :not, :in]
+    |> Enum.map(&assert is_comparsion(&1))
+  end
+
+  test "guard is_comparsion_operator" do
+    [:==, :!=, :===, :!==, :<, :<=, :>, :>=]
+    |> Enum.map(&assert is_comparsion_operator(&1))
   end
 
   test "guard is_strict_bool_comparsion(" do
-    assert is_strict_bool_comparsion(:and)
+    [:and, :or, :not, :in]
+    |> Enum.map(&assert is_strict_bool_comparsion(&1))
   end
 
-  test "and" do
+  test "guard is_relaxed_bool_comparsion(" do
+    [:&&, :||, :!]
+    |> Enum.map(&assert is_relaxed_bool_comparsion(&1))
+  end
+
+  test "strict boolean and" do
     {:ok, ast} = Code.string_to_quoted("true and false")
 
     assert %{
@@ -44,7 +58,7 @@ defmodule Umwelt.Parser.ComparsionTest do
              Comparsion.parse(ast, [])
   end
 
-  test "negate" do
+  test "strict boolean negate" do
     {:ok, ast} = Code.string_to_quoted("not false")
 
     assert %{
@@ -55,13 +69,13 @@ defmodule Umwelt.Parser.ComparsionTest do
              Comparsion.parse(ast, [])
   end
 
-  test "inclusion" do
+  test "strict boolean inclusion" do
     {:ok, ast} = Code.string_to_quoted("foobar in [:foo, :bar, :baz]")
 
     assert %{
              body: "inclusion",
              kind: :inclusion,
-             left: %{body: "foobar", kind: [:Capture]},
+             left: %{body: "foobar", kind: [:Variable]},
              right: [
                %{body: "foo", kind: [:Atom]},
                %{body: "bar", kind: [:Atom]},
@@ -71,7 +85,7 @@ defmodule Umwelt.Parser.ComparsionTest do
              Comparsion.parse(ast, [])
   end
 
-  test "or" do
+  test "strict boolean or" do
     {:ok, ast} = Code.string_to_quoted("false or true")
 
     assert %{
@@ -82,90 +96,90 @@ defmodule Umwelt.Parser.ComparsionTest do
            } == Comparsion.parse(ast, [])
   end
 
-  test "equal" do
+  test "equal to" do
     {:ok, ast} = Code.string_to_quoted("foo == :bar")
 
     assert %{
              body: "==",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Capture]},
+             left: %{body: "foo", kind: [:Variable]},
              right: %{body: "bar", kind: [:Atom]}
            } == Comparsion.parse(ast, [])
   end
 
-  test "not equal" do
+  test "not equal to" do
     {:ok, ast} = Code.string_to_quoted("foo != :bar")
 
     assert %{
              body: "!=",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Capture]},
+             left: %{body: "foo", kind: [:Variable]},
              right: %{body: "bar", kind: [:Atom]}
            } == Comparsion.parse(ast, [])
   end
 
-  test "strict equal" do
+  test "strictly equal to" do
     {:ok, ast} = Code.string_to_quoted("foo === :bar")
 
     assert %{
              body: "===",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Capture]},
+             left: %{body: "foo", kind: [:Variable]},
              right: %{body: "bar", kind: [:Atom]}
            } == Comparsion.parse(ast, [])
   end
 
-  test "strict not equal" do
-    {:ok, ast} = Code.string_to_quoted("foo !== :bar")
+  test "strictly not equal to" do
+    {:ok, ast} = Code.string_to_quoted("1 !== 1.0")
 
     assert %{
              body: "!==",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Capture]},
-             right: %{body: "bar", kind: [:Atom]}
+             left: %{body: "1", kind: [:Integer]},
+             right: %{body: "1.0", kind: [:Float]}
            } == Comparsion.parse(ast, [])
   end
 
-  test "less" do
+  test "less-than" do
     {:ok, ast} = Code.string_to_quoted("foo < 5")
 
     assert %{
              body: "<",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Capture]},
+             left: %{body: "foo", kind: [:Variable]},
              right: %{body: "5", kind: [:Integer]}
            } == Comparsion.parse(ast, [])
   end
 
-  test "more" do
+  test "more-than" do
     {:ok, ast} = Code.string_to_quoted("foo > 5")
 
     assert %{
              body: ">",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Capture]},
+             left: %{body: "foo", kind: [:Variable]},
              right: %{body: "5", kind: [:Integer]}
            } == Comparsion.parse(ast, [])
   end
 
-  test "less equal" do
+  test "less-than or equal to" do
     {:ok, ast} = Code.string_to_quoted("foo <= 5")
 
     assert %{
              body: "<=",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Capture]},
+             left: %{body: "foo", kind: [:Variable]},
              right: %{body: "5", kind: [:Integer]}
            } == Comparsion.parse(ast, [])
   end
 
-  test "more equal" do
+  test "greater-than or equal to" do
     {:ok, ast} = Code.string_to_quoted("foo >= 5")
 
     assert %{
              body: ">=",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Capture]},
+             left: %{body: "foo", kind: [:Variable]},
              right: %{body: "5", kind: [:Integer]}
            } == Comparsion.parse(ast, [])
   end

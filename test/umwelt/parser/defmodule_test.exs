@@ -26,13 +26,13 @@ defmodule Umwelt.Parser.DefmoduleTest do
     assert [
              [
                %{
-                 args: [%{body: "baz", kind: [:Capture]}],
+                 args: [%{body: "baz", kind: [:Variable]}],
                  function: :bar,
                  impl: [%{body: "true", kind: [:Boolean]}]
                },
                %{context: [:Foo, :Bar, :Baz], moduledoc: ["Baz description"]}
              ],
-             %{args: [%{body: "bar", kind: [:Capture]}], function: :foo, doc: ["bar -> baz"]},
+             %{args: [%{body: "bar", kind: [:Variable]}], function: :foo, doc: ["bar -> baz"]},
              %{context: [:Foo, :Bar], moduledoc: ["Foobar description"]}
            ] == Defmodule.parse(ast, [])
   end
@@ -73,18 +73,18 @@ defmodule Umwelt.Parser.DefmoduleTest do
     assert [
              [
                [
-                 %{args: [%{body: "foo", kind: [:Capture]}], function: :baz},
+                 %{args: [%{body: "foo", kind: [:Variable]}], function: :baz},
                  %{context: [:Root, :Foo, :Baz], moduledoc: ["Baz description"]}
                ],
                [
-                 %{args: [%{body: "baz", kind: [:Capture]}], function: :bar},
+                 %{args: [%{body: "baz", kind: [:Variable]}], function: :bar},
                  %{context: [:Root, :Foo, :Bar], moduledoc: ["Bar description"]}
                ],
-               %{args: [%{body: "bar", kind: [:Capture]}], function: :foo},
+               %{args: [%{body: "bar", kind: [:Variable]}], function: :foo},
                %{context: [:Root, :Foo], moduledoc: ["Foo description"]}
              ],
-             %{args: [%{body: "twice", kind: [:Capture]}], function: :root_two},
-             %{args: [%{body: "once", kind: [:Capture]}], function: :root_one},
+             %{args: [%{body: "twice", kind: [:Variable]}], function: :root_two},
+             %{args: [%{body: "once", kind: [:Variable]}], function: :root_one},
              %{context: [:Root], moduledoc: ["Foo description"]}
            ] == Defmodule.parse(ast, [])
   end
@@ -120,7 +120,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
     assert [
              %{
                args: [
-                 %{body: "bar", kind: [:Capture]}
+                 %{body: "bar", kind: [:Variable]}
                ],
                function: :foo
              },

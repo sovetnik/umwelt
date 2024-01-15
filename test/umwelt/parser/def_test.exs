@@ -29,8 +29,8 @@ defmodule Umwelt.Parser.DefTest do
 
     assert %{
              args: [
-               %{body: "a", kind: [:Capture]},
-               %{body: "b", kind: [:Capture]}
+               %{body: "a", kind: [:Variable]},
+               %{body: "b", kind: [:Variable]}
              ],
              function: :div
            } == Def.parse(ast, [])
@@ -48,10 +48,10 @@ defmodule Umwelt.Parser.DefTest do
 
     assert %{
              args: [
-               %{body: "path", kind: [:Capture]},
+               %{body: "path", kind: [:Variable]},
                %{
                  default_arg: [
-                   %{body: "project", kind: [:Capture]},
+                   %{body: "project", kind: [:Variable]},
                    %{
                      brackets: %{
                        key: %{body: "app", kind: [:Atom]},
@@ -84,8 +84,8 @@ defmodule Umwelt.Parser.DefTest do
 
     assert %{
              args: [
-               %{body: "ast", kind: [:Capture]},
-               %{body: "_aliases", kind: [:Capture]}
+               %{body: "ast", kind: [:Variable]},
+               %{body: "_aliases", kind: [:Variable]}
              ],
              function: :parse_tuple_child,
              guards: %{
@@ -99,21 +99,21 @@ defmodule Umwelt.Parser.DefTest do
                    kind: :comparsion,
                    left: %{
                      guard: %{body: "is_atom", kind: [:Atom]},
-                     target_arg: [%{body: "ast", kind: [:Capture]}]
+                     target_arg: [%{body: "ast", kind: [:Variable]}]
                    },
                    right: %{
                      guard: %{body: "is_binary", kind: [:Atom]},
-                     target_arg: [%{body: "ast", kind: [:Capture]}]
+                     target_arg: [%{body: "ast", kind: [:Variable]}]
                    }
                  },
                  right: %{
                    guard: %{body: "is_integer", kind: [:Atom]},
-                   target_arg: [%{body: "ast", kind: [:Capture]}]
+                   target_arg: [%{body: "ast", kind: [:Variable]}]
                  }
                },
                right: %{
                  guard: %{body: "is_float", kind: [:Atom]},
-                 target_arg: [%{body: "ast", kind: [:Capture]}]
+                 target_arg: [%{body: "ast", kind: [:Variable]}]
                }
              }
            } == Def.parse(ast, [])
@@ -131,10 +131,10 @@ defmodule Umwelt.Parser.DefTest do
 
     assert %{
              args: [
-               %{body: "num", kind: [:Capture]},
+               %{body: "num", kind: [:Variable]},
                %{
                  default_arg: [
-                   %{body: "add", kind: [:Capture]},
+                   %{body: "add", kind: [:Variable]},
                    %{body: "1", kind: [:Integer]}
                  ]
                }
@@ -145,11 +145,11 @@ defmodule Umwelt.Parser.DefTest do
                kind: :comparsion,
                left: %{
                  guard: %{body: "is_integer", kind: [:Atom]},
-                 target_arg: [%{body: "num", kind: [:Capture]}]
+                 target_arg: [%{body: "num", kind: [:Variable]}]
                },
                right: %{
                  guard: %{body: "is_float", kind: [:Atom]},
-                 target_arg: [%{body: "num", kind: [:Capture]}]
+                 target_arg: [%{body: "num", kind: [:Variable]}]
                }
              }
            } == Def.parse(ast, [])

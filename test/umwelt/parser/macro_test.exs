@@ -6,7 +6,7 @@ defmodule Umwelt.Parser.MacroTest do
   test "just variable" do
     {:ok, ast} = Code.string_to_quoted("foo")
 
-    assert %{:body => "foo", :kind => [:Capture]} ==
+    assert %{:body => "foo", :kind => [:Variable]} ==
              Macro.parse(ast, [])
   end
 
@@ -46,7 +46,7 @@ defmodule Umwelt.Parser.MacroTest do
     assert [
              %{
                args: [
-                 %{body: "bar", kind: [:Capture]}
+                 %{body: "bar", kind: [:Variable]}
                ],
                function: :foo
              },
@@ -90,7 +90,7 @@ defmodule Umwelt.Parser.MacroTest do
     assert %{
              tuple: [
                %{body: "ok", kind: [:Atom]},
-               %{body: "one", kind: [:Capture]},
+               %{body: "one", kind: [:Variable]},
                [%{body: "two", kind: [:Atom]}]
              ]
            } == Macro.parse(ast, [[:Foo, :Bar]])

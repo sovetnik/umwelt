@@ -5,7 +5,7 @@ defmodule Umwelt.MixProject do
     [
       app: :umwelt,
       version: "0.1.0",
-      elixir: "~> 1.14",
+      elixir: "~> 1.15",
       compilers: [:leex, :yecc] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),

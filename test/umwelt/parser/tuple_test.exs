@@ -22,7 +22,7 @@ defmodule Umwelt.Parser.TupleTest do
     assert %{
              tuple: [
                %{body: "ok", kind: [:Atom]},
-               %{body: "result", kind: [:Capture]}
+               %{body: "result", kind: [:Variable]}
              ]
            } == Tuple.parse(ast, [])
   end
@@ -66,8 +66,8 @@ defmodule Umwelt.Parser.TupleTest do
     assert %{
              tuple: [
                %{body: "error", kind: [:Atom]},
-               %{body: "msg", kind: [:Capture]},
-               %{body: "details", kind: [:Capture]}
+               %{body: "msg", kind: [:Variable]},
+               %{body: "details", kind: [:Variable]}
              ]
            } == Tuple.parse(ast, [])
   end
