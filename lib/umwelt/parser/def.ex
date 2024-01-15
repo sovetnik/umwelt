@@ -4,7 +4,7 @@ defmodule Umwelt.Parser.Def do
   alias Umwelt.Parser
 
   def parse({:def, _, [{:when, _, _} = ast, [do: _]]}, aliases),
-    do: Parser.When.parse(ast, aliases)
+    do: Parser.Guard.parse(ast, aliases)
 
   def parse({:def, _, [{function, _, arguments}, [do: _]]}, aliases) do
     %{}

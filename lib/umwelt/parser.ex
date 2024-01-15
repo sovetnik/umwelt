@@ -3,6 +3,7 @@ defmodule Umwelt.Parser do
 
   alias Umwelt.Parser
 
+  import Umwelt.Parser.Macro, only: [is_macro: 1]
   def read_ast({:error, msg}), do: {:error, msg}
 
   def read_ast({:ok, code}),
@@ -11,10 +12,10 @@ defmodule Umwelt.Parser do
   def parse({:ok, ast}),
     do: ast |> parse([]) |> index()
 
-  def parse({_, _, _} = ast, aliases),
-    do: Parser.Triple.parse(ast, aliases)
+  def parse(ast, aliases) when is_macro(ast),
+    do: Parser.Macro.parse(ast, aliases)
 
-  def parse({_, _} = ast, aliases),
+  def parse(ast, aliases) when is_tuple(ast) and tuple_size(ast) == 2,
     do: Parser.Tuple.parse(ast, aliases)
 
   def parse(ast, aliases) when is_list(ast),

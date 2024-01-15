@@ -1,16 +1,10 @@
 defmodule Umwelt.Files do
   @moduledoc "Finds elixir files recursive from dir"
 
-  def list_from_root(project),
-    do: files_in("lib/#{project}")
-
-  # TODO: implement Access & fun calls in argument parsers before commit,
-  # for keep parser ability to parse itself
-
-  # def list_from_root(project \\ Mix.Project.config()[:app]) do
-  #   Mix.Project.config()[:elixirc_paths]
-  #   |> Enum.flat_map(&files_in(Path.join(&1, to_string(project))))
-  # end
+  def list_from_root(project \\ Mix.Project.config()[:app]) do
+    Mix.Project.config()[:elixirc_paths]
+    |> Enum.flat_map(&files_in(Path.join(&1, to_string(project))))
+  end
 
   def files_in(path), do: path |> File.dir?() |> do_files_in(path)
 

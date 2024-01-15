@@ -1,34 +1,34 @@
-defmodule Umwelt.Parser.TripleTest do
+defmodule Umwelt.Parser.MacroTest do
   use ExUnit.Case, async: true
 
-  alias Umwelt.Parser.Triple
+  alias Umwelt.Parser.Macro
 
   test "just variable" do
     {:ok, ast} = Code.string_to_quoted("foo")
 
-    assert %{:body => "foo", :kind => [:Undefined]} ==
-             Triple.parse(ast, [])
+    assert %{:body => "foo", :kind => [:Capture]} ==
+             Macro.parse(ast, [])
   end
 
   test "typed variable Bar" do
     {:ok, ast} = Code.string_to_quoted("%Bar{} = bar")
 
     assert %{:body => "bar", :match => [:Bar]} ==
-             Triple.parse(ast, [])
+             Macro.parse(ast, [])
   end
 
   test "typed variable Bar.Baz" do
     {:ok, ast} = Code.string_to_quoted("%Bar.Baz{} = bar")
 
     assert %{:body => "bar", :match => [:Bar, :Baz]} ==
-             Triple.parse(ast, [])
+             Macro.parse(ast, [])
   end
 
   test "typed variable Bar.Baz aliased" do
     {:ok, ast} = Code.string_to_quoted("%Bar.Baz{} = bar")
 
     assert %{:body => "bar", :match => [:Foo, :Bar, :Baz]} ==
-             Triple.parse(ast, [[:Foo, :Bar]])
+             Macro.parse(ast, [[:Foo, :Bar]])
   end
 
   test "defmodule triple" do
@@ -46,7 +46,7 @@ defmodule Umwelt.Parser.TripleTest do
     assert [
              %{
                args: [
-                 %{body: "bar", kind: [:Undefined]}
+                 %{body: "bar", kind: [:Capture]}
                ],
                function: :foo
              },
@@ -54,7 +54,7 @@ defmodule Umwelt.Parser.TripleTest do
                context: [:Foo, :Bar],
                moduledoc: ["Foobar description"]
              }
-           ] == Triple.parse(ast, [])
+           ] == Macro.parse(ast, [])
   end
 
   test "def triple" do
@@ -69,19 +69,19 @@ defmodule Umwelt.Parser.TripleTest do
     assert %{
              args: [],
              function: :div
-           } == Triple.parse(ast, [])
+           } == Macro.parse(ast, [])
   end
 
   test "= triple" do
     {:ok, ast} = Code.string_to_quoted("%Foo{} = msg")
 
-    assert %{body: "msg", match: [:Foo]} == Triple.parse(ast, [])
+    assert %{body: "msg", match: [:Foo]} == Macro.parse(ast, [])
   end
 
   test "% triple" do
     {:ok, ast} = Code.string_to_quoted("%Foo{}")
 
-    assert [:Foo] == Triple.parse(ast, [])
+    assert [:Foo] == Macro.parse(ast, [])
   end
 
   test "tuple triple" do
@@ -90,9 +90,9 @@ defmodule Umwelt.Parser.TripleTest do
     assert %{
              tuple: [
                %{body: "ok", kind: [:Atom]},
-               %{body: "one", kind: [:Undefined]},
+               %{body: "one", kind: [:Capture]},
                [%{body: "two", kind: [:Atom]}]
              ]
-           } == Triple.parse(ast, [[:Foo, :Bar]])
+           } == Macro.parse(ast, [[:Foo, :Bar]])
   end
 end

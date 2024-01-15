@@ -120,20 +120,20 @@ defmodule Umwelt.ParserTest do
   test "parse", %{code: code} do
     assert %{
              [:Root] => [
-               %{args: [%{body: "twice", kind: [:Undefined]}], function: :root_two},
-               %{args: [%{body: "once", kind: [:Undefined]}], function: :root_one},
+               %{args: [%{body: "twice", kind: [:Capture]}], function: :root_two},
+               %{args: [%{body: "once", kind: [:Capture]}], function: :root_one},
                %{context: [:Root], moduledoc: ["Foo description"]}
              ],
              [:Root, :Foo] => [
-               %{args: [%{body: "bar", kind: [:Undefined]}], function: :foo},
+               %{args: [%{body: "bar", kind: [:Capture]}], function: :foo},
                %{context: [:Root, :Foo], moduledoc: ["Foo description"]}
              ],
              [:Root, :Foo, :Bar] => [
-               %{args: [%{body: "baz", kind: [:Undefined]}], function: :bar},
+               %{args: [%{body: "baz", kind: [:Capture]}], function: :bar},
                %{context: [:Root, :Foo, :Bar], moduledoc: ["Bar description"]}
              ],
              [:Root, :Foo, :Baz] => [
-               %{args: [%{body: "foo", kind: [:Undefined]}], function: :baz},
+               %{args: [%{body: "foo", kind: [:Capture]}], function: :baz},
                %{context: [:Root, :Foo, :Baz], moduledoc: ["Baz description"]}
              ]
            } ==
@@ -148,7 +148,7 @@ defmodule Umwelt.ParserTest do
     assert %{
              tuple: [
                %{body: "ok", kind: [:Atom]},
-               %{body: "msg", kind: [:Undefined]}
+               %{body: "msg", kind: [:Capture]}
              ]
            } ==
              Parser.parse(ast, [[:Foo, :Bar]])

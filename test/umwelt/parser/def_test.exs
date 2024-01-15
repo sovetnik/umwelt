@@ -29,10 +29,45 @@ defmodule Umwelt.Parser.DefTest do
 
     assert %{
              args: [
-               %{body: "a", kind: [:Undefined]},
-               %{body: "b", kind: [:Undefined]}
+               %{body: "a", kind: [:Capture]},
+               %{body: "b", kind: [:Capture]}
              ],
              function: :div
+           } == Def.parse(ast, [])
+  end
+
+  test "method call in argument" do
+    {:ok, ast} =
+      """
+        def list_from_root(path, project \\\\ Mix.Project.config()[:app]) do
+          Mix.Project.config()[:elixirc_paths]
+          |> Enum.flat_map(&files_in(Path.join(&1, to_string(project))))
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert %{
+             args: [
+               %{body: "path", kind: [:Capture]},
+               %{
+                 default_arg: [
+                   %{body: "project", kind: [:Capture]},
+                   %{
+                     brackets: %{
+                       key: %{body: "app", kind: [:Atom]},
+                       from: %{call: [[:Mix, :Project], %{body: "config", kind: [:Atom]}]}
+                     },
+                     struct: %{
+                       call: [
+                         %{body: "Elixir.Access", kind: [:Atom]},
+                         %{body: "get", kind: [:Atom]}
+                       ]
+                     }
+                   }
+                 ]
+               }
+             ],
+             function: :list_from_root
            } == Def.parse(ast, [])
   end
 
@@ -48,9 +83,39 @@ defmodule Umwelt.Parser.DefTest do
       |> Code.string_to_quoted()
 
     assert %{
-             args: [%{body: "ast", kind: [:Undefined]}, %{body: "_aliases", kind: [:Undefined]}],
+             args: [
+               %{body: "ast", kind: [:Capture]},
+               %{body: "_aliases", kind: [:Capture]}
+             ],
              function: :parse_tuple_child,
-             guards: %{ast: [:is_float, :is_integer, :is_binary, :is_atom]}
+             guards: %{
+               body: "or",
+               kind: :comparsion,
+               left: %{
+                 body: "or",
+                 kind: :comparsion,
+                 left: %{
+                   body: "or",
+                   kind: :comparsion,
+                   left: %{
+                     guard: %{body: "is_atom", kind: [:Atom]},
+                     target_arg: [%{body: "ast", kind: [:Capture]}]
+                   },
+                   right: %{
+                     guard: %{body: "is_binary", kind: [:Atom]},
+                     target_arg: [%{body: "ast", kind: [:Capture]}]
+                   }
+                 },
+                 right: %{
+                   guard: %{body: "is_integer", kind: [:Atom]},
+                   target_arg: [%{body: "ast", kind: [:Capture]}]
+                 }
+               },
+               right: %{
+                 guard: %{body: "is_float", kind: [:Atom]},
+                 target_arg: [%{body: "ast", kind: [:Capture]}]
+               }
+             }
            } == Def.parse(ast, [])
   end
 
@@ -66,16 +131,27 @@ defmodule Umwelt.Parser.DefTest do
 
     assert %{
              args: [
-               %{body: "num", kind: [:Undefined]},
+               %{body: "num", kind: [:Capture]},
                %{
-                 default_value: [
-                   %{body: "add", kind: [:Undefined]},
+                 default_arg: [
+                   %{body: "add", kind: [:Capture]},
                    %{body: "1", kind: [:Integer]}
                  ]
                }
              ],
-             guards: %{num: [:is_float, :is_integer]},
-             function: :increase
+             function: :increase,
+             guards: %{
+               body: "or",
+               kind: :comparsion,
+               left: %{
+                 guard: %{body: "is_integer", kind: [:Atom]},
+                 target_arg: [%{body: "num", kind: [:Capture]}]
+               },
+               right: %{
+                 guard: %{body: "is_float", kind: [:Atom]},
+                 target_arg: [%{body: "num", kind: [:Capture]}]
+               }
+             }
            } == Def.parse(ast, [])
   end
 end
