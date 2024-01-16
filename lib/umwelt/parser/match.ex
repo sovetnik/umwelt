@@ -6,6 +6,7 @@ defmodule Umwelt.Parser.Match do
   def parse({:=, _, [left, {name, _, nil}]}, aliases),
     do: %{
       body: to_string(name),
-      match: Parser.parse(left, aliases)
+      kind: :match,
+      term: Parser.parse(left, aliases)
     }
 end

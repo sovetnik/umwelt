@@ -24,16 +24,36 @@ defmodule Umwelt.Parser.DefmoduleTest do
       |> Code.string_to_quoted()
 
     assert [
+             %{
+               body: "Bar",
+               context: [:Foo, :Bar],
+               functions: [
+                 %{
+                   arguments: [%{body: "bar", kind: :literal, type: [:Variable]}],
+                   body: "foo",
+                   kind: :function,
+                   note: "bar -> baz"
+                 }
+               ],
+               kind: :space,
+               note: "Foobar description"
+             },
              [
                %{
-                 args: [%{body: "baz", kind: [:Variable]}],
-                 function: :bar,
-                 impl: [%{body: "true", kind: [:Boolean]}]
-               },
-               %{context: [:Foo, :Bar, :Baz], moduledoc: ["Baz description"]}
-             ],
-             %{args: [%{body: "bar", kind: [:Variable]}], function: :foo, doc: ["bar -> baz"]},
-             %{context: [:Foo, :Bar], moduledoc: ["Foobar description"]}
+                 body: "Baz",
+                 context: [:Foo, :Bar, :Baz],
+                 functions: [
+                   %{
+                     arguments: [%{body: "baz", kind: :literal, type: [:Variable]}],
+                     body: "bar",
+                     impl: %{body: "true", kind: :literal, type: [:Boolean]},
+                     kind: :function
+                   }
+                 ],
+                 kind: :space,
+                 note: "Baz description"
+               }
+             ]
            ] == Defmodule.parse(ast, [])
   end
 
@@ -41,7 +61,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
     {:ok, ast} =
       """
         defmodule Root do
-          @moduledoc "Foo description"
+          @moduledoc "Root description"
           def root_one(once) do
             1
           end
@@ -71,21 +91,69 @@ defmodule Umwelt.Parser.DefmoduleTest do
       |> Code.string_to_quoted()
 
     assert [
+             %{
+               functions: [
+                 %{
+                   arguments: [%{type: [:Variable], body: "once", kind: :literal}],
+                   body: "root_one",
+                   kind: :function
+                 },
+                 %{
+                   arguments: [%{type: [:Variable], body: "twice", kind: :literal}],
+                   body: "root_two",
+                   kind: :function
+                 }
+               ],
+               context: [:Root],
+               body: "Root",
+               kind: :space,
+               note: "Root description"
+             },
              [
+               %{
+                 functions: [
+                   %{
+                     arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
+                     body: "foo",
+                     kind: :function
+                   }
+                 ],
+                 context: [:Root, :Foo],
+                 body: "Foo",
+                 kind: :space,
+                 note: "Foo description"
+               },
                [
-                 %{args: [%{body: "foo", kind: [:Variable]}], function: :baz},
-                 %{context: [:Root, :Foo, :Baz], moduledoc: ["Baz description"]}
+                 %{
+                   functions: [
+                     %{
+                       arguments: [%{type: [:Variable], body: "foo", kind: :literal}],
+                       body: "baz",
+                       kind: :function
+                     }
+                   ],
+                   context: [:Root, :Foo, :Baz],
+                   body: "Baz",
+                   kind: :space,
+                   note: "Baz description"
+                 }
                ],
                [
-                 %{args: [%{body: "baz", kind: [:Variable]}], function: :bar},
-                 %{context: [:Root, :Foo, :Bar], moduledoc: ["Bar description"]}
-               ],
-               %{args: [%{body: "bar", kind: [:Variable]}], function: :foo},
-               %{context: [:Root, :Foo], moduledoc: ["Foo description"]}
-             ],
-             %{args: [%{body: "twice", kind: [:Variable]}], function: :root_two},
-             %{args: [%{body: "once", kind: [:Variable]}], function: :root_one},
-             %{context: [:Root], moduledoc: ["Foo description"]}
+                 %{
+                   functions: [
+                     %{
+                       arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
+                       body: "bar",
+                       kind: :function
+                     }
+                   ],
+                   context: [:Root, :Foo, :Bar],
+                   body: "Bar",
+                   kind: :space,
+                   note: "Bar description"
+                 }
+               ]
+             ]
            ] == Defmodule.parse(ast, [])
   end
 
@@ -100,8 +168,8 @@ defmodule Umwelt.Parser.DefmoduleTest do
       |> Code.string_to_quoted()
 
     assert [
-             [%{context: [:Foo, :Bar, :Baz]}],
-             %{context: [:Foo, :Bar]}
+             %{context: [:Foo, :Bar], body: "Bar", kind: :space},
+             [%{context: [:Foo, :Bar, :Baz], body: "Baz", kind: :space}]
            ] == Defmodule.parse(ast, [])
   end
 
@@ -119,14 +187,17 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
     assert [
              %{
-               args: [
-                 %{body: "bar", kind: [:Variable]}
-               ],
-               function: :foo
-             },
-             %{
+               body: "Bar",
+               kind: :space,
                context: [:Foo, :Bar],
-               moduledoc: ["Foobar description"]
+               functions: [
+                 %{
+                   arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
+                   body: "foo",
+                   kind: :function
+                 }
+               ],
+               note: "Foobar description"
              }
            ] == Defmodule.parse(ast, [])
   end
@@ -141,10 +212,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       |> Code.string_to_quoted()
 
     assert [
-             %{
-               context: [:Foo, :Bar],
-               moduledoc: ["Foobar description"]
-             }
+             %{context: [:Foo, :Bar], body: "Bar", kind: :space, note: "Foobar description"}
            ] == Defmodule.parse(ast, [])
   end
 
@@ -156,10 +224,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       """
       |> Code.string_to_quoted()
 
-    assert [
-             %{
-               context: [:Foo, :Bar]
-             }
-           ] == Defmodule.parse(ast, [])
+    assert [%{context: [:Foo, :Bar], body: "Bar", kind: :space}] ==
+             Defmodule.parse(ast, [])
   end
 end

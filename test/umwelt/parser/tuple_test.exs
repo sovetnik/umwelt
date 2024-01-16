@@ -12,7 +12,7 @@ defmodule Umwelt.Parser.TupleTest do
   test "tuple single" do
     {:ok, ast} = Code.string_to_quoted("{:foo}")
 
-    assert %{tuple: [%{body: "foo", kind: [:Atom]}]} ==
+    assert %{tuple: [%{body: "foo", kind: :literal, type: [:Atom]}]} ==
              Tuple.parse(ast, [])
   end
 
@@ -21,8 +21,8 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              tuple: [
-               %{body: "ok", kind: [:Atom]},
-               %{body: "result", kind: [:Variable]}
+               %{body: "ok", kind: :literal, type: [:Atom]},
+               %{body: "result", kind: :literal, type: [:Variable]}
              ]
            } == Tuple.parse(ast, [])
   end
@@ -32,8 +32,8 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              tuple: [
-               %{body: "ok", kind: [:Atom]},
-               %{body: "binary", kind: [:Binary]}
+               %{body: "ok", kind: :literal, type: [:Atom]},
+               %{body: "binary", kind: :literal, type: [:Binary]}
              ]
            } == Tuple.parse(ast, [])
   end
@@ -43,8 +43,8 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              tuple: [
-               %{body: "ok", kind: [:Atom]},
-               %{body: "13", kind: [:Integer]}
+               %{body: "ok", kind: :literal, type: [:Atom]},
+               %{body: "13", kind: :literal, type: [:Integer]}
              ]
            } == Tuple.parse(ast, [])
   end
@@ -54,8 +54,8 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              tuple: [
-               %{body: "ok", kind: [:Atom]},
-               %{body: "result", match: [:Result]}
+               %{body: "ok", kind: :literal, type: [:Atom]},
+               %{body: "result", kind: :match, term: [:Result]}
              ]
            } == Tuple.parse(ast, [])
   end
@@ -65,9 +65,9 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              tuple: [
-               %{body: "error", kind: [:Atom]},
-               %{body: "msg", kind: [:Variable]},
-               %{body: "details", kind: [:Variable]}
+               %{body: "error", kind: :literal, type: [:Atom]},
+               %{body: "msg", kind: :literal, type: [:Variable]},
+               %{body: "details", kind: :literal, type: [:Variable]}
              ]
            } == Tuple.parse(ast, [])
   end

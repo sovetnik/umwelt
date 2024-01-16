@@ -2,23 +2,23 @@ defmodule Umwelt.Parser.Literal do
   @moduledoc "Parses Literal AST"
 
   def parse(literal) when is_binary(literal),
-    do: %{body: literal, kind: [:Binary]}
+    do: %{body: literal, kind: :literal, type: [:Binary]}
 
   def parse(literal) when is_float(literal),
-    do: %{body: to_string(literal), kind: [:Float]}
+    do: %{body: to_string(literal), kind: :literal, type: [:Float]}
 
   def parse(literal) when is_integer(literal),
-    do: %{body: to_string(literal), kind: [:Integer]}
+    do: %{body: to_string(literal), kind: :literal, type: [:Integer]}
 
   def parse(true),
-    do: %{body: "true", kind: [:Boolean]}
+    do: %{body: "true", kind: :literal, type: [:Boolean]}
 
   def parse(false),
-    do: %{body: "false", kind: [:Boolean]}
+    do: %{body: "false", kind: :literal, type: [:Boolean]}
 
   def parse(literal) when is_atom(literal),
-    do: %{body: to_string(literal), kind: [:Atom]}
+    do: %{body: to_string(literal), kind: :literal, type: [:Atom]}
 
   def parse({literal, _, nil}),
-    do: %{body: to_string(literal), kind: [:Variable]}
+    do: %{body: to_string(literal), kind: :literal, type: [:Variable]}
 end

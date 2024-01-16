@@ -120,21 +120,69 @@ defmodule Umwelt.ParserTest do
   test "parse", %{code: code} do
     assert %{
              [:Root] => [
-               %{args: [%{body: "twice", kind: [:Variable]}], function: :root_two},
-               %{args: [%{body: "once", kind: [:Variable]}], function: :root_one},
-               %{context: [:Root], moduledoc: ["Foo description"]}
+               %{
+                 body: "Root",
+                 context: [:Root],
+                 functions: [
+                   %{
+                     arguments: [%{type: [:Variable], body: "once", kind: :literal}],
+                     body: "root_one",
+                     kind: :function
+                   },
+                   %{
+                     arguments: [%{type: [:Variable], body: "twice", kind: :literal}],
+                     body: "root_two",
+                     kind: :function
+                   }
+                 ],
+                 kind: :space,
+                 note: "Foo description"
+               }
              ],
              [:Root, :Foo] => [
-               %{args: [%{body: "bar", kind: [:Variable]}], function: :foo},
-               %{context: [:Root, :Foo], moduledoc: ["Foo description"]}
+               %{
+                 body: "Foo",
+                 context: [:Root, :Foo],
+                 functions: [
+                   %{
+                     arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
+                     body: "foo",
+                     kind: :function
+                   }
+                 ],
+                 kind: :space,
+                 note: "Foo description"
+               }
              ],
              [:Root, :Foo, :Bar] => [
-               %{args: [%{body: "baz", kind: [:Variable]}], function: :bar},
-               %{context: [:Root, :Foo, :Bar], moduledoc: ["Bar description"]}
+               %{
+                 body: "Bar",
+                 context: [:Root, :Foo, :Bar],
+                 functions: [
+                   %{
+                     arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
+                     body: "bar",
+                     kind: :function
+                   }
+                 ],
+                 kind: :space,
+                 note: "Bar description"
+               }
              ],
              [:Root, :Foo, :Baz] => [
-               %{args: [%{body: "foo", kind: [:Variable]}], function: :baz},
-               %{context: [:Root, :Foo, :Baz], moduledoc: ["Baz description"]}
+               %{
+                 body: "Baz",
+                 context: [:Root, :Foo, :Baz],
+                 functions: [
+                   %{
+                     arguments: [%{type: [:Variable], body: "foo", kind: :literal}],
+                     body: "baz",
+                     kind: :function
+                   }
+                 ],
+                 kind: :space,
+                 note: "Baz description"
+               }
              ]
            } ==
              {:ok, code}
@@ -147,8 +195,8 @@ defmodule Umwelt.ParserTest do
 
     assert %{
              tuple: [
-               %{body: "ok", kind: [:Atom]},
-               %{body: "msg", kind: [:Variable]}
+               %{body: "ok", kind: :literal, type: [:Atom]},
+               %{body: "msg", kind: :literal, type: [:Variable]}
              ]
            } ==
              Parser.parse(ast, [[:Foo, :Bar]])
@@ -159,8 +207,8 @@ defmodule Umwelt.ParserTest do
 
     assert %{
              tuple: [
-               %{body: "ok", kind: [:Atom]},
-               %{body: "13", kind: [:Integer]}
+               %{body: "ok", kind: :literal, type: [:Atom]},
+               %{body: "13", kind: :literal, type: [:Integer]}
              ]
            } ==
              Parser.parse(ast, [[:Foo, :Bar]])

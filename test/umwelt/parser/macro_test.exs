@@ -6,32 +6,32 @@ defmodule Umwelt.Parser.MacroTest do
   test "just variable" do
     {:ok, ast} = Code.string_to_quoted("foo")
 
-    assert %{:body => "foo", :kind => [:Variable]} ==
+    assert %{body: "foo", kind: :literal, type: [:Variable]} ==
              Macro.parse(ast, [])
   end
 
   test "typed variable Bar" do
     {:ok, ast} = Code.string_to_quoted("%Bar{} = bar")
 
-    assert %{:body => "bar", :match => [:Bar]} ==
+    assert %{body: "bar", kind: :match, term: [:Bar]} ==
              Macro.parse(ast, [])
   end
 
   test "typed variable Bar.Baz" do
     {:ok, ast} = Code.string_to_quoted("%Bar.Baz{} = bar")
 
-    assert %{:body => "bar", :match => [:Bar, :Baz]} ==
+    assert %{body: "bar", kind: :match, term: [:Bar, :Baz]} ==
              Macro.parse(ast, [])
   end
 
   test "typed variable Bar.Baz aliased" do
     {:ok, ast} = Code.string_to_quoted("%Bar.Baz{} = bar")
 
-    assert %{:body => "bar", :match => [:Foo, :Bar, :Baz]} ==
+    assert %{body: "bar", kind: :match, term: [:Foo, :Bar, :Baz]} ==
              Macro.parse(ast, [[:Foo, :Bar]])
   end
 
-  test "defmodule triple" do
+  test "defmodule macro" do
     code = """
       defmodule Foo.Bar do
         @moduledoc "Foobar description"
@@ -45,19 +45,22 @@ defmodule Umwelt.Parser.MacroTest do
 
     assert [
              %{
-               args: [
-                 %{body: "bar", kind: [:Variable]}
-               ],
-               function: :foo
-             },
-             %{
+               body: "Bar",
                context: [:Foo, :Bar],
-               moduledoc: ["Foobar description"]
+               functions: [
+                 %{
+                   arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
+                   body: "foo",
+                   kind: :function
+                 }
+               ],
+               kind: :space,
+               note: "Foobar description"
              }
            ] == Macro.parse(ast, [])
   end
 
-  test "def triple" do
+  test "def macro" do
     {:ok, ast} =
       """
         def div do
@@ -67,31 +70,32 @@ defmodule Umwelt.Parser.MacroTest do
       |> Code.string_to_quoted()
 
     assert %{
-             args: [],
-             function: :div
+             arguments: [],
+             body: "div",
+             kind: :function
            } == Macro.parse(ast, [])
   end
 
-  test "= triple" do
+  test "= macro" do
     {:ok, ast} = Code.string_to_quoted("%Foo{} = msg")
 
-    assert %{body: "msg", match: [:Foo]} == Macro.parse(ast, [])
+    assert %{body: "msg", kind: :match, term: [:Foo]} == Macro.parse(ast, [])
   end
 
-  test "% triple" do
+  test "% macro" do
     {:ok, ast} = Code.string_to_quoted("%Foo{}")
 
     assert [:Foo] == Macro.parse(ast, [])
   end
 
-  test "tuple triple" do
+  test "tuple macro" do
     {:ok, ast} = Code.string_to_quoted("{:ok, one, [:two]}")
 
     assert %{
              tuple: [
-               %{body: "ok", kind: [:Atom]},
-               %{body: "one", kind: [:Variable]},
-               [%{body: "two", kind: [:Atom]}]
+               %{body: "ok", kind: :literal, type: [:Atom]},
+               %{body: "one", kind: :literal, type: [:Variable]},
+               [%{body: "two", kind: :literal, type: [:Atom]}]
              ]
            } == Macro.parse(ast, [[:Foo, :Bar]])
   end

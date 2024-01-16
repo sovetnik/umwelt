@@ -37,8 +37,8 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: "and",
              kind: :comparsion,
-             left: %{body: "true", kind: [:Boolean]},
-             right: %{body: "false", kind: [:Boolean]}
+             left: %{body: "true", kind: :literal, type: [:Boolean]},
+             right: %{body: "false", kind: :literal, type: [:Boolean]}
            } == Comparsion.parse(ast, [])
   end
 
@@ -48,11 +48,11 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: "and",
              kind: :comparsion,
-             left: %{body: "true", kind: [:Boolean]},
+             left: %{body: "true", kind: :literal, type: [:Boolean]},
              right: %{
                body: "not",
                kind: :negate,
-               expr: %{body: "false", kind: [:Boolean]}
+               expr: %{body: "false", kind: :literal, type: [:Boolean]}
              }
            } ==
              Comparsion.parse(ast, [])
@@ -64,7 +64,7 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: "not",
              kind: :negate,
-             expr: %{body: "false", kind: [:Boolean]}
+             expr: %{body: "false", kind: :literal, type: [:Boolean]}
            } ==
              Comparsion.parse(ast, [])
   end
@@ -75,11 +75,11 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: "inclusion",
              kind: :inclusion,
-             left: %{body: "foobar", kind: [:Variable]},
+             left: %{body: "foobar", kind: :literal, type: [:Variable]},
              right: [
-               %{body: "foo", kind: [:Atom]},
-               %{body: "bar", kind: [:Atom]},
-               %{body: "baz", kind: [:Atom]}
+               %{body: "foo", kind: :literal, type: [:Atom]},
+               %{body: "bar", kind: :literal, type: [:Atom]},
+               %{body: "baz", kind: :literal, type: [:Atom]}
              ]
            } ==
              Comparsion.parse(ast, [])
@@ -91,8 +91,8 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: "or",
              kind: :comparsion,
-             left: %{body: "false", kind: [:Boolean]},
-             right: %{body: "true", kind: [:Boolean]}
+             left: %{body: "false", kind: :literal, type: [:Boolean]},
+             right: %{body: "true", kind: :literal, type: [:Boolean]}
            } == Comparsion.parse(ast, [])
   end
 
@@ -102,8 +102,8 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: "==",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Variable]},
-             right: %{body: "bar", kind: [:Atom]}
+             left: %{body: "foo", kind: :literal, type: [:Variable]},
+             right: %{body: "bar", kind: :literal, type: [:Atom]}
            } == Comparsion.parse(ast, [])
   end
 
@@ -113,8 +113,8 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: "!=",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Variable]},
-             right: %{body: "bar", kind: [:Atom]}
+             left: %{body: "foo", kind: :literal, type: [:Variable]},
+             right: %{body: "bar", kind: :literal, type: [:Atom]}
            } == Comparsion.parse(ast, [])
   end
 
@@ -124,8 +124,8 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: "===",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Variable]},
-             right: %{body: "bar", kind: [:Atom]}
+             left: %{body: "foo", kind: :literal, type: [:Variable]},
+             right: %{body: "bar", kind: :literal, type: [:Atom]}
            } == Comparsion.parse(ast, [])
   end
 
@@ -135,8 +135,8 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: "!==",
              kind: :comparsion,
-             left: %{body: "1", kind: [:Integer]},
-             right: %{body: "1.0", kind: [:Float]}
+             left: %{body: "1", kind: :literal, type: [:Integer]},
+             right: %{body: "1.0", kind: :literal, type: [:Float]}
            } == Comparsion.parse(ast, [])
   end
 
@@ -146,8 +146,8 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: "<",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Variable]},
-             right: %{body: "5", kind: [:Integer]}
+             left: %{body: "foo", kind: :literal, type: [:Variable]},
+             right: %{body: "5", kind: :literal, type: [:Integer]}
            } == Comparsion.parse(ast, [])
   end
 
@@ -157,8 +157,8 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: ">",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Variable]},
-             right: %{body: "5", kind: [:Integer]}
+             left: %{body: "foo", kind: :literal, type: [:Variable]},
+             right: %{body: "5", kind: :literal, type: [:Integer]}
            } == Comparsion.parse(ast, [])
   end
 
@@ -168,8 +168,8 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: "<=",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Variable]},
-             right: %{body: "5", kind: [:Integer]}
+             left: %{body: "foo", kind: :literal, type: [:Variable]},
+             right: %{body: "5", kind: :literal, type: [:Integer]}
            } == Comparsion.parse(ast, [])
   end
 
@@ -179,8 +179,8 @@ defmodule Umwelt.Parser.ComparsionTest do
     assert %{
              body: ">=",
              kind: :comparsion,
-             left: %{body: "foo", kind: [:Variable]},
-             right: %{body: "5", kind: [:Integer]}
+             left: %{body: "foo", kind: :literal, type: [:Variable]},
+             right: %{body: "5", kind: :literal, type: [:Integer]}
            } == Comparsion.parse(ast, [])
   end
 end
