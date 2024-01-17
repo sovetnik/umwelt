@@ -7,10 +7,7 @@ defmodule Umwelt.Parser.Defmodule do
     do: children |> parse_children(context)
 
   defp parse_children(
-         [
-           {:__aliases__, _, module},
-           [do: block_children]
-         ],
+         [{:__aliases__, _, module}, [do: block_children]],
          context
        ) do
     block_children
@@ -20,8 +17,6 @@ defmodule Umwelt.Parser.Defmodule do
       kind: :space,
       context: context ++ module
     })
-    |> combine_functions()
-    |> List.wrap()
   end
 
   defp parse_block({:defmodule, _, _} = ast, context),
@@ -46,26 +41,48 @@ defmodule Umwelt.Parser.Defmodule do
   defp parse_block_child({:def, _, _} = ast, _, aliases),
     do: Parser.Def.parse(ast, aliases)
 
-  defp parse_block_child(_ast, _context, _block_children),
-    do: nil
+  defp parse_block_child({:defstruct, _, fields}, _context, aliases) do
+    %{defstruct: Parser.parse(fields, aliases)}
+  end
+
+  defp parse_block_child(_ast, _, _) do
+    nil
+  end
 
   defp aliases(children) do
-    children
-    |> Enum.flat_map(fn
+    Enum.flat_map(children, fn
       {:alias, _, [{:__aliases__, _, module}]} ->
         [module]
 
       _other ->
-        # other |> IO.inspect(label: :other_in_parse_aliases)
         []
     end)
   end
 
   defp combine(block_children, module) do
-    Enum.reduce([[module] | block_children], fn
-      %{moduledoc: [value]}, [head | rest] ->
-        [%{}, Map.put(head, :note, value) | rest]
+    this_module =
+      block_children
+      |> combine_module(module)
+      |> Map.put(:functions, extract_functions(block_children))
 
+    [this_module | Enum.filter(block_children, &is_list(&1))]
+  end
+
+  defp combine_module(block_children, module) do
+    Enum.reduce(block_children, module, fn
+      %{moduledoc: [value]}, module ->
+        Map.put(module, :note, value)
+
+      %{defstruct: [value]}, module ->
+        Map.put(module, :fields, value)
+
+      _other, module ->
+        module
+    end)
+  end
+
+  defp extract_functions(block_children) do
+    Enum.reduce([[%{}] | block_children], fn
       %{doc: [value]}, [head | rest] ->
         [Map.put(head, :note, value) | rest]
 
@@ -75,29 +92,10 @@ defmodule Umwelt.Parser.Defmodule do
       %{kind: :function} = function, [head | rest] ->
         [%{}, Map.merge(head, function) | rest]
 
-      inner_module, acc when is_list(inner_module) ->
-        [inner_module | acc]
+      _other, acc ->
+        acc
     end)
     |> Enum.reject(&Enum.empty?/1)
-  end
-
-  defp combine_functions(modules) do
-    this_module =
-      modules
-      |> Enum.filter(&is_map(&1))
-      |> Enum.reduce(%{}, fn
-        %{kind: :space} = space, acc ->
-          Map.merge(space, acc)
-
-        %{kind: :function} = func, acc ->
-          functions = acc[:functions] || []
-          Map.put(acc, :functions, [func | functions])
-
-          # other, acc ->
-          #   IO.inspect(other, label: :combine_other)
-          #   acc
-      end)
-
-    [this_module | Enum.filter(modules, &is_list(&1))]
+    |> Enum.reverse()
   end
 end

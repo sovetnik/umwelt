@@ -127,21 +127,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  %{
                    functions: [
                      %{
-                       arguments: [%{type: [:Variable], body: "foo", kind: :literal}],
-                       body: "baz",
-                       kind: :function
-                     }
-                   ],
-                   context: [:Root, :Foo, :Baz],
-                   body: "Baz",
-                   kind: :space,
-                   note: "Baz description"
-                 }
-               ],
-               [
-                 %{
-                   functions: [
-                     %{
                        arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
                        body: "bar",
                        kind: :function
@@ -152,6 +137,44 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    kind: :space,
                    note: "Bar description"
                  }
+               ],
+               [
+                 %{
+                   functions: [
+                     %{
+                       arguments: [%{type: [:Variable], body: "foo", kind: :literal}],
+                       body: "baz",
+                       kind: :function
+                     }
+                   ],
+                   context: [:Root, :Foo, :Baz],
+                   body: "Baz",
+                   kind: :space,
+                   note: "Baz description"
+                 }
+               ]
+             ]
+           ] == Defmodule.parse(ast, [])
+  end
+
+  test "empty inner modules expands aliases" do
+    {:ok, ast} =
+      """
+        defmodule Foo do
+          defmodule Bar do
+            defmodule Baz do
+            end
+          end
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             %{body: "Foo", kind: :space, context: [:Foo], functions: []},
+             [
+               %{body: "Bar", kind: :space, context: [:Foo, :Bar], functions: []},
+               [
+                 %{body: "Baz", kind: :space, context: [:Foo, :Bar, :Baz], functions: []}
                ]
              ]
            ] == Defmodule.parse(ast, [])
@@ -168,8 +191,55 @@ defmodule Umwelt.Parser.DefmoduleTest do
       |> Code.string_to_quoted()
 
     assert [
-             %{context: [:Foo, :Bar], body: "Bar", kind: :space},
-             [%{context: [:Foo, :Bar, :Baz], body: "Baz", kind: :space}]
+             %{context: [:Foo, :Bar], body: "Bar", kind: :space, functions: []},
+             [%{context: [:Foo, :Bar, :Baz], body: "Baz", kind: :space, functions: []}]
+           ] == Defmodule.parse(ast, [])
+  end
+
+  test "just a module with defstruct" do
+    {:ok, ast} =
+      """
+        defmodule Foo.Bar do
+          @moduledoc "Foobar description"
+          defstruct foo: nil, tree: %{}
+          def foo(bar) do
+            :baz
+          end
+          def bar(baz) do
+            :foo
+          end
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             %{
+               body: "Bar",
+               note: "Foobar description",
+               kind: :space,
+               context: [:Foo, :Bar],
+               fields: [
+                 %{
+                   tuple: [
+                     %{type: [:Atom], body: "foo", kind: :literal},
+                     %{type: [:Atom], body: "", kind: :literal}
+                   ]
+                 },
+                 %{tuple: [%{type: [:Atom], body: "tree", kind: :literal}, %{struct: []}]}
+               ],
+               functions: [
+                 %{
+                   arguments: [%{body: "bar", kind: :literal, type: [:Variable]}],
+                   body: "foo",
+                   kind: :function
+                 },
+                 %{
+                   arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
+                   body: "bar",
+                   kind: :function
+                 }
+               ]
+             }
            ] == Defmodule.parse(ast, [])
   end
 
@@ -212,7 +282,13 @@ defmodule Umwelt.Parser.DefmoduleTest do
       |> Code.string_to_quoted()
 
     assert [
-             %{context: [:Foo, :Bar], body: "Bar", kind: :space, note: "Foobar description"}
+             %{
+               context: [:Foo, :Bar],
+               body: "Bar",
+               kind: :space,
+               note: "Foobar description",
+               functions: []
+             }
            ] == Defmodule.parse(ast, [])
   end
 
@@ -224,7 +300,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       """
       |> Code.string_to_quoted()
 
-    assert [%{context: [:Foo, :Bar], body: "Bar", kind: :space}] ==
+    assert [%{context: [:Foo, :Bar], body: "Bar", kind: :space, functions: []}] ==
              Defmodule.parse(ast, [])
   end
 end
