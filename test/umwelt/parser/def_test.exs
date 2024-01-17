@@ -40,8 +40,8 @@ defmodule Umwelt.Parser.DefTest do
 
   test "method call in argument" do
     {:ok, ast} =
-      """
-        def list_from_root(path, project \\\\ Mix.Project.config()[:app]) do
+      ~S"""
+        def list_from_root(path, project \\ Mix.Project.config()[:app]) do
           Mix.Project.config()[:elixirc_paths]
           |> Enum.flat_map(&files_in(Path.join(&1, to_string(project))))
         end
@@ -130,11 +130,11 @@ defmodule Umwelt.Parser.DefTest do
 
   test "parse with guards and default value" do
     {:ok, ast} =
-      """
-      def increase(num, add \\\\ 1)
-        when is_integer(num) or is_float(num) do
-          num + add
-      end
+      ~S"""
+        def increase(num, add \\ 1)
+          when is_integer(num) or is_float(num) do
+            num + add
+        end
       """
       |> Code.string_to_quoted()
 
