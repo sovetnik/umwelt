@@ -3,9 +3,25 @@ defmodule Umwelt.Parser.Macro do
 
   alias Umwelt.Parser
 
-  import Umwelt.Parser.Comparsion, only: [is_comparsion: 1]
+  import Umwelt.Parser.Comparison, only: [is_comparison: 1]
 
-  defguard is_macro(term) when is_tuple(term) and tuple_size(term) == 3
+  # defguard is_macro(term) when is_tuple(term) and tuple_size(term) == 3
+
+  defguardp is_atom_macro(term)
+           when is_tuple(term) and
+                  tuple_size(term) == 3 and
+                  is_atom(elem(term, 0)) and
+                  (is_list(elem(term, 1)) or is_nil(elem(term, 1))) and
+                  (is_list(elem(term, 2)) or is_atom(elem(term, 2)))
+
+  defguardp is_macro_macro(term)
+            when is_tuple(term) and
+                   tuple_size(term) == 3 and
+                   is_atom_macro(elem(term, 0)) and
+                   (is_list(elem(term, 1)) or is_nil(elem(term, 1))) and
+                   (is_list(elem(term, 2)) or is_atom(elem(term, 2)))
+
+  defguard is_macro(term) when is_atom_macro(term) or is_macro_macro(term)
 
   def parse({_, _, nil} = ast, _aliases),
     do: Parser.Literal.parse(ast)
@@ -41,8 +57,8 @@ defmodule Umwelt.Parser.Macro do
   def parse({:., _, children} = ast, aliases) when is_macro(ast),
     do: %{call: Parser.parse(children, aliases)}
 
-  def parse({term, _, _} = ast, aliases) when is_comparsion(term),
-    do: Parser.Comparsion.parse(ast, aliases)
+  def parse({term, _, _} = ast, aliases) when is_comparison(term),
+    do: Parser.Comparison.parse(ast, aliases)
 
   def parse({term, [from_brackets: true, line: _], [from, key]} = ast, aliases)
       when is_macro(ast) and is_macro(term) do

@@ -1,21 +1,21 @@
-defmodule Umwelt.Parser.Comparsion do
-  @moduledoc "Parses Comparsion AST"
+defmodule Umwelt.Parser.Comparison do
+  @moduledoc "Parses Comparison AST"
 
   alias Umwelt.Parser
 
-  defguard is_comparsion_operator(term)
+  defguard is_comparison_operator(term)
            when term in [:==, :!=, :===, :!==, :<, :<=, :>, :>=]
 
-  defguard is_strict_bool_comparsion(term)
+  defguard is_strict_bool_comparison(term)
            when term in [:and, :or, :not, :in]
 
-  defguard is_relaxed_bool_comparsion(term)
+  defguard is_relaxed_bool_comparison(term)
            when term in [:&&, :||, :!]
 
-  defguard is_comparsion(term)
-           when is_comparsion_operator(term) or
-                  is_strict_bool_comparsion(term) or
-                  is_relaxed_bool_comparsion(term)
+  defguard is_comparison(term)
+           when is_comparison_operator(term) or
+                  is_strict_bool_comparison(term) or
+                  is_relaxed_bool_comparison(term)
 
   def parse({:in, _, [left, right]}, aliases) when is_list(right) do
     %{
@@ -27,9 +27,9 @@ defmodule Umwelt.Parser.Comparsion do
   end
 
   def parse({term, _, [left, right]}, aliases)
-      when is_comparsion(term) do
+      when is_comparison(term) do
     %{
-      kind: :comparsion,
+      kind: :comparison,
       body: to_string(term),
       left: Parser.parse(left, aliases),
       right: Parser.parse(right, aliases)

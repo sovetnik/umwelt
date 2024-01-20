@@ -99,13 +99,13 @@ defmodule Umwelt.Parser.DefTest do
              kind: :function,
              guards: %{
                body: "or",
-               kind: :comparsion,
+               kind: :comparison,
                left: %{
                  body: "or",
-                 kind: :comparsion,
+                 kind: :comparison,
                  left: %{
                    body: "or",
-                   kind: :comparsion,
+                   kind: :comparison,
                    left: %{
                      guard: %{body: "is_atom", kind: :literal, type: [:Atom]},
                      target_arg: [%{body: "ast", kind: :literal, type: [:Variable]}]
@@ -141,7 +141,7 @@ defmodule Umwelt.Parser.DefTest do
     assert %{
              guards: %{
                body: "or",
-               kind: :comparsion,
+               kind: :comparison,
                left: %{
                  guard: %{body: "is_integer", kind: :literal, type: [:Atom]},
                  target_arg: [%{body: "num", kind: :literal, type: [:Variable]}]
