@@ -4,7 +4,7 @@ defmodule Umwelt.Parser.Defmodule do
   alias Umwelt.Parser
 
   def parse({:defmodule, _meta, children}, context),
-    do: children |> parse_children(context)
+    do: parse_children(children, context)
 
   defp parse_children(
          [{:__aliases__, _, module}, [do: block_children]],
@@ -19,13 +19,13 @@ defmodule Umwelt.Parser.Defmodule do
     })
   end
 
-  defp parse_block({:defmodule, _, _} = ast, context),
+  def parse_block({:defmodule, _, _} = ast, context),
     do: [parse(ast, context)]
 
-  defp parse_block({:@, _, _} = ast, _context),
+  def parse_block({:@, _, _} = ast, _context),
     do: [Parser.Attrs.parse(ast)]
 
-  defp parse_block({:__block__, _, block_children}, context) do
+  def parse_block({:__block__, _, block_children}, context) do
     block_children
     |> Enum.map(&parse_block_child(&1, context, aliases(block_children)))
     |> Enum.reject(&is_nil(&1))
@@ -59,7 +59,7 @@ defmodule Umwelt.Parser.Defmodule do
     end)
   end
 
-  defp combine(block_children, module) do
+  def combine(block_children, module) do
     this_module =
       block_children
       |> combine_module(module)

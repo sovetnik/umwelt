@@ -12,6 +12,9 @@ defmodule Umwelt.Parser do
   def parse({:ok, ast}),
     do: ast |> parse([]) |> index()
 
+  def parse_root({:ok, ast}),
+    do: Parser.Root.parse(ast) |> index()
+
   def parse(ast, aliases) when is_macro(ast),
     do: Parser.Macro.parse(ast, aliases)
 
@@ -28,16 +31,13 @@ defmodule Umwelt.Parser do
     parsed
     |> inner_modules()
     |> Enum.map(&index(&1))
-    |> Enum.reduce(
-      index_root(parsed),
-      &Map.merge(&2, &1)
-    )
+    |> Enum.reduce(index_root(parsed), &Map.merge(&2, &1))
   end
 
-  def index_root(parsed) do
+  defp index_root(parsed) do
     parsed
     |> root_module()
-    |> Enum.reduce(%{}, &Map.put(&2, context(&1), &1))
+    |> Enum.reduce(%{}, &Map.put(&2, context(&1), List.first(&1)))
   end
 
   defp root_module(parsed),

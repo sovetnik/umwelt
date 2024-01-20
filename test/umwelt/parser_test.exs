@@ -119,71 +119,63 @@ defmodule Umwelt.ParserTest do
 
   test "parse", %{code: code} do
     assert %{
-             [:Root] => [
-               %{
-                 body: "Root",
-                 context: [:Root],
-                 functions: [
-                   %{
-                     arguments: [%{type: [:Variable], body: "once", kind: :literal}],
-                     body: "root_one",
-                     kind: :function
-                   },
-                   %{
-                     arguments: [%{type: [:Variable], body: "twice", kind: :literal}],
-                     body: "root_two",
-                     kind: :function
-                   }
-                 ],
-                 kind: :space,
-                 note: "Foo description"
-               }
-             ],
-             [:Root, :Foo] => [
-               %{
-                 body: "Foo",
-                 context: [:Root, :Foo],
-                 functions: [
-                   %{
-                     arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
-                     body: "foo",
-                     kind: :function
-                   }
-                 ],
-                 kind: :space,
-                 note: "Foo description"
-               }
-             ],
-             [:Root, :Foo, :Bar] => [
-               %{
-                 body: "Bar",
-                 context: [:Root, :Foo, :Bar],
-                 functions: [
-                   %{
-                     arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
-                     body: "bar",
-                     kind: :function
-                   }
-                 ],
-                 kind: :space,
-                 note: "Bar description"
-               }
-             ],
-             [:Root, :Foo, :Baz] => [
-               %{
-                 body: "Baz",
-                 context: [:Root, :Foo, :Baz],
-                 functions: [
-                   %{
-                     arguments: [%{type: [:Variable], body: "foo", kind: :literal}],
-                     body: "baz",
-                     kind: :function
-                   }
-                 ],
-                 kind: :space,
-                 note: "Baz description"
-               }
-             ]
+             [:Root] => %{
+               body: "Root",
+               context: [:Root],
+               functions: [
+                 %{
+                   arguments: [%{type: [:Variable], body: "once", kind: :literal}],
+                   body: "root_one",
+                   kind: :function
+                 },
+                 %{
+                   arguments: [%{type: [:Variable], body: "twice", kind: :literal}],
+                   body: "root_two",
+                   kind: :function
+                 }
+               ],
+               kind: :space,
+               note: "Foo description"
+             },
+             [:Root, :Foo] => %{
+               body: "Foo",
+               context: [:Root, :Foo],
+               functions: [
+                 %{
+                   arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
+                   body: "foo",
+                   kind: :function
+                 }
+               ],
+               kind: :space,
+               note: "Foo description"
+             },
+             [:Root, :Foo, :Bar] => %{
+               body: "Bar",
+               context: [:Root, :Foo, :Bar],
+               functions: [
+                 %{
+                   arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
+                   body: "bar",
+                   kind: :function
+                 }
+               ],
+               kind: :space,
+               note: "Bar description"
+             },
+             [:Root, :Foo, :Baz] => %{
+               body: "Baz",
+               context: [:Root, :Foo, :Baz],
+               functions: [
+                 %{
+                   arguments: [%{type: [:Variable], body: "foo", kind: :literal}],
+                   body: "baz",
+                   kind: :function
+                 }
+               ],
+               kind: :space,
+               note: "Baz description"
+             }
            } ==
              {:ok, code}
              |> Parser.read_ast()
