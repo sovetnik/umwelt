@@ -8,11 +8,11 @@ defmodule Umwelt.Parser.Macro do
   # defguard is_macro(term) when is_tuple(term) and tuple_size(term) == 3
 
   defguardp is_atom_macro(term)
-           when is_tuple(term) and
-                  tuple_size(term) == 3 and
-                  is_atom(elem(term, 0)) and
-                  (is_list(elem(term, 1)) or is_nil(elem(term, 1))) and
-                  (is_list(elem(term, 2)) or is_atom(elem(term, 2)))
+            when is_tuple(term) and
+                   tuple_size(term) == 3 and
+                   is_atom(elem(term, 0)) and
+                   (is_list(elem(term, 1)) or is_nil(elem(term, 1))) and
+                   (is_list(elem(term, 2)) or is_atom(elem(term, 2)))
 
   defguardp is_macro_macro(term)
             when is_tuple(term) and
@@ -53,15 +53,18 @@ defmodule Umwelt.Parser.Macro do
   def parse({:\\, _, children} = ast, aliases) when is_macro(ast),
     do: %{default_arg: Parser.parse(children, aliases)}
 
-  # fun call
   def parse({:., _, children} = ast, aliases) when is_macro(ast),
     do: %{call: Parser.parse(children, aliases)}
+
+  def parse({{:., _, [{:__aliases__, _, [:Kernel]}, term]}, _, arguments}, aliases)
+      when is_atom(term),
+      do: Parser.parse({term, [], arguments}, aliases)
 
   def parse({term, _, _} = ast, aliases) when is_comparison(term),
     do: Parser.Comparison.parse(ast, aliases)
 
   def parse({term, [from_brackets: true, line: _], [from, key]} = ast, aliases)
-      when is_macro(ast) and is_macro(term) do
+      when is_macro_macro(ast) do
     %{
       struct: parse(term, aliases),
       brackets: %{
@@ -72,15 +75,12 @@ defmodule Umwelt.Parser.Macro do
   end
 
   # access get
-  def parse({term, _, []} = ast, aliases)
-      when is_macro(ast) and is_macro(term),
-      do: parse(term, aliases)
+  def parse({term, _, []} = ast, aliases) when is_macro_macro(ast),
+    do: parse(term, aliases)
 
-  # guard call
-  def parse({term, _, children} = ast, aliases)
-      when is_macro(ast) and is_atom(term) do
-    %{guard: Parser.parse(term, aliases), target_arg: Parser.parse(children, aliases)}
-  end
+  # guard call, like is_atom, etc.
+  def parse({term, _, children} = ast, aliases) when is_atom_macro(ast),
+    do: %{guard: Parser.parse(term, aliases), target_arg: Parser.parse(children, aliases)}
 
   defp expand_module(module, []), do: module
 

@@ -26,24 +26,15 @@ defmodule Umwelt.Parser.Def do
         {:when, _,
          [
            {function, _, arguments},
-           {_, _, _} = either
+           {_, _, _} = guards
          ]},
         aliases
       ) do
     %{
       body: to_string(function),
       kind: :function,
-      arguments: parse_args(arguments, aliases),
-      guards: parse_guards(either, aliases)
+      arguments: Parser.parse(arguments, aliases),
+      guards: Parser.parse(guards, aliases)
     }
   end
-
-  # other guards, like is_*
-  def parse_guards({term, _, _} = ast, aliases)
-      when is_atom(term) do
-    Parser.parse(ast, aliases)
-  end
-
-  def parse_args(arguments, aliases),
-    do: arguments |> Enum.map(&Parser.parse(&1, aliases))
 end

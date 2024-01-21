@@ -31,15 +31,14 @@ defmodule Umwelt.Parser.Defmodule do
     |> Enum.reject(&is_nil(&1))
   end
 
-  defp parse_block_child({:defmodule, _, _} = ast, context, _aliases) do
-    parse(ast, context)
-  end
-
   defp parse_block_child({:@, _, _} = ast, _, _),
     do: Parser.Attrs.parse(ast)
 
   defp parse_block_child({:def, _, _} = ast, _, aliases),
     do: Parser.Def.parse(ast, aliases)
+
+  defp parse_block_child({:defmodule, _, _} = ast, context, _aliases),
+    do: parse(ast, context)
 
   defp parse_block_child({:defstruct, _, fields}, _context, aliases) do
     %{defstruct: Parser.parse(fields, aliases)}

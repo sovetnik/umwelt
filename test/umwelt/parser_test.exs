@@ -117,6 +117,61 @@ defmodule Umwelt.ParserTest do
             }} == Parser.read_ast({:ok, code})
   end
 
+  # test "weird comparison" do
+  #   {:ok, ast} =
+  #     """
+  #       def bar(a, b) when a |> Kernel.and(b) do
+  #         :baz
+  #       end
+  #     """
+  #     |> Code.string_to_quoted()
+
+  #   assert %{
+  #            body: "bar",
+  #            kind: :function,
+  #            arguments: [
+  #              %{type: [:Variable], body: "a", kind: :literal},
+  #              %{type: [:Variable], body: "b", kind: :literal}
+  #            ],
+  #            guards: %{
+  #              guard: %{type: [:Atom], body: "|>", kind: :literal},
+  #              target_arg: [
+  #                %{type: [:Variable], body: "a", kind: :literal},
+  #                %{
+  #                  expr: %{type: [:Variable], body: "b", kind: :literal},
+  #                  body: "and",
+  #                  kind: :check
+  #                }
+  #              ]
+  #            }
+  #          } == Parser.parse(ast, [])
+  # end
+
+  test "kernel comparison" do
+    {:ok, ast} =
+      """
+        def bar(a, b) when Kernel.and(a, b) do
+          :baz
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert %{
+             body: "bar",
+             kind: :function,
+             arguments: [
+               %{type: [:Variable], body: "a", kind: :literal},
+               %{type: [:Variable], body: "b", kind: :literal}
+             ],
+             guards: %{
+               left: %{type: [:Variable], body: "a", kind: :literal},
+               right: %{type: [:Variable], body: "b", kind: :literal},
+               body: "and",
+               kind: :comparison
+             }
+           } == Parser.parse(ast, [])
+  end
+
   test "parse", %{code: code} do
     assert %{
              [:Root] => %{
