@@ -13,7 +13,7 @@ defmodule Umwelt.Parser do
     do: ast |> parse([]) |> index()
 
   def parse_root({:ok, ast}),
-    do: Parser.Root.parse(ast) |> index()
+    do: ast |> Parser.Root.parse() |> index()
 
   def parse(ast, aliases) when is_macro(ast),
     do: Parser.Macro.parse(ast, aliases)

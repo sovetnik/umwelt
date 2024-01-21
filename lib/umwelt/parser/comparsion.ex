@@ -43,12 +43,4 @@ defmodule Umwelt.Parser.Comparison do
       expr: Parser.parse(expr, aliases)
     }
   end
-
-  #   def parse({check, _, [expr]}, aliases) do
-  #     %{
-  #       kind: :check,
-  #       body: to_string(check),
-  #       expr: Parser.parse(expr, aliases)
-  #     }
-  #   end
 end
