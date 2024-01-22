@@ -128,7 +128,69 @@ defmodule Umwelt.Parser.DefTest do
            } == Def.parse(ast, [])
   end
 
-  test "parse with guards and default value" do
+  test "parse with or guard" do
+    {:ok, ast} =
+      """
+      def foo(bar, baz)
+        when is_integer(bar) or is_float(baz) do
+          :good
+      end
+      """
+      |> Code.string_to_quoted()
+
+    assert %{
+             arguments: [
+               %{body: "bar", kind: :literal, type: [:Variable]},
+               %{body: "baz", kind: :literal, type: [:Variable]}
+             ],
+             body: "foo",
+             kind: :function,
+             guards: %{
+               body: "or",
+               kind: :comparison,
+               left: %{
+                 guard: %{type: [:Atom], body: "is_integer", kind: :literal},
+                 target_arg: [%{type: [:Variable], body: "bar", kind: :literal}]
+               },
+               right: %{
+                 guard: %{body: "is_float", kind: :literal, type: [:Atom]},
+                 target_arg: [%{body: "baz", kind: :literal, type: [:Variable]}]
+               }
+             }
+           } == Def.parse(ast, [])
+  end
+
+  test "parse with many guards" do
+    {:ok, ast} =
+      """
+      def foo(bar, baz)
+        when is_integer(bar) when is_float(baz) do
+          :good
+      end
+      """
+      |> Code.string_to_quoted()
+
+    assert %{
+             arguments: [
+               %{body: "bar", kind: :literal, type: [:Variable]},
+               %{body: "baz", kind: :literal, type: [:Variable]}
+             ],
+             body: "foo",
+             kind: :function,
+             guards: [
+               %{
+                 guard: %{type: [:Atom], body: "is_integer", kind: :literal},
+                 target_arg: [%{type: [:Variable], body: "bar", kind: :literal}]
+               },
+               %{
+                 guard: %{type: [:Atom], body: "is_float", kind: :literal},
+                 target_arg: [%{type: [:Variable], body: "baz", kind: :literal}]
+               }
+             ]
+           } == Def.parse(ast, [])
+  end
+
+  test "parse with guard and default value" do
     {:ok, ast} =
       ~S"""
         def increase(num, add \\ 1)

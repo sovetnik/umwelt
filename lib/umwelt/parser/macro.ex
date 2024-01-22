@@ -7,19 +7,19 @@ defmodule Umwelt.Parser.Macro do
 
   # defguard is_macro(term) when is_tuple(term) and tuple_size(term) == 3
 
-  defguardp is_atom_macro(term)
-            when is_tuple(term) and
-                   tuple_size(term) == 3 and
-                   is_atom(elem(term, 0)) and
-                   (is_list(elem(term, 1)) or is_nil(elem(term, 1))) and
-                   (is_list(elem(term, 2)) or is_atom(elem(term, 2)))
+  defguard is_atom_macro(term)
+           when is_tuple(term) and
+                  tuple_size(term) == 3 and
+                  is_atom(elem(term, 0)) and
+                  (is_list(elem(term, 1)) or is_nil(elem(term, 1))) and
+                  (is_list(elem(term, 2)) or is_atom(elem(term, 2)))
 
-  defguardp is_macro_macro(term)
-            when is_tuple(term) and
-                   tuple_size(term) == 3 and
-                   is_atom_macro(elem(term, 0)) and
-                   (is_list(elem(term, 1)) or is_nil(elem(term, 1))) and
-                   (is_list(elem(term, 2)) or is_atom(elem(term, 2)))
+  defguard is_macro_macro(term)
+           when is_tuple(term) and
+                  tuple_size(term) == 3 and
+                  is_atom_macro(elem(term, 0)) and
+                  (is_list(elem(term, 1)) or is_nil(elem(term, 1))) and
+                  (is_list(elem(term, 2)) or is_atom(elem(term, 2)))
 
   defguard is_macro(term) when is_atom_macro(term) or is_macro_macro(term)
 
@@ -40,6 +40,10 @@ defmodule Umwelt.Parser.Macro do
 
   def parse({:def, _, _} = ast, aliases) when is_macro(ast),
     do: Parser.Def.parse(ast, aliases)
+
+  # guard call, like is_atom, etc.
+  def parse({:when, _, children} = ast, aliases) when is_atom_macro(ast),
+    do: Parser.parse(children, aliases)
 
   def parse({:{}, _, _} = ast, aliases) when is_macro(ast),
     do: Parser.Tuple.parse(ast, aliases)
