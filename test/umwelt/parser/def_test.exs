@@ -42,13 +42,14 @@ defmodule Umwelt.Parser.DefTest do
     {:ok, ast} =
       ~S"""
         def list_from_root(path, project \\ Mix.Project.config()[:app]) do
-          Mix.Project.config()[:elixirc_paths]
-          |> Enum.flat_map(&files_in(Path.join(&1, to_string(project))))
+          :good_path
         end
       """
       |> Code.string_to_quoted()
 
     assert %{
+             body: "list_from_root",
+             kind: :function,
              arguments: [
                %{body: "path", kind: :literal, type: [:Variable]},
                %{
@@ -64,14 +65,17 @@ defmodule Umwelt.Parser.DefTest do
                      },
                      brackets: %{
                        key: %{type: [:Atom], body: "app", kind: :literal},
-                       from: %{context: [:Mix, :Project], body: "config", kind: :call}
+                       from: %{
+                         context: [:Mix, :Project],
+                         body: "config",
+                         kind: :call,
+                         arguments: []
+                       }
                      }
                    }
                  }
                }
-             ],
-             body: "list_from_root",
-             kind: :function
+             ]
            } == Def.parse(ast, [])
   end
 
@@ -87,13 +91,16 @@ defmodule Umwelt.Parser.DefTest do
       |> Code.string_to_quoted()
 
     assert %{
-             arguments: [
-               %{type: [:Variable], body: "ast", kind: :literal},
-               %{type: [:Variable], body: "_aliases", kind: :literal}
-             ],
-             body: "parse_tuple_child",
-             kind: :function,
-             guards: %{
+             kind: :when,
+             left: %{
+               arguments: [
+                 %{type: [:Variable], body: "ast", kind: :literal},
+                 %{type: [:Variable], body: "_aliases", kind: :literal}
+               ],
+               body: "parse_tuple_child",
+               kind: :function
+             },
+             right: %{
                body: "or",
                kind: :comparison,
                left: %{
@@ -103,22 +110,34 @@ defmodule Umwelt.Parser.DefTest do
                    body: "or",
                    kind: :comparison,
                    left: %{
-                     guard: %{body: "is_atom", kind: :literal, type: [:Atom]},
-                     target_arg: [%{body: "ast", kind: :literal, type: [:Variable]}]
+                     body: "is_atom",
+                     kind: :function,
+                     arguments: [
+                       %{type: [:Variable], body: "ast", kind: :literal}
+                     ]
                    },
                    right: %{
-                     guard: %{body: "is_binary", kind: :literal, type: [:Atom]},
-                     target_arg: [%{body: "ast", kind: :literal, type: [:Variable]}]
+                     body: "is_binary",
+                     kind: :function,
+                     arguments: [
+                       %{type: [:Variable], body: "ast", kind: :literal}
+                     ]
                    }
                  },
                  right: %{
-                   guard: %{body: "is_integer", kind: :literal, type: [:Atom]},
-                   target_arg: [%{body: "ast", kind: :literal, type: [:Variable]}]
+                   body: "is_integer",
+                   kind: :function,
+                   arguments: [
+                     %{type: [:Variable], body: "ast", kind: :literal}
+                   ]
                  }
                },
                right: %{
-                 guard: %{body: "is_float", kind: :literal, type: [:Atom]},
-                 target_arg: [%{body: "ast", kind: :literal, type: [:Variable]}]
+                 body: "is_float",
+                 kind: :function,
+                 arguments: [
+                   %{type: [:Variable], body: "ast", kind: :literal}
+                 ]
                }
              }
            } == Def.parse(ast, [])
@@ -135,23 +154,28 @@ defmodule Umwelt.Parser.DefTest do
       |> Code.string_to_quoted()
 
     assert %{
-             arguments: [
-               %{body: "bar", kind: :literal, type: [:Variable]},
-               %{body: "baz", kind: :literal, type: [:Variable]}
-             ],
-             body: "foo",
-             kind: :function,
-             guards: %{
-               body: "or",
-               kind: :comparison,
+             kind: :when,
+             left: %{
+               arguments: [
+                 %{type: [:Variable], body: "bar", kind: :literal},
+                 %{type: [:Variable], body: "baz", kind: :literal}
+               ],
+               body: "foo",
+               kind: :function
+             },
+             right: %{
                left: %{
-                 guard: %{type: [:Atom], body: "is_integer", kind: :literal},
-                 target_arg: [%{type: [:Variable], body: "bar", kind: :literal}]
+                 arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
+                 body: "is_integer",
+                 kind: :function
                },
                right: %{
-                 guard: %{body: "is_float", kind: :literal, type: [:Atom]},
-                 target_arg: [%{body: "baz", kind: :literal, type: [:Variable]}]
-               }
+                 arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
+                 body: "is_float",
+                 kind: :function
+               },
+               body: "or",
+               kind: :comparison
              }
            } == Def.parse(ast, [])
   end
@@ -167,22 +191,28 @@ defmodule Umwelt.Parser.DefTest do
       |> Code.string_to_quoted()
 
     assert %{
-             arguments: [
-               %{body: "bar", kind: :literal, type: [:Variable]},
-               %{body: "baz", kind: :literal, type: [:Variable]}
-             ],
-             body: "foo",
-             kind: :function,
-             guards: [
-               %{
-                 guard: %{type: [:Atom], body: "is_integer", kind: :literal},
-                 target_arg: [%{type: [:Variable], body: "bar", kind: :literal}]
+             kind: :when,
+             left: %{
+               arguments: [
+                 %{type: [:Variable], body: "bar", kind: :literal},
+                 %{type: [:Variable], body: "baz", kind: :literal}
+               ],
+               body: "foo",
+               kind: :function
+             },
+             right: %{
+               left: %{
+                 arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
+                 body: "is_integer",
+                 kind: :function
                },
-               %{
-                 guard: %{type: [:Atom], body: "is_float", kind: :literal},
-                 target_arg: [%{type: [:Variable], body: "baz", kind: :literal}]
-               }
-             ]
+               right: %{
+                 arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
+                 body: "is_float",
+                 kind: :function
+               },
+               kind: :when
+             }
            } == Def.parse(ast, [])
   end
 
@@ -197,29 +227,34 @@ defmodule Umwelt.Parser.DefTest do
       |> Code.string_to_quoted()
 
     assert %{
-             guards: %{
+             kind: :when,
+             left: %{
+               body: "increase",
+               kind: :function,
+               arguments: [
+                 %{type: [:Variable], body: "num", kind: :literal},
+                 %{
+                   default_arg: %{
+                     arg: %{type: [:Variable], body: "add", kind: :literal},
+                     default_value: %{type: [:Integer], body: "1", kind: :literal}
+                   }
+                 }
+               ]
+             },
+             right: %{
                body: "or",
                kind: :comparison,
                left: %{
-                 guard: %{body: "is_integer", kind: :literal, type: [:Atom]},
-                 target_arg: [%{body: "num", kind: :literal, type: [:Variable]}]
+                 arguments: [%{type: [:Variable], body: "num", kind: :literal}],
+                 body: "is_integer",
+                 kind: :function
                },
                right: %{
-                 guard: %{body: "is_float", kind: :literal, type: [:Atom]},
-                 target_arg: [%{body: "num", kind: :literal, type: [:Variable]}]
+                 arguments: [%{type: [:Variable], body: "num", kind: :literal}],
+                 body: "is_float",
+                 kind: :function
                }
-             },
-             arguments: [
-               %{type: [:Variable], body: "num", kind: :literal},
-               %{
-                 default_arg: %{
-                   arg: %{type: [:Variable], body: "add", kind: :literal},
-                   default_value: %{type: [:Integer], body: "1", kind: :literal}
-                 }
-               }
-             ],
-             body: "increase",
-             kind: :function
+             }
            } == Def.parse(ast, [])
   end
 end

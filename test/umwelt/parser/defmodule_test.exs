@@ -3,6 +3,101 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
   alias Umwelt.Parser.Defmodule
 
+  test "module with defguard only" do
+    {:ok, ast} =
+      ~S"""
+        defmodule Foo.Bar do
+          defguard is_foobar(term) when term in [:foo, :bar]
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             %{
+               body: "Bar",
+               kind: :space,
+               context: [:Foo, :Bar],
+               functions: [],
+               guards: [
+                 %{
+                   left: %{
+                     arguments: [%{type: [:Variable], body: "term", kind: :literal}],
+                     body: "is_foobar",
+                     kind: :function
+                   },
+                   right: %{
+                     left: %{type: [:Variable], body: "term", kind: :literal},
+                     right: [
+                       %{type: [:Atom], body: "foo", kind: :literal},
+                       %{type: [:Atom], body: "bar", kind: :literal}
+                     ],
+                     body: "inclusion",
+                     kind: :inclusion
+                   },
+                   kind: :when
+                 }
+               ],
+               attrs: []
+             }
+           ] == Defmodule.parse(ast, [])
+  end
+
+  test "module with defguard" do
+    {:ok, ast} =
+      ~S"""
+        defmodule Foo.Bar do
+          defguard is_foobar(term) when term in [:foo, :bar]
+          def foobar(term) when is_foobar(term) do
+            term <> term
+          end
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             %{
+               body: "Bar",
+               kind: :space,
+               context: [:Foo, :Bar],
+               functions: [
+                 %{
+                   kind: :when,
+                   left: %{
+                     arguments: [%{type: [:Variable], body: "term", kind: :literal}],
+                     body: "foobar",
+                     kind: :function
+                   },
+                   right: %{
+                     arguments: [%{type: [:Variable], body: "term", kind: :literal}],
+                     body: "is_foobar",
+                     kind: :function
+                   }
+                 }
+               ],
+               guards: [
+                 %{
+                   kind: :when,
+                   left: %{
+                     arguments: [%{type: [:Variable], body: "term", kind: :literal}],
+                     body: "is_foobar",
+                     kind: :function
+                   },
+                   right: %{
+                     left: %{type: [:Variable], body: "term", kind: :literal},
+                     right: [
+                       %{type: [:Atom], body: "foo", kind: :literal},
+                       %{type: [:Atom], body: "bar", kind: :literal}
+                     ],
+                     body: "inclusion",
+                     kind: :inclusion
+                   }
+                 }
+               ],
+               attrs: []
+             }
+           ] == Defmodule.parse(ast, [])
+  end
+
   test "module with multiple clauses function" do
     {:ok, ast} =
       ~S"""
@@ -19,6 +114,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                body: "Enumeric",
                context: [:Enumeric],
                attrs: [],
+               guards: [],
                functions: [
                  %{
                    arguments: [
@@ -86,6 +182,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                body: "Bar",
                context: [:Foo, :Bar],
                attrs: [],
+               guards: [],
                functions: [
                  %{
                    arguments: [%{body: "bar", kind: :literal, type: [:Variable]}],
@@ -102,6 +199,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  body: "Baz",
                  context: [:Foo, :Bar, :Baz],
                  attrs: [],
+                 guards: [],
                  functions: [
                    %{
                      arguments: [%{body: "baz", kind: :literal, type: [:Variable]}],
@@ -166,6 +264,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                ],
                context: [:Root],
                attrs: [],
+               guards: [],
                body: "Root",
                kind: :space,
                note: "Root description"
@@ -181,6 +280,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  ],
                  context: [:Root, :Foo],
                  attrs: [],
+                 guards: [],
                  body: "Foo",
                  kind: :space,
                  note: "Foo description"
@@ -196,6 +296,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    ],
                    context: [:Root, :Foo, :Bar],
                    attrs: [],
+                   guards: [],
                    body: "Bar",
                    kind: :space,
                    note: "Bar description"
@@ -212,6 +313,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    ],
                    context: [:Root, :Foo, :Baz],
                    attrs: [],
+                   guards: [],
                    body: "Baz",
                    kind: :space,
                    note: "Baz description"
@@ -234,14 +336,22 @@ defmodule Umwelt.Parser.DefmoduleTest do
       |> Code.string_to_quoted()
 
     assert [
-             %{body: "Foo", kind: :space, context: [:Foo], attrs: [], functions: []},
+             %{body: "Foo", kind: :space, context: [:Foo], attrs: [], guards: [], functions: []},
              [
-               %{body: "Bar", kind: :space, attrs: [], context: [:Foo, :Bar], functions: []},
+               %{
+                 body: "Bar",
+                 kind: :space,
+                 context: [:Foo, :Bar],
+                 attrs: [],
+                 guards: [],
+                 functions: []
+               },
                [
                  %{
                    body: "Baz",
                    kind: :space,
                    attrs: [],
+                   guards: [],
                    context: [:Foo, :Bar, :Baz],
                    functions: []
                  }
@@ -261,8 +371,24 @@ defmodule Umwelt.Parser.DefmoduleTest do
       |> Code.string_to_quoted()
 
     assert [
-             %{context: [:Foo, :Bar], body: "Bar", kind: :space, attrs: [], functions: []},
-             [%{context: [:Foo, :Bar, :Baz], body: "Baz", kind: :space, attrs: [], functions: []}]
+             %{
+               context: [:Foo, :Bar],
+               body: "Bar",
+               kind: :space,
+               attrs: [],
+               guards: [],
+               functions: []
+             },
+             [
+               %{
+                 context: [:Foo, :Bar, :Baz],
+                 body: "Baz",
+                 kind: :space,
+                 attrs: [],
+                 guards: [],
+                 functions: []
+               }
+             ]
            ] == Defmodule.parse(ast, [])
   end
 
@@ -289,6 +415,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                kind: :space,
                context: [:Foo, :Bar],
                attrs: [],
+               guards: [],
                fields: [
                  %{
                    tuple: [
@@ -332,6 +459,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                kind: :space,
                context: [:Foo, :Bar],
                attrs: [],
+               guards: [],
                functions: [
                  %{
                    arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
@@ -372,6 +500,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    kind: :attr
                  }
                ],
+               guards: [],
                functions: []
              }
            ] == Defmodule.parse(ast, [])
@@ -393,6 +522,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                kind: :space,
                note: "Foobar description",
                attrs: [],
+               guards: [],
                functions: []
              }
            ] == Defmodule.parse(ast, [])
@@ -406,7 +536,16 @@ defmodule Umwelt.Parser.DefmoduleTest do
       """
       |> Code.string_to_quoted()
 
-    assert [%{context: [:Foo, :Bar], body: "Bar", kind: :space, attrs: [], functions: []}] ==
+    assert [
+             %{
+               context: [:Foo, :Bar],
+               body: "Bar",
+               kind: :space,
+               attrs: [],
+               guards: [],
+               functions: []
+             }
+           ] ==
              Defmodule.parse(ast, [])
   end
 end

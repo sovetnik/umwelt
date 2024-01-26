@@ -15,16 +15,11 @@ defmodule Umwelt.Parser.Defmodule do
     |> combine(%{
       body: to_string(List.last(module)),
       attrs: [],
+      guards: [],
       kind: :space,
       context: context ++ module
     })
   end
-
-  def parse_block({:defmodule, _, _} = ast, context),
-    do: [parse(ast, context)]
-
-  def parse_block({:@, _, _} = ast, _context),
-    do: [Parser.Attrs.parse(ast)]
 
   def parse_block({:__block__, _, block_children}, context) do
     block_children
@@ -32,14 +27,21 @@ defmodule Umwelt.Parser.Defmodule do
     |> Enum.reject(&is_nil(&1))
   end
 
+  def parse_block({term, _, _} = ast, context)
+      when term in [:@, :defguard, :defmodule],
+      do: [Parser.parse(ast, context)]
+
   defp parse_block_child({:@, _, _} = ast, _, _),
-    do: Parser.Attrs.parse(ast)
+    do: Parser.parse(ast, [])
 
   defp parse_block_child({:def, _, _} = ast, _, aliases),
-    do: Parser.Def.parse(ast, aliases)
+    do: Parser.parse(ast, aliases)
+
+  defp parse_block_child({:defguard, _, _} = ast, context, _aliases),
+    do: Parser.parse(ast, context)
 
   defp parse_block_child({:defmodule, _, _} = ast, context, _aliases),
-    do: parse(ast, context)
+    do: Parser.parse(ast, context)
 
   defp parse_block_child({:defstruct, _, fields}, _context, aliases) do
     %{defstruct: Parser.parse(fields, aliases)}
@@ -76,6 +78,9 @@ defmodule Umwelt.Parser.Defmodule do
       %{defstruct: [value]}, module ->
         Map.put(module, :fields, value)
 
+      %{defguard: value}, %{guards: attrs} = module ->
+        Map.put(module, :guards, [value | attrs])
+
       %{kind: :attr} = value, %{attrs: attrs} = module ->
         Map.put(module, :attrs, [value | attrs])
 
@@ -93,6 +98,9 @@ defmodule Umwelt.Parser.Defmodule do
         [Map.put(head, :impl, value) | rest]
 
       %{kind: :function} = function, [head | rest] ->
+        [%{}, Map.merge(head, function) | rest]
+
+      %{kind: :when} = function, [head | rest] ->
         [%{}, Map.merge(head, function) | rest]
 
       _other, acc ->

@@ -13,7 +13,8 @@ defmodule Umwelt.Parser.Root do
       body: to_string(List.last(module)),
       kind: :root,
       context: module,
-      attrs: []
+      attrs: [],
+      guards: []
     })
   end
 
@@ -25,7 +26,8 @@ defmodule Umwelt.Parser.Root do
         kind: :root,
         context: [head],
         functions: [],
-        attrs: []
+        attrs: [],
+        guards: []
       }
       | [
           block_children
@@ -34,7 +36,8 @@ defmodule Umwelt.Parser.Root do
             body: to_string(List.last(module)),
             kind: :space,
             context: module,
-            attrs: []
+            attrs: [],
+            guards: []
           })
         ]
     ]

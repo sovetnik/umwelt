@@ -131,6 +131,7 @@ defmodule Umwelt.ParserTest do
                    kind: :attr
                  }
                ],
+               guards: [],
                functions: [
                  %{
                    arguments: [%{type: [:Variable], body: "once", kind: :literal}],
@@ -161,6 +162,7 @@ defmodule Umwelt.ParserTest do
                    kind: :attr
                  }
                ],
+               guards: [],
                functions: [
                  %{
                    arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
@@ -175,6 +177,7 @@ defmodule Umwelt.ParserTest do
                body: "Bar",
                context: [:Root, :Foo, :Bar],
                attrs: [],
+               guards: [],
                functions: [
                  %{
                    arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
@@ -189,6 +192,7 @@ defmodule Umwelt.ParserTest do
                body: "Baz",
                context: [:Root, :Foo, :Baz],
                attrs: [],
+               guards: [],
                functions: [
                  %{
                    arguments: [%{type: [:Variable], body: "foo", kind: :literal}],
@@ -215,13 +219,16 @@ defmodule Umwelt.ParserTest do
       |> Code.string_to_quoted()
 
     assert %{
-             body: "bar",
-             kind: :function,
-             arguments: [
-               %{type: [:Variable], body: "a", kind: :literal},
-               %{type: [:Variable], body: "b", kind: :literal}
-             ],
-             guards: %{
+             kind: :when,
+             left: %{
+               body: "bar",
+               kind: :function,
+               arguments: [
+                 %{type: [:Variable], body: "a", kind: :literal},
+                 %{type: [:Variable], body: "b", kind: :literal}
+               ]
+             },
+             right: %{
                body: "and",
                kind: :comparison,
                left: %{type: [:Variable], body: "a", kind: :literal},
@@ -240,17 +247,20 @@ defmodule Umwelt.ParserTest do
       |> Code.string_to_quoted()
 
     assert %{
-             body: "bar",
-             kind: :function,
-             arguments: [
-               %{type: [:Variable], body: "a", kind: :literal},
-               %{type: [:Variable], body: "b", kind: :literal}
-             ],
-             guards: %{
-               left: %{type: [:Variable], body: "a", kind: :literal},
-               right: %{type: [:Variable], body: "b", kind: :literal},
+             kind: :when,
+             left: %{
+               body: "bar",
+               kind: :function,
+               arguments: [
+                 %{type: [:Variable], body: "a", kind: :literal},
+                 %{type: [:Variable], body: "b", kind: :literal}
+               ]
+             },
+             right: %{
                body: "and",
-               kind: :comparison
+               kind: :comparison,
+               left: %{type: [:Variable], body: "a", kind: :literal},
+               right: %{type: [:Variable], body: "b", kind: :literal}
              }
            } == Parser.parse(ast, [])
   end

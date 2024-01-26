@@ -7,8 +7,6 @@ defmodule Umwelt.Parser.Macro do
   import Umwelt.Parser.Operator, only: [is_operator: 1]
   import Umwelt.Parser.Pipe, only: [is_pipe_operator: 1]
 
-  # defguard is_macro(term) when is_tuple(term) and tuple_size(term) == 3
-
   defguard is_atom_macro(term)
            when is_tuple(term) and
                   tuple_size(term) == 3 and
@@ -28,21 +26,20 @@ defmodule Umwelt.Parser.Macro do
   def parse({_, _, nil} = ast, _aliases),
     do: Parser.Literal.parse(ast)
 
-  # def parse({:@, _, _} = ast, _aliases),
-  #   do: Parser.Attrs.parse(ast)
+  def parse({:@, _, _} = ast, _aliases),
+    do: Parser.Attrs.parse(ast)
 
-  def parse({:__aliases__, _, module} = ast, aliases) when is_macro(ast),
+  def parse({:__aliases__, _, module}, aliases),
     do: Parser.expand_module(module, aliases)
 
   def parse({:defmodule, _, _} = ast, context) when is_macro(ast),
     do: Parser.Defmodule.parse(ast, context)
 
+  def parse({:defguard, _, [{:when, _, _} = when_ast]}, context),
+    do: %{defguard: parse(when_ast, context)}
+
   def parse({:def, _, _} = ast, aliases) when is_macro(ast),
     do: Parser.Def.parse(ast, aliases)
-
-  # guard call, like is_atom, etc.
-  def parse({:when, _, children} = ast, aliases) when is_atom_macro(ast),
-    do: Parser.parse(children, aliases)
 
   def parse({:{}, _, _} = ast, aliases) when is_macro(ast),
     do: Parser.Tuple.parse(ast, aliases)
@@ -52,10 +49,6 @@ defmodule Umwelt.Parser.Macro do
 
   def parse({:%{}, _, children} = ast, _aliases) when is_macro(ast),
     do: %{struct: children}
-
-  # access get
-  def parse({term, _, []} = ast, aliases) when is_macro_macro(ast),
-    do: Parser.parse(term, aliases)
 
   def parse({term, _, _} = ast, aliases) when is_operator(term),
     do: Parser.Operator.parse(ast, aliases)
@@ -69,10 +62,13 @@ defmodule Umwelt.Parser.Macro do
   def parse({term, _, _} = ast, aliases) when is_comparison(term),
     do: Parser.Comparison.parse(ast, aliases)
 
-  # guard call, like is_atom, etc.
-  def parse({term, _, children} = ast, aliases) when is_atom_macro(ast) do
-    # IO.inspect(ast, label: :term_ast)
-    # IO.inspect(term, label: :term)
-    %{guard: Parser.parse(term, aliases), target_arg: Parser.parse(children, aliases)}
+  # signature.
+  def parse({term, _, children} = ast, aliases)
+      when is_atom_macro(ast) do
+    %{
+      kind: :function,
+      body: to_string(term),
+      arguments: Parser.parse(children, aliases)
+    }
   end
 end

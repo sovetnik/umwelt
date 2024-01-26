@@ -98,6 +98,7 @@ defmodule Umwelt.Parser.MacroTest do
                body: "Bar",
                context: [:Foo, :Bar],
                attrs: [],
+               guards: [],
                functions: [
                  %{
                    arguments: [%{type: [:Variable], body: "bar", kind: :literal}],

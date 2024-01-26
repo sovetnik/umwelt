@@ -4,6 +4,7 @@ defmodule Umwelt.Parser do
   alias Umwelt.Parser
 
   import Umwelt.Parser.Macro, only: [is_macro: 1]
+
   def read_ast({:error, msg}), do: {:error, msg}
 
   def read_ast({:ok, code}),

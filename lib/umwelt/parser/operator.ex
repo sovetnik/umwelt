@@ -11,12 +11,23 @@ defmodule Umwelt.Parser.Operator do
 
   alias Umwelt.Parser
 
-  defguard is_operator(term) when term in [:^, :., :=, :&, :"::", :\\]
+  defguard is_operator(term) when term in [:^, :., :=, :&, :"::", :\\, :when]
 
   # compactize Kernel calls
   def parse({{:., _, [{:__aliases__, _, [:Kernel]}, term]}, _, arguments}, aliases)
       when is_atom(term),
       do: Parser.parse({term, [], arguments}, aliases)
+
+  # compactize Kernel calls
+  def parse({{:., _, [{:__aliases__, _, module}, term]}, _, arguments}, aliases)
+      when is_atom(term) do
+    %{
+      body: to_string(term),
+      context: module,
+      kind: :call,
+      arguments: Parser.parse(arguments, aliases)
+    }
+  end
 
   # {:., [from_brackets: true, line: 4], [Access, :get]}
   def parse({term, [from_brackets: true, line: _], [from, key]}, aliases) do
@@ -26,15 +37,6 @@ defmodule Umwelt.Parser.Operator do
         from: Parser.parse(from, aliases),
         key: Parser.parse(key, aliases)
       }
-    }
-  end
-
-  # {:., _, [{:__aliases__, _, [:Mix, :Project]}, :config]}
-  def parse({:., _, [{:__aliases__, _, context}, function]}, aliases) do
-    %{
-      body: to_string(function),
-      kind: :call,
-      context: Parser.expand_module(context, aliases)
     }
   end
 
@@ -72,6 +74,14 @@ defmodule Umwelt.Parser.Operator do
         arg: Parser.parse(arg, aliases),
         default_value: Parser.parse(default, aliases)
       }
+    }
+  end
+
+  def parse({:when, _, [left, right]}, aliases) do
+    %{
+      kind: :when,
+      left: Parser.parse(left, aliases),
+      right: Parser.parse(right, aliases)
     }
   end
 end
