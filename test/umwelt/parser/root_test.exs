@@ -8,6 +8,7 @@ defmodule Umwelt.Parser.RootTest do
       """
         defmodule Foo.Bar do
           @moduledoc "Foobar description"
+          @foo :bar
           @doc "bar -> baz"
           def foo(bar) do
             :baz
@@ -27,6 +28,7 @@ defmodule Umwelt.Parser.RootTest do
              %{
                body: "Foo",
                context: [:Foo],
+               attrs: [],
                functions: [],
                kind: :root
              },
@@ -41,6 +43,13 @@ defmodule Umwelt.Parser.RootTest do
                    }
                  ],
                  context: [:Foo, :Bar],
+                 attrs: [
+                   %{
+                     value: [%{type: [:Atom], body: "bar", kind: :literal}],
+                     body: "foo",
+                     kind: :attr
+                   }
+                 ],
                  body: "Bar",
                  kind: :space,
                  note: "Foobar description"
@@ -56,6 +65,7 @@ defmodule Umwelt.Parser.RootTest do
                      }
                    ],
                    context: [:Foo, :Bar, :Baz],
+                   attrs: [],
                    body: "Baz",
                    kind: :space,
                    note: "Baz description"
@@ -113,6 +123,7 @@ defmodule Umwelt.Parser.RootTest do
                  }
                ],
                context: [:Root],
+               attrs: [],
                body: "Root",
                kind: :root,
                note: "Root description"
@@ -127,6 +138,7 @@ defmodule Umwelt.Parser.RootTest do
                    }
                  ],
                  context: [:Root, :Foo],
+                 attrs: [],
                  body: "Foo",
                  kind: :space,
                  note: "Foo description"
@@ -141,6 +153,7 @@ defmodule Umwelt.Parser.RootTest do
                      }
                    ],
                    context: [:Root, :Foo, :Bar],
+                   attrs: [],
                    body: "Bar",
                    kind: :space,
                    note: "Bar description"
@@ -156,6 +169,7 @@ defmodule Umwelt.Parser.RootTest do
                      }
                    ],
                    context: [:Root, :Foo, :Baz],
+                   attrs: [],
                    body: "Baz",
                    kind: :space,
                    note: "Baz description"
@@ -178,11 +192,17 @@ defmodule Umwelt.Parser.RootTest do
       |> Code.string_to_quoted()
 
     assert [
-             %{body: "Foo", kind: :root, context: [:Foo], functions: []},
+             %{body: "Foo", kind: :root, context: [:Foo], attrs: [], functions: []},
              [
-               %{body: "Bar", kind: :space, context: [:Foo, :Bar], functions: []},
+               %{body: "Bar", kind: :space, context: [:Foo, :Bar], attrs: [], functions: []},
                [
-                 %{body: "Baz", kind: :space, context: [:Foo, :Bar, :Baz], functions: []}
+                 %{
+                   body: "Baz",
+                   kind: :space,
+                   context: [:Foo, :Bar, :Baz],
+                   attrs: [],
+                   functions: []
+                 }
                ]
              ]
            ] == Root.parse(ast)
@@ -199,11 +219,29 @@ defmodule Umwelt.Parser.RootTest do
       |> Code.string_to_quoted()
 
     assert [
-             %{context: [:Foo], body: "Foo", kind: :root, functions: []},
+             %{
+               context: [:Foo],
+               body: "Foo",
+               kind: :root,
+               attrs: [],
+               functions: []
+             },
              [
-               %{context: [:Foo, :Bar], body: "Bar", kind: :space, functions: []},
+               %{
+                 context: [:Foo, :Bar],
+                 body: "Bar",
+                 kind: :space,
+                 attrs: [],
+                 functions: []
+               },
                [
-                 %{context: [:Foo, :Bar, :Baz], body: "Baz", kind: :space, functions: []}
+                 %{
+                   context: [:Foo, :Bar, :Baz],
+                   body: "Baz",
+                   kind: :space,
+                   attrs: [],
+                   functions: []
+                 }
                ]
              ]
            ] == Root.parse(ast)
@@ -229,6 +267,7 @@ defmodule Umwelt.Parser.RootTest do
              %{
                body: "Foo",
                context: [:Foo],
+               attrs: [],
                functions: [],
                kind: :root
              },
@@ -238,6 +277,7 @@ defmodule Umwelt.Parser.RootTest do
                  note: "Foobar description",
                  kind: :space,
                  context: [:Foo, :Bar],
+                 attrs: [],
                  fields: [
                    %{
                      tuple: [
@@ -280,6 +320,7 @@ defmodule Umwelt.Parser.RootTest do
              %{
                body: "Foo",
                context: [:Foo],
+               attrs: [],
                functions: [],
                kind: :root
              },
@@ -288,6 +329,7 @@ defmodule Umwelt.Parser.RootTest do
                  body: "Bar",
                  kind: :space,
                  context: [:Foo, :Bar],
+                 attrs: [],
                  functions: [
                    %{
                      arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
@@ -313,16 +355,18 @@ defmodule Umwelt.Parser.RootTest do
     assert [
              %{
                body: "Foo",
+               kind: :root,
                context: [:Foo],
-               functions: [],
-               kind: :root
+               attrs: [],
+               functions: []
              },
              [
                %{
-                 context: [:Foo, :Bar],
                  body: "Bar",
                  kind: :space,
+                 context: [:Foo, :Bar],
                  note: "Foobar description",
+                 attrs: [],
                  functions: []
                }
              ]

@@ -14,6 +14,7 @@ defmodule Umwelt.Parser.Defmodule do
     |> parse_block(context ++ module)
     |> combine(%{
       body: to_string(List.last(module)),
+      attrs: [],
       kind: :space,
       context: context ++ module
     })
@@ -74,6 +75,9 @@ defmodule Umwelt.Parser.Defmodule do
 
       %{defstruct: [value]}, module ->
         Map.put(module, :fields, value)
+
+      %{kind: :attr} = value, %{attrs: attrs} = module ->
+        Map.put(module, :attrs, [value | attrs])
 
       _other, module ->
         module

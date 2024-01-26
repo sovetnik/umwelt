@@ -1,15 +1,22 @@
-defmodule Umwelt.Parser.MatchTest do
+defmodule Umwelt.Parser.OperatorTest do
   use ExUnit.Case, async: true
 
-  alias Umwelt.Parser.Match
+  alias Umwelt.Parser.Operator
 
-  test "typed variable Bar" do
-    {:ok, ast} = Code.string_to_quoted("%Bar{} = bar")
+  import Umwelt.Parser.Operator, only: [is_operator: 1]
 
-    assert %{body: "bar", kind: :match, term: [:Bar]} == Match.parse(ast, [])
+  test "guard is_operator" do
+    [:^, :., :=, :&, :"::", :\\]
+    |> Enum.map(&assert is_operator(&1))
   end
 
-  test "list with atom" do
+  test "match typed variable Bar" do
+    {:ok, ast} = Code.string_to_quoted("%Bar{} = bar")
+
+    assert %{body: "bar", kind: :match, term: [:Bar]} == Operator.parse(ast, [])
+  end
+
+  test "match list with atom" do
     {:ok, ast} = Code.string_to_quoted(":foo = bar")
 
     assert %{
@@ -17,10 +24,10 @@ defmodule Umwelt.Parser.MatchTest do
              kind: :match,
              term: %{type: [:Atom], body: "foo", kind: :literal}
            } ==
-             Match.parse(ast, [])
+             Operator.parse(ast, [])
   end
 
-  test "list with atom in list" do
+  test "match list with atom in list" do
     {:ok, ast} = Code.string_to_quoted("[:foo] = bar")
 
     assert %{
@@ -28,6 +35,6 @@ defmodule Umwelt.Parser.MatchTest do
              kind: :match,
              term: [%{type: [:Atom], body: "foo", kind: :literal}]
            } ==
-             Match.parse(ast, [])
+             Operator.parse(ast, [])
   end
 end

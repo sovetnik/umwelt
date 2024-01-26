@@ -11,11 +11,18 @@ defmodule Umwelt.Parser.Attrs do
       [{:doc, _, children} | _] ->
         %{:doc => children}
 
+      [{:impl, _, children} | _] ->
+        %{:impl => Parser.parse(children, [])}
+
       # [{:spec, _, children} | _] ->
       #   %{:spec => children}
 
       [{constant, _, children} | _] ->
-        %{constant => Parser.parse(children, [])}
+        %{
+          body: to_string(constant),
+          kind: :attr,
+          value: Parser.parse(children, [])
+        }
 
         # _ ->
         #   nil

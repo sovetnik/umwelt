@@ -1,20 +1,70 @@
 defmodule Umwelt.Parser.MacroTest do
   use ExUnit.Case, async: true
 
+  alias Umwelt.Parser
   alias Umwelt.Parser.Macro
+
+  import Umwelt.Parser.Macro,
+    only: [
+      is_atom_macro: 1,
+      is_macro_macro: 1,
+      is_macro: 1
+    ]
+
+  test "guard is_macro" do
+    [
+      {:foo, [], nil},
+      {:bar, [], []},
+      {{:foo, [], nil}, [], []},
+      {{:foo, [], []}, [], []}
+    ]
+    |> Enum.map(&assert is_macro(&1))
+  end
+
+  test "guard is_atom_macro" do
+    [{:foo, [], nil}, {:bar, [], []}]
+    |> Enum.map(&assert is_atom_macro(&1))
+  end
+
+  test "guard is_macro_macro" do
+    [
+      {{:foo, [], nil}, [], []},
+      {{:foo, [], []}, [], []}
+    ]
+    |> Enum.map(&assert is_macro_macro(&1))
+  end
+
+  test "literal list" do
+    {:ok, ast} = Code.string_to_quoted("head | tail")
+
+    assert %{
+             body: "|",
+             kind: :pipe,
+             values: [
+               %{type: [:Variable], body: "head", kind: :literal},
+               %{type: [:Variable], body: "tail", kind: :literal}
+             ]
+           } == Parser.parse(ast, [])
+  end
 
   test "just variable" do
     {:ok, ast} = Code.string_to_quoted("foo")
 
-    assert %{body: "foo", kind: :literal, type: [:Variable]} ==
-             Macro.parse(ast, [])
+    assert %{
+             body: "foo",
+             kind: :literal,
+             type: [:Variable]
+           } == Macro.parse(ast, [])
   end
 
   test "typed variable Bar" do
     {:ok, ast} = Code.string_to_quoted("%Bar{} = bar")
 
-    assert %{body: "bar", kind: :match, term: [:Bar]} ==
-             Macro.parse(ast, [])
+    assert %{
+             body: "bar",
+             kind: :match,
+             term: [:Bar]
+           } == Macro.parse(ast, [])
   end
 
   test "typed variable Bar.Baz" do
@@ -47,6 +97,7 @@ defmodule Umwelt.Parser.MacroTest do
              %{
                body: "Bar",
                context: [:Foo, :Bar],
+               attrs: [],
                functions: [
                  %{
                    arguments: [%{type: [:Variable], body: "bar", kind: :literal}],

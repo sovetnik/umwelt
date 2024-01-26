@@ -12,17 +12,20 @@ defmodule Umwelt.Parser.Root do
     |> Parser.Defmodule.combine(%{
       body: to_string(List.last(module)),
       kind: :root,
-      context: module
+      context: module,
+      attrs: []
     })
   end
 
+  # make it recursive for case Foo.Bar.Baz
   def do_parse(block_children, [head | _tail] = module) do
     [
       %{
         body: to_string(head),
         kind: :root,
         context: [head],
-        functions: []
+        functions: [],
+        attrs: []
       }
       | [
           block_children
@@ -30,7 +33,8 @@ defmodule Umwelt.Parser.Root do
           |> Parser.Defmodule.combine(%{
             body: to_string(List.last(module)),
             kind: :space,
-            context: module
+            context: module,
+            attrs: []
           })
         ]
     ]

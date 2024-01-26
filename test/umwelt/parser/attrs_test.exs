@@ -32,7 +32,11 @@ defmodule Umwelt.Parser.AttrsTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{attr: [%{struct: [foo: :bar]}]} ==
+    assert %{
+             body: "attr",
+             kind: :attr,
+             value: [%{struct: [foo: :bar]}]
+           } ==
              Attrs.parse(ast)
   end
 end

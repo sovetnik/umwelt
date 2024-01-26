@@ -52,26 +52,22 @@ defmodule Umwelt.Parser.DefTest do
              arguments: [
                %{body: "path", kind: :literal, type: [:Variable]},
                %{
-                 default_arg: [
-                   %{body: "project", kind: :literal, type: [:Variable]},
-                   %{
-                     struct: %{
-                       call: [
-                         %{body: "Elixir.Access", kind: :literal, type: [:Atom]},
-                         %{body: "get", kind: :literal, type: [:Atom]}
-                       ]
+                 default_arg: %{
+                   arg: %{type: [:Variable], body: "project", kind: :literal},
+                   default_value: %{
+                     source: %{
+                       source: %{type: [:Atom], body: ".", kind: :literal},
+                       brackets: %{
+                         key: %{type: [:Atom], body: "get", kind: :literal},
+                         from: %{type: [:Atom], body: "Elixir.Access", kind: :literal}
+                       }
                      },
                      brackets: %{
-                       key: %{body: "app", kind: :literal, type: [:Atom]},
-                       from: %{
-                         call: [
-                           [:Mix, :Project],
-                           %{body: "config", kind: :literal, type: [:Atom]}
-                         ]
-                       }
+                       key: %{type: [:Atom], body: "app", kind: :literal},
+                       from: %{context: [:Mix, :Project], body: "config", kind: :call}
                      }
                    }
-                 ]
+                 }
                }
              ],
              body: "list_from_root",
@@ -216,10 +212,10 @@ defmodule Umwelt.Parser.DefTest do
              arguments: [
                %{type: [:Variable], body: "num", kind: :literal},
                %{
-                 default_arg: [
-                   %{type: [:Variable], body: "add", kind: :literal},
-                   %{type: [:Integer], body: "1", kind: :literal}
-                 ]
+                 default_arg: %{
+                   arg: %{type: [:Variable], body: "add", kind: :literal},
+                   default_value: %{type: [:Integer], body: "1", kind: :literal}
+                 }
                }
              ],
              body: "increase",

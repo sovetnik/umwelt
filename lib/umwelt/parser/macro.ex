@@ -4,6 +4,8 @@ defmodule Umwelt.Parser.Macro do
   alias Umwelt.Parser
 
   import Umwelt.Parser.Comparison, only: [is_comparison: 1]
+  import Umwelt.Parser.Operator, only: [is_operator: 1]
+  import Umwelt.Parser.Pipe, only: [is_pipe_operator: 1]
 
   # defguard is_macro(term) when is_tuple(term) and tuple_size(term) == 3
 
@@ -29,11 +31,8 @@ defmodule Umwelt.Parser.Macro do
   # def parse({:@, _, _} = ast, _aliases),
   #   do: Parser.Attrs.parse(ast)
 
-  def parse({:|>, _, _} = ast, aliases),
-    do: Parser.Pipe.parse(ast, aliases)
-
   def parse({:__aliases__, _, module} = ast, aliases) when is_macro(ast),
-    do: expand_module(module, aliases)
+    do: Parser.expand_module(module, aliases)
 
   def parse({:defmodule, _, _} = ast, context) when is_macro(ast),
     do: Parser.Defmodule.parse(ast, context)
@@ -48,53 +47,32 @@ defmodule Umwelt.Parser.Macro do
   def parse({:{}, _, _} = ast, aliases) when is_macro(ast),
     do: Parser.Tuple.parse(ast, aliases)
 
-  def parse({:=, _, _} = ast, aliases) when is_macro(ast),
-    do: Parser.Match.parse(ast, aliases)
-
   def parse({:%, _, _} = ast, aliases) when is_macro(ast),
     do: Parser.Struct.parse(ast, aliases)
 
   def parse({:%{}, _, children} = ast, _aliases) when is_macro(ast),
     do: %{struct: children}
 
-  def parse({:\\, _, children} = ast, aliases) when is_macro(ast),
-    do: %{default_arg: Parser.parse(children, aliases)}
+  # access get
+  def parse({term, _, []} = ast, aliases) when is_macro_macro(ast),
+    do: Parser.parse(term, aliases)
 
-  def parse({:., _, children} = ast, aliases) when is_macro(ast),
-    do: %{call: Parser.parse(children, aliases)}
+  def parse({term, _, _} = ast, aliases) when is_operator(term),
+    do: Parser.Operator.parse(ast, aliases)
 
-  def parse({{:., _, [{:__aliases__, _, [:Kernel]}, term]}, _, arguments}, aliases)
-      when is_atom(term),
-      do: Parser.parse({term, [], arguments}, aliases)
+  def parse({{term, _, _}, _, _} = ast, aliases) when is_operator(term),
+    do: Parser.Operator.parse(ast, aliases)
+
+  def parse({term, _, _} = ast, aliases) when is_pipe_operator(term),
+    do: Parser.Pipe.parse(ast, aliases)
 
   def parse({term, _, _} = ast, aliases) when is_comparison(term),
     do: Parser.Comparison.parse(ast, aliases)
 
-  def parse({term, [from_brackets: true, line: _], [from, key]} = ast, aliases)
-      when is_macro_macro(ast) do
-    %{
-      struct: parse(term, aliases),
-      brackets: %{
-        from: Parser.parse(from, aliases),
-        key: Parser.parse(key, aliases)
-      }
-    }
-  end
-
-  # access get
-  def parse({term, _, []} = ast, aliases) when is_macro_macro(ast),
-    do: parse(term, aliases)
-
   # guard call, like is_atom, etc.
-  def parse({term, _, children} = ast, aliases) when is_atom_macro(ast),
-    do: %{guard: Parser.parse(term, aliases), target_arg: Parser.parse(children, aliases)}
-
-  defp expand_module(module, []), do: module
-
-  defp expand_module([head | rest], aliases) do
-    aliases
-    |> Enum.filter(&match?([^head | _], Enum.reverse(&1)))
-    |> List.flatten()
-    |> Kernel.++(rest)
+  def parse({term, _, children} = ast, aliases) when is_atom_macro(ast) do
+    # IO.inspect(ast, label: :term_ast)
+    # IO.inspect(term, label: :term)
+    %{guard: Parser.parse(term, aliases), target_arg: Parser.parse(children, aliases)}
   end
 end

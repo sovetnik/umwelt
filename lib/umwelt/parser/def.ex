@@ -21,6 +21,11 @@ defmodule Umwelt.Parser.Def do
     parse_fun_with_args(ast, aliases)
   end
 
+  def parse({:def, _, [function]}, aliases)
+      when is_atom_macro(function) do
+    parse_fun_with_args(function, aliases)
+  end
+
   defp parse_fun_with_args({function, _, arguments}, aliases) do
     %{
       body: to_string(function),
