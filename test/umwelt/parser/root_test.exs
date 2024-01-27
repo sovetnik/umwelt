@@ -272,6 +272,46 @@ defmodule Umwelt.Parser.RootTest do
            ] == Root.parse(ast)
   end
 
+  test "empty inner module expands aliases deeply" do
+    {:ok, ast} =
+      """
+        defmodule Foo.Bar.Baz do
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             %{
+               context: [:Foo],
+               body: "Foo",
+               kind: :root,
+               attrs: [],
+               guards: [],
+               functions: []
+             },
+             [
+               %{
+                 context: [:Foo, :Bar],
+                 body: "Bar",
+                 kind: :space,
+                 attrs: [],
+                 guards: [],
+                 functions: []
+               },
+               [
+                 %{
+                   context: [:Foo, :Bar, :Baz],
+                   body: "Baz",
+                   kind: :space,
+                   attrs: [],
+                   guards: [],
+                   functions: []
+                 }
+               ]
+             ]
+           ] == Root.parse(ast)
+  end
+
   test "just a module with defstruct" do
     {:ok, ast} =
       """
