@@ -19,8 +19,8 @@ defmodule Umwelt.Parser.Comparison do
 
   def parse({:in, _, [left, right]}, aliases) when is_list(right) do
     %{
-      kind: :inclusion,
-      body: "inclusion",
+      body: "membership",
+      kind: :comparison,
       left: Parser.parse(left, aliases),
       right: Parser.parse(right, aliases)
     }
@@ -36,10 +36,10 @@ defmodule Umwelt.Parser.Comparison do
     }
   end
 
-  def parse({:not, _, [expr]}, aliases) do
+  def parse({term, _, [expr]}, aliases) when term in [:not, :!] do
     %{
       kind: :negate,
-      body: "not",
+      body: to_string(term),
       expr: Parser.parse(expr, aliases)
     }
   end

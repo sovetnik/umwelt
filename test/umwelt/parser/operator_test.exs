@@ -13,7 +13,16 @@ defmodule Umwelt.Parser.OperatorTest do
   test "match typed variable Bar" do
     {:ok, ast} = Code.string_to_quoted("%Bar{} = bar")
 
-    assert %{body: "bar", kind: :match, term: [:Bar]} == Operator.parse(ast, [])
+    assert %{
+             body: "bar",
+             kind: :match,
+             term: %{
+               context: [:Bar],
+               body: :map,
+               kind: :structure,
+               keyword: []
+             }
+           } == Operator.parse(ast, [])
   end
 
   test "match list with atom" do
@@ -23,8 +32,7 @@ defmodule Umwelt.Parser.OperatorTest do
              body: "bar",
              kind: :match,
              term: %{type: [:Atom], body: "foo", kind: :literal}
-           } ==
-             Operator.parse(ast, [])
+           } == Operator.parse(ast, [])
   end
 
   test "match list with atom in list" do
@@ -34,7 +42,6 @@ defmodule Umwelt.Parser.OperatorTest do
              body: "bar",
              kind: :match,
              term: [%{type: [:Atom], body: "foo", kind: :literal}]
-           } ==
-             Operator.parse(ast, [])
+           } == Operator.parse(ast, [])
   end
 end

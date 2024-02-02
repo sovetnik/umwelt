@@ -3,7 +3,7 @@ defmodule Umwelt.Parser.AttrsTest do
 
   alias Umwelt.Parser.Attrs
 
-  test "parse mdoc" do
+  test "parse module doc" do
     {:ok, ast} =
       """
         @moduledoc "Calculator"
@@ -14,7 +14,7 @@ defmodule Umwelt.Parser.AttrsTest do
              Attrs.parse(ast)
   end
 
-  test "parse doc" do
+  test "parse function doc" do
     {:ok, ast} =
       """
       @doc "summarize two nums"
@@ -35,8 +35,23 @@ defmodule Umwelt.Parser.AttrsTest do
     assert %{
              body: "attr",
              kind: :attr,
-             value: [%{struct: [foo: :bar]}]
-           } ==
-             Attrs.parse(ast)
+             value: [
+               %{
+                 body: :map,
+                 context: [],
+                 keyword: [
+                   %{
+                     body: :tuple,
+                     kind: :structure,
+                     elements: [
+                       %{type: [:Atom], body: "foo", kind: :literal},
+                       %{type: [:Atom], body: "bar", kind: :literal}
+                     ]
+                   }
+                 ],
+                 kind: :structure
+               }
+             ]
+           } == Attrs.parse(ast)
   end
 end

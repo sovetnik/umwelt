@@ -40,266 +40,302 @@ defmodule Umwelt.ParserTest do
     {:ok, code: code}
   end
 
-  test "read_ast when error" do
-    assert {:error, "read failed"} ==
-             Parser.read_ast({:error, "read failed"})
-  end
+  describe "reading ast" do
+    test "read_ast when error" do
+      assert {:error, "read failed"} ==
+               Parser.read_ast({:error, "read failed"})
+    end
 
-  test "read_ast", %{code: code} do
-    assert {:ok,
-            {
-              :defmodule,
-              [line: 1],
-              [
-                {:__aliases__, [line: 1], [:Root]},
+    test "read_ast success", %{code: code} do
+      assert {:ok,
+              {
+                :defmodule,
+                [line: 1],
                 [
-                  do: {
-                    :__block__,
-                    [],
-                    [
-                      {:@, [line: 2], [{:moduledoc, [line: 2], ["Root description"]}]},
-                      {:@, [line: 3], [{:root_attr, [line: 3], [:root_attribute]}]},
-                      {:def, [line: 4],
-                       [{:root_one, [line: 4], [{:once, [line: 4], nil}]}, [do: 1]]},
-                      {:def, [line: 7],
-                       [{:root_two, [line: 7], [{:twice, [line: 7], nil}]}, [do: 2]]},
-                      {:defmodule, [line: 10],
-                       [
-                         {:__aliases__, [line: 10], [:Foo]},
+                  {:__aliases__, [line: 1], [:Root]},
+                  [
+                    do: {
+                      :__block__,
+                      [],
+                      [
+                        {:@, [line: 2], [{:moduledoc, [line: 2], ["Root description"]}]},
+                        {:@, [line: 3], [{:root_attr, [line: 3], [:root_attribute]}]},
+                        {:def, [line: 4],
+                         [{:root_one, [line: 4], [{:once, [line: 4], nil}]}, [do: 1]]},
+                        {:def, [line: 7],
+                         [{:root_two, [line: 7], [{:twice, [line: 7], nil}]}, [do: 2]]},
+                        {:defmodule, [line: 10],
                          [
-                           do:
-                             {:__block__, [],
-                              [
-                                {:@, [line: 11], [{:moduledoc, [line: 11], ["Foo description"]}]},
-                                {:@, [line: 12], [{:bar_attr, [line: 12], [:bar_attribute]}]},
-                                {:@, [line: 13], [{:baz_attr, [line: 13], [:baz_attribute]}]},
-                                {:def, [line: 14],
-                                 [{:foo, [line: 14], [{:bar, [line: 14], nil}]}, [do: :baz]]},
-                                {:defmodule, [line: 17],
-                                 [
-                                   {:__aliases__, [line: 17], [:Bar]},
+                           {:__aliases__, [line: 10], [:Foo]},
+                           [
+                             do:
+                               {:__block__, [],
+                                [
+                                  {:@, [line: 11],
+                                   [{:moduledoc, [line: 11], ["Foo description"]}]},
+                                  {:@, [line: 12], [{:bar_attr, [line: 12], [:bar_attribute]}]},
+                                  {:@, [line: 13], [{:baz_attr, [line: 13], [:baz_attribute]}]},
+                                  {:def, [line: 14],
+                                   [{:foo, [line: 14], [{:bar, [line: 14], nil}]}, [do: :baz]]},
+                                  {:defmodule, [line: 17],
                                    [
-                                     do:
-                                       {:__block__, [],
-                                        [
-                                          {:@, [line: 18],
-                                           [{:moduledoc, [line: 18], ["Bar description"]}]},
-                                          {:def, [line: 19],
-                                           [
-                                             {:bar, [line: 19], [{:baz, [line: 19], nil}]},
-                                             [do: :foo]
-                                           ]}
-                                        ]}
-                                   ]
-                                 ]},
-                                {:defmodule, [line: 23],
-                                 [
-                                   {:__aliases__, [line: 23], [:Baz]},
+                                     {:__aliases__, [line: 17], [:Bar]},
+                                     [
+                                       do:
+                                         {:__block__, [],
+                                          [
+                                            {:@, [line: 18],
+                                             [{:moduledoc, [line: 18], ["Bar description"]}]},
+                                            {:def, [line: 19],
+                                             [
+                                               {:bar, [line: 19], [{:baz, [line: 19], nil}]},
+                                               [do: :foo]
+                                             ]}
+                                          ]}
+                                     ]
+                                   ]},
+                                  {:defmodule, [line: 23],
                                    [
-                                     do:
-                                       {:__block__, [],
-                                        [
-                                          {:@, [line: 24],
-                                           [{:moduledoc, [line: 24], ["Baz description"]}]},
-                                          {:def, [line: 25],
-                                           [
-                                             {:baz, [line: 25], [{:foo, [line: 25], nil}]},
-                                             [do: :bar]
-                                           ]}
-                                        ]}
-                                   ]
-                                 ]}
-                              ]}
-                         ]
-                       ]}
-                    ]
-                  }
+                                     {:__aliases__, [line: 23], [:Baz]},
+                                     [
+                                       do:
+                                         {:__block__, [],
+                                          [
+                                            {:@, [line: 24],
+                                             [{:moduledoc, [line: 24], ["Baz description"]}]},
+                                            {:def, [line: 25],
+                                             [
+                                               {:baz, [line: 25], [{:foo, [line: 25], nil}]},
+                                               [do: :bar]
+                                             ]}
+                                          ]}
+                                     ]
+                                   ]}
+                                ]}
+                           ]
+                         ]}
+                      ]
+                    }
+                  ]
                 ]
-              ]
-            }} == Parser.read_ast({:ok, code})
+              }} == Parser.read_ast({:ok, code})
+    end
   end
 
-  test "parse", %{code: code} do
-    assert %{
-             [:Root] => %{
-               body: "Root",
-               context: [:Root],
-               attrs: [
-                 %{
-                   value: [%{type: [:Atom], body: "root_attribute", kind: :literal}],
-                   body: "root_attr",
-                   kind: :attr
-                 }
-               ],
-               guards: [],
-               functions: [
-                 %{
-                   arguments: [%{type: [:Variable], body: "once", kind: :literal}],
-                   body: "root_one",
-                   kind: :function
-                 },
-                 %{
-                   arguments: [%{type: [:Variable], body: "twice", kind: :literal}],
-                   body: "root_two",
-                   kind: :function
-                 }
-               ],
-               kind: :space,
-               note: "Root description"
-             },
-             [:Root, :Foo] => %{
-               body: "Foo",
-               context: [:Root, :Foo],
-               attrs: [
-                 %{
-                   value: [%{type: [:Atom], body: "baz_attribute", kind: :literal}],
-                   body: "baz_attr",
-                   kind: :attr
-                 },
-                 %{
-                   value: [%{type: [:Atom], body: "bar_attribute", kind: :literal}],
-                   body: "bar_attr",
-                   kind: :attr
-                 }
-               ],
-               guards: [],
-               functions: [
-                 %{
-                   arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
-                   body: "foo",
-                   kind: :function
-                 }
-               ],
-               kind: :space,
-               note: "Foo description"
-             },
-             [:Root, :Foo, :Bar] => %{
-               body: "Bar",
-               context: [:Root, :Foo, :Bar],
-               attrs: [],
-               guards: [],
-               functions: [
-                 %{
-                   arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
-                   body: "bar",
-                   kind: :function
-                 }
-               ],
-               kind: :space,
-               note: "Bar description"
-             },
-             [:Root, :Foo, :Baz] => %{
-               body: "Baz",
-               context: [:Root, :Foo, :Baz],
-               attrs: [],
-               guards: [],
-               functions: [
-                 %{
-                   arguments: [%{type: [:Variable], body: "foo", kind: :literal}],
-                   body: "baz",
-                   kind: :function
-                 }
-               ],
-               kind: :space,
-               note: "Baz description"
-             }
-           } ==
-             {:ok, code}
-             |> Parser.read_ast()
-             |> Parser.parse()
-  end
+  describe "parsing ast" do
+    test "general example", %{code: code} do
+      assert %{
+               [:Root] => %{
+                 body: "Root",
+                 context: [:Root],
+                 attrs: [
+                   %{
+                     value: [%{type: [:Atom], body: "root_attribute", kind: :literal}],
+                     body: "root_attr",
+                     kind: :attr
+                   }
+                 ],
+                 guards: [],
+                 functions: [
+                   %{
+                     arguments: [%{type: [:Variable], body: "once", kind: :literal}],
+                     body: "root_one",
+                     kind: :call
+                   },
+                   %{
+                     arguments: [%{type: [:Variable], body: "twice", kind: :literal}],
+                     body: "root_two",
+                     kind: :call
+                   }
+                 ],
+                 kind: :space,
+                 note: "Root description"
+               },
+               [:Root, :Foo] => %{
+                 body: "Foo",
+                 context: [:Root, :Foo],
+                 attrs: [
+                   %{
+                     value: [%{type: [:Atom], body: "baz_attribute", kind: :literal}],
+                     body: "baz_attr",
+                     kind: :attr
+                   },
+                   %{
+                     value: [%{type: [:Atom], body: "bar_attribute", kind: :literal}],
+                     body: "bar_attr",
+                     kind: :attr
+                   }
+                 ],
+                 guards: [],
+                 functions: [
+                   %{
+                     arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
+                     body: "foo",
+                     kind: :call
+                   }
+                 ],
+                 kind: :space,
+                 note: "Foo description"
+               },
+               [:Root, :Foo, :Bar] => %{
+                 body: "Bar",
+                 context: [:Root, :Foo, :Bar],
+                 attrs: [],
+                 guards: [],
+                 functions: [
+                   %{
+                     arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
+                     body: "bar",
+                     kind: :call
+                   }
+                 ],
+                 kind: :space,
+                 note: "Bar description"
+               },
+               [:Root, :Foo, :Baz] => %{
+                 body: "Baz",
+                 context: [:Root, :Foo, :Baz],
+                 attrs: [],
+                 guards: [],
+                 functions: [
+                   %{
+                     arguments: [%{type: [:Variable], body: "foo", kind: :literal}],
+                     body: "baz",
+                     kind: :call
+                   }
+                 ],
+                 kind: :space,
+                 note: "Baz description"
+               }
+             } ==
+               {:ok, code}
+               |> Parser.read_ast()
+               |> Parser.parse()
+    end
 
-  test "weird pipe comparison" do
-    {:ok, ast} =
-      """
-        def bar(a, b) when a |> Kernel.and(b) do
-          :baz
-        end
-      """
-      |> Code.string_to_quoted()
+    test "weird pipe comparison" do
+      {:ok, ast} =
+        """
+          def bar(a, b) when a |> Kernel.and(b) do
+            :baz
+          end
+        """
+        |> Code.string_to_quoted()
 
-    assert %{
-             kind: :when,
-             left: %{
-               body: "bar",
-               kind: :function,
-               arguments: [
-                 %{type: [:Variable], body: "a", kind: :literal},
-                 %{type: [:Variable], body: "b", kind: :literal}
+      assert %{
+               body: "when",
+               kind: :operator,
+               left: %{
+                 arguments: [
+                   %{body: "a", kind: :literal, type: [:Variable]},
+                   %{body: "b", kind: :literal, type: [:Variable]}
+                 ],
+                 body: "bar",
+                 kind: :call
+               },
+               right: %{
+                 body: "and",
+                 kind: :comparison,
+                 left: %{body: "a", kind: :literal, type: [:Variable]},
+                 right: %{body: "b", kind: :literal, type: [:Variable]}
+               }
+             } == Parser.parse(ast, [])
+    end
+
+    test "kernel comparison" do
+      {:ok, ast} =
+        """
+          def bar(a, b) when Kernel.and(a, b) do
+            :baz
+          end
+        """
+        |> Code.string_to_quoted()
+
+      assert %{
+               body: "when",
+               kind: :operator,
+               left: %{
+                 arguments: [
+                   %{body: "a", kind: :literal, type: [:Variable]},
+                   %{body: "b", kind: :literal, type: [:Variable]}
+                 ],
+                 body: "bar",
+                 kind: :call
+               },
+               right: %{
+                 body: "and",
+                 kind: :comparison,
+                 left: %{body: "a", kind: :literal, type: [:Variable]},
+                 right: %{body: "b", kind: :literal, type: [:Variable]}
+               }
+             } == Parser.parse(ast, [])
+    end
+
+    test "tuple pair" do
+      {:ok, ast} = Code.string_to_quoted("{:ok, msg}")
+
+      assert %{
+               body: :tuple,
+               kind: :structure,
+               elements: [
+                 %{body: "ok", kind: :literal, type: [:Atom]},
+                 %{body: "msg", kind: :literal, type: [:Variable]}
                ]
-             },
-             right: %{
-               body: "and",
-               kind: :comparison,
-               left: %{type: [:Variable], body: "a", kind: :literal},
-               right: %{type: [:Variable], body: "b", kind: :literal}
-             }
-           } == Parser.parse(ast, [])
-  end
+             } == Parser.parse(ast, [[:Foo, :Bar]])
+    end
 
-  test "kernel comparison" do
-    {:ok, ast} =
-      """
-        def bar(a, b) when Kernel.and(a, b) do
-          :baz
-        end
-      """
-      |> Code.string_to_quoted()
+    test "string literal" do
+      {:ok, ast} = Code.string_to_quoted("\"foo\"")
 
-    assert %{
-             kind: :when,
-             left: %{
-               body: "bar",
-               kind: :function,
-               arguments: [
-                 %{type: [:Variable], body: "a", kind: :literal},
-                 %{type: [:Variable], body: "b", kind: :literal}
+      assert %{
+               body: "foo",
+               kind: :literal,
+               type: [:Binary]
+             } == Parser.parse(ast, [[:Foo, :Bar]])
+    end
+
+    test "raw string" do
+      {:ok, ast} = Code.string_to_quoted("<<1,2,3>>")
+
+      assert %{
+               body: :bitstring,
+               kind: :structure,
+               bits: [
+                 %{type: [:Integer], body: "1", kind: :literal},
+                 %{type: [:Integer], body: "2", kind: :literal},
+                 %{type: [:Integer], body: "3", kind: :literal}
                ]
-             },
-             right: %{
-               body: "and",
-               kind: :comparison,
-               left: %{type: [:Variable], body: "a", kind: :literal},
-               right: %{type: [:Variable], body: "b", kind: :literal}
-             }
-           } == Parser.parse(ast, [])
-  end
+             } ==
+               Parser.parse(ast, [[:Foo, :Bar]])
+    end
 
-  test "tuple pair" do
-    {:ok, ast} = Code.string_to_quoted("{:ok, msg}")
+    test "tuple literal" do
+      {:ok, ast} = Code.string_to_quoted("{:ok, 13}")
 
-    assert %{
-             tuple: [
-               %{body: "ok", kind: :literal, type: [:Atom]},
-               %{body: "msg", kind: :literal, type: [:Variable]}
-             ]
-           } == Parser.parse(ast, [[:Foo, :Bar]])
-  end
+      assert %{
+               body: :tuple,
+               kind: :structure,
+               elements: [
+                 %{body: "ok", kind: :literal, type: [:Atom]},
+                 %{body: "13", kind: :literal, type: [:Integer]}
+               ]
+             } == Parser.parse(ast, [[:Foo, :Bar]])
+    end
 
-  test "tuple literal" do
-    {:ok, ast} = Code.string_to_quoted("{:ok, 13}")
+    test "literal list with pipe" do
+      {:ok, ast} = Code.string_to_quoted("[head | tail]")
 
-    assert %{
-             tuple: [
-               %{body: "ok", kind: :literal, type: [:Atom]},
-               %{body: "13", kind: :literal, type: [:Integer]}
-             ]
-           } == Parser.parse(ast, [[:Foo, :Bar]])
-  end
-
-  test "literal list with pipe" do
-    {:ok, ast} = Code.string_to_quoted("[head | tail]")
-
-    assert [
-             %{
-               values: [
-                 %{type: [:Variable], body: "head", kind: :literal},
-                 %{type: [:Variable], body: "tail", kind: :literal}
-               ],
-               body: "|",
-               kind: :pipe
-             }
-           ] == Parser.parse(ast, [])
+      assert [
+               %{
+                 values: [
+                   %{type: [:Variable], body: "head", kind: :literal},
+                   %{type: [:Variable], body: "tail", kind: :literal}
+                 ],
+                 body: "|",
+                 kind: :pipe
+               }
+             ] == Parser.parse(ast, [])
+    end
   end
 
   describe "expandind modules via aliases" do

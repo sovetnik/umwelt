@@ -6,6 +6,7 @@ defmodule Umwelt.Parser.Macro do
   import Umwelt.Parser.Comparison, only: [is_comparison: 1]
   import Umwelt.Parser.Operator, only: [is_operator: 1]
   import Umwelt.Parser.Pipe, only: [is_pipe_operator: 1]
+  import Umwelt.Parser.Structure, only: [is_structure: 1]
 
   defguard is_atom_macro(term)
            when is_tuple(term) and
@@ -44,11 +45,8 @@ defmodule Umwelt.Parser.Macro do
   def parse({:{}, _, _} = ast, aliases) when is_macro(ast),
     do: Parser.Tuple.parse(ast, aliases)
 
-  def parse({:%, _, _} = ast, aliases) when is_macro(ast),
-    do: Parser.Struct.parse(ast, aliases)
-
-  def parse({:%{}, _, children} = ast, _aliases) when is_macro(ast),
-    do: %{struct: children}
+  def parse({term, _, _} = ast, aliases) when is_macro(ast) and is_structure(term),
+    do: Parser.Structure.parse(ast, aliases)
 
   def parse({term, _, _} = ast, aliases) when is_operator(term),
     do: Parser.Operator.parse(ast, aliases)
@@ -62,11 +60,11 @@ defmodule Umwelt.Parser.Macro do
   def parse({term, _, _} = ast, aliases) when is_comparison(term),
     do: Parser.Comparison.parse(ast, aliases)
 
-  # signature.
+  # simple call node
   def parse({term, _, children} = ast, aliases)
       when is_atom_macro(ast) do
     %{
-      kind: :function,
+      kind: :call,
       body: to_string(term),
       arguments: Parser.parse(children, aliases)
     }

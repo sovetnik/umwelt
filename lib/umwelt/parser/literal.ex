@@ -19,6 +19,6 @@ defmodule Umwelt.Parser.Literal do
   def parse(literal) when is_atom(literal),
     do: %{body: to_string(literal), kind: :literal, type: [:Atom]}
 
-  def parse({literal, _, nil}),
+  def parse({literal, _, nil}) when is_atom(literal),
     do: %{body: to_string(literal), kind: :literal, type: [:Variable]}
 end

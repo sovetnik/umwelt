@@ -18,7 +18,7 @@ defmodule Umwelt.Parser.Operator do
       when is_atom(term),
       do: Parser.parse({term, [], arguments}, aliases)
 
-  # compactize Kernel calls
+  # qualified call node
   def parse({{:., _, [{:__aliases__, _, module}, term]}, _, arguments}, aliases)
       when is_atom(term) do
     %{
@@ -79,7 +79,8 @@ defmodule Umwelt.Parser.Operator do
 
   def parse({:when, _, [left, right]}, aliases) do
     %{
-      kind: :when,
+      body: "when",
+      kind: :operator,
       left: Parser.parse(left, aliases),
       right: Parser.parse(right, aliases)
     }

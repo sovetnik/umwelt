@@ -4,7 +4,11 @@ defmodule Umwelt.Parser.Tuple do
   alias Umwelt.Parser
 
   def parse({:{}, _, children}, aliases),
-    do: %{tuple: parse_children(children, aliases)}
+    do: %{
+      body: :tuple,
+      kind: :structure,
+      elements: Parser.parse(children, aliases)
+    }
 
   def parse(tuple, aliases) when is_tuple(tuple) do
     result =
@@ -12,9 +16,10 @@ defmodule Umwelt.Parser.Tuple do
       |> Tuple.to_list()
       |> Parser.parse(aliases)
 
-    %{tuple: result}
+    %{
+      body: :tuple,
+      kind: :structure,
+      elements: result
+    }
   end
-
-  def parse_children(children, aliases),
-    do: children |> Parser.parse(aliases)
 end

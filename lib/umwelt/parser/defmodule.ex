@@ -97,10 +97,10 @@ defmodule Umwelt.Parser.Defmodule do
       %{impl: [value]}, [head | rest] ->
         [Map.put(head, :impl, value) | rest]
 
-      %{kind: :function} = function, [head | rest] ->
+      %{kind: :call} = function, [head | rest] ->
         [%{}, Map.merge(head, function) | rest]
 
-      %{kind: :when} = function, [head | rest] ->
+      %{kind: :operator, body: "when"} = function, [head | rest] ->
         [%{}, Map.merge(head, function) | rest]
 
       _other, acc ->
