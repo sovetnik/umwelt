@@ -11,7 +11,30 @@ defmodule Umwelt.Parser.Operator do
 
   alias Umwelt.Parser
 
-  defguard is_operator(term) when term in [:^, :., :=, :&, :"::", :\\, :when]
+  defguard is_special_operator(term)
+           when term in [:^, :., :=, :&, :"::"]
+
+  defguard is_comparison_operator(term)
+           when term in [:==, :!=, :===, :!==, :<, :<=, :>, :>=]
+
+  defguard is_other_operator(term)
+           when term in [:\\, :in, :when]
+
+  defguard is_relaxed_bool_operator(term)
+           when term in [:&&, :||, :!]
+
+  defguard is_strict_bool_operator(term)
+           when term in [:and, :or, :not]
+
+  defguard is_unary(term)
+           when term in [:!, :^, :not, :&]
+
+  defguard is_operator(term)
+           when is_special_operator(term) or
+                  is_comparison_operator(term) or
+                  is_other_operator(term) or
+                  is_relaxed_bool_operator(term) or
+                  is_strict_bool_operator(term)
 
   # compactize Kernel calls
   def parse({{:., _, [{:__aliases__, _, [:Kernel]}, term]}, _, arguments}, aliases)
@@ -29,14 +52,15 @@ defmodule Umwelt.Parser.Operator do
     }
   end
 
-  # {:., [from_brackets: true, line: 4], [Access, :get]}
-  def parse({term, [from_brackets: true, line: _], [from, key]}, aliases) do
+  def parse(
+        {{:., [from_brackets: true, line: _], [Access, :get]}, [from_brackets: true, line: _],
+         [from, key]},
+        aliases
+      ) do
     %{
-      source: Parser.parse(term, aliases),
-      brackets: %{
-        from: Parser.parse(from, aliases),
-        key: Parser.parse(key, aliases)
-      }
+      kind: :access,
+      source: Parser.parse(from, aliases),
+      key: Parser.parse(key, aliases)
     }
   end
 
@@ -77,9 +101,26 @@ defmodule Umwelt.Parser.Operator do
     }
   end
 
-  def parse({:when, _, [left, right]}, aliases) do
+  def parse({:in, _, [left, right]}, aliases) when is_list(right) do
     %{
-      body: "when",
+      body: "membership",
+      kind: :operator,
+      left: Parser.parse(left, aliases),
+      right: Parser.parse(right, aliases)
+    }
+  end
+
+  def parse({term, _, [expr]}, aliases) when is_unary(term) do
+    %{
+      body: to_string(term),
+      kind: :operator,
+      expr: Parser.parse(expr, aliases)
+    }
+  end
+
+  def parse({term, _, [left, right]}, aliases) do
+    %{
+      body: to_string(term),
       kind: :operator,
       left: Parser.parse(left, aliases),
       right: Parser.parse(right, aliases)

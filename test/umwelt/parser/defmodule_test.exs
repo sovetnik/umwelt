@@ -31,7 +31,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      },
                      right: %{
                        body: "membership",
-                       kind: :comparison,
+                       kind: :operator,
                        left: %{type: [:Variable], body: "term", kind: :literal},
                        right: [
                          %{type: [:Atom], body: "foo", kind: :literal},
@@ -88,7 +88,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      },
                      right: %{
                        body: "membership",
-                       kind: :comparison,
+                       kind: :operator,
                        left: %{type: [:Variable], body: "term", kind: :literal},
                        right: [
                          %{type: [:Atom], body: "foo", kind: :literal},

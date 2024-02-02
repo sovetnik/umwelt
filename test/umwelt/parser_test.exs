@@ -213,7 +213,7 @@ defmodule Umwelt.ParserTest do
                |> Parser.parse()
     end
 
-    test "weird pipe comparison" do
+    test "weird pipe operator" do
       {:ok, ast} =
         """
           def bar(a, b) when a |> Kernel.and(b) do
@@ -235,14 +235,14 @@ defmodule Umwelt.ParserTest do
                },
                right: %{
                  body: "and",
-                 kind: :comparison,
+                 kind: :operator,
                  left: %{body: "a", kind: :literal, type: [:Variable]},
                  right: %{body: "b", kind: :literal, type: [:Variable]}
                }
              } == Parser.parse(ast, [])
     end
 
-    test "kernel comparison" do
+    test "kernel operator" do
       {:ok, ast} =
         """
           def bar(a, b) when Kernel.and(a, b) do
@@ -264,7 +264,7 @@ defmodule Umwelt.ParserTest do
                },
                right: %{
                  body: "and",
-                 kind: :comparison,
+                 kind: :operator,
                  left: %{body: "a", kind: :literal, type: [:Variable]},
                  right: %{body: "b", kind: :literal, type: [:Variable]}
                }

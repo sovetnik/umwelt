@@ -41,7 +41,7 @@ defmodule Umwelt.Parser.DefTest do
   test "method call in argument" do
     {:ok, ast} =
       ~S"""
-        def list_from_root(path, project \\ Mix.Project.config()[:app]) do
+        def list_from_root(path, project \\ Mix.Project.config(:dev)[:app]) do
           :good_path
         end
       """
@@ -57,21 +57,13 @@ defmodule Umwelt.Parser.DefTest do
                    arg: %{type: [:Variable], body: "project", kind: :literal},
                    default_value: %{
                      source: %{
-                       source: %{type: [:Atom], body: ".", kind: :literal},
-                       brackets: %{
-                         key: %{type: [:Atom], body: "get", kind: :literal},
-                         from: %{type: [:Atom], body: "Elixir.Access", kind: :literal}
-                       }
+                       arguments: [%{type: [:Atom], body: "dev", kind: :literal}],
+                       body: "config",
+                       context: [:Mix, :Project],
+                       kind: :call
                      },
-                     brackets: %{
-                       key: %{type: [:Atom], body: "app", kind: :literal},
-                       from: %{
-                         context: [:Mix, :Project],
-                         body: "config",
-                         kind: :call,
-                         arguments: []
-                       }
-                     }
+                     key: %{type: [:Atom], body: "app", kind: :literal},
+                     kind: :access
                    }
                  }
                }
@@ -104,13 +96,13 @@ defmodule Umwelt.Parser.DefTest do
                },
                right: %{
                  body: "or",
-                 kind: :comparison,
+                 kind: :operator,
                  left: %{
                    body: "or",
-                   kind: :comparison,
+                   kind: :operator,
                    left: %{
                      body: "or",
-                     kind: :comparison,
+                     kind: :operator,
                      left: %{
                        body: "is_atom",
                        kind: :call,
@@ -178,7 +170,7 @@ defmodule Umwelt.Parser.DefTest do
                    kind: :call
                  },
                  body: "or",
-                 kind: :comparison
+                 kind: :operator
                }
              } == Def.parse(ast, [])
     end
@@ -249,7 +241,7 @@ defmodule Umwelt.Parser.DefTest do
                },
                right: %{
                  body: "or",
-                 kind: :comparison,
+                 kind: :operator,
                  left: %{
                    arguments: [%{type: [:Variable], body: "num", kind: :literal}],
                    body: "is_integer",

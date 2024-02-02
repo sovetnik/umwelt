@@ -3,7 +3,6 @@ defmodule Umwelt.Parser.Macro do
 
   alias Umwelt.Parser
 
-  import Umwelt.Parser.Comparison, only: [is_comparison: 1]
   import Umwelt.Parser.Operator, only: [is_operator: 1]
   import Umwelt.Parser.Pipe, only: [is_pipe_operator: 1]
   import Umwelt.Parser.Structure, only: [is_structure: 1]
@@ -56,9 +55,6 @@ defmodule Umwelt.Parser.Macro do
 
   def parse({term, _, _} = ast, aliases) when is_pipe_operator(term),
     do: Parser.Pipe.parse(ast, aliases)
-
-  def parse({term, _, _} = ast, aliases) when is_comparison(term),
-    do: Parser.Comparison.parse(ast, aliases)
 
   # simple call node
   def parse({term, _, children} = ast, aliases)
