@@ -37,19 +37,17 @@ defmodule Umwelt.Parser.AttrsTest do
              kind: :attr,
              value: [
                %{
-                 body: :map,
                  context: [],
                  keyword: [
                    %{
-                     body: :tuple,
-                     kind: :structure,
+                     type: [:Tuple],
                      elements: [
                        %{type: [:Atom], body: "foo", kind: :literal},
                        %{type: [:Atom], body: "bar", kind: :literal}
                      ]
                    }
                  ],
-                 kind: :structure
+                 type: [:Map]
                }
              ]
            } == Attrs.parse(ast)

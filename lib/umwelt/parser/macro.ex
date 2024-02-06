@@ -57,12 +57,10 @@ defmodule Umwelt.Parser.Macro do
     do: Parser.Pipe.parse(ast, aliases)
 
   # simple call node
-  def parse({term, _, children} = ast, aliases)
-      when is_atom_macro(ast) do
-    %{
+  def parse({term, _, children} = ast, aliases) when is_atom_macro(ast),
+    do: %{
       kind: :call,
       body: to_string(term),
       arguments: Parser.parse(children, aliases)
     }
-  end
 end

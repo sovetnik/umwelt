@@ -5,32 +5,20 @@ defmodule Umwelt.Parser.Structure do
 
   defguard is_structure(term) when term in [:%, :%{}, :<<>>]
 
-  def parse(
-        {:%, _, [{:__aliases__, _, _} = ast, {:%{}, _, children}]},
-        aliases
-      ) do
-    %{
-      body: :map,
-      kind: :structure,
+  def parse({:%, _, [{:__aliases__, _, _} = ast, {:%{}, _, children}]}, aliases),
+    do: %{
+      type: [:Map],
       context: Parser.parse(ast, aliases),
       keyword: Parser.parse(children, aliases)
     }
-  end
 
-  def parse({:%{}, _, children}, aliases) do
-    %{
-      body: :map,
-      kind: :structure,
+  def parse({:%{}, _, children}, aliases),
+    do: %{
+      type: [:Map],
       context: [],
       keyword: Parser.parse(children, aliases)
     }
-  end
 
-  def parse({:<<>>, _, children}, aliases) do
-    %{
-      body: :bitstring,
-      kind: :structure,
-      bits: Parser.parse(children, aliases)
-    }
-  end
+  def parse({:<<>>, _, children}, aliases),
+    do: %{type: [:Bitstring], bits: Parser.parse(children, aliases)}
 end

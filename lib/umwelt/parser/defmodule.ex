@@ -47,9 +47,7 @@ defmodule Umwelt.Parser.Defmodule do
     %{defstruct: Parser.parse(fields, aliases)}
   end
 
-  defp parse_block_child(_ast, _, _) do
-    nil
-  end
+  defp parse_block_child(_ast, _, _), do: nil
 
   defp aliases(children) do
     Enum.flat_map(children, fn

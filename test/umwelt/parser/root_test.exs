@@ -50,7 +50,7 @@ defmodule Umwelt.Parser.RootTest do
                    guards: [],
                    functions: [
                      %{
-                       arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
+                       arguments: [%{type: [:Variable], body: "bar", kind: :variable}],
                        body: "foo",
                        kind: :call,
                        note: "bar -> baz"
@@ -67,7 +67,7 @@ defmodule Umwelt.Parser.RootTest do
                      guards: [],
                      functions: [
                        %{
-                         arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
+                         arguments: [%{type: [:Variable], body: "baz", kind: :variable}],
                          impl: %{type: [:Boolean], body: "true", kind: :literal},
                          body: "bar",
                          kind: :call
@@ -116,12 +116,12 @@ defmodule Umwelt.Parser.RootTest do
                %{
                  functions: [
                    %{
-                     arguments: [%{type: [:Variable], body: "once", kind: :literal}],
+                     arguments: [%{type: [:Variable], body: "once", kind: :variable}],
                      body: "root_one",
                      kind: :call
                    },
                    %{
-                     arguments: [%{type: [:Variable], body: "twice", kind: :literal}],
+                     arguments: [%{type: [:Variable], body: "twice", kind: :variable}],
                      body: "root_two",
                      kind: :call
                    }
@@ -137,7 +137,7 @@ defmodule Umwelt.Parser.RootTest do
                  %{
                    functions: [
                      %{
-                       arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
+                       arguments: [%{type: [:Variable], body: "bar", kind: :variable}],
                        body: "foo",
                        kind: :call
                      }
@@ -153,7 +153,7 @@ defmodule Umwelt.Parser.RootTest do
                    %{
                      functions: [
                        %{
-                         arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
+                         arguments: [%{type: [:Variable], body: "baz", kind: :variable}],
                          body: "bar",
                          kind: :call
                        }
@@ -170,7 +170,7 @@ defmodule Umwelt.Parser.RootTest do
                    %{
                      functions: [
                        %{
-                         arguments: [%{type: [:Variable], body: "foo", kind: :literal}],
+                         arguments: [%{type: [:Variable], body: "foo", kind: :variable}],
                          body: "baz",
                          kind: :call
                        }
@@ -354,26 +354,28 @@ defmodule Umwelt.Parser.RootTest do
                          %{body: "foo", kind: :literal, type: [:Atom]},
                          %{body: "", kind: :literal, type: [:Atom]}
                        ],
-                       body: :tuple,
-                       kind: :structure
+                       type: [:Tuple]
                      },
                      %{
                        elements: [
                          %{body: "tree", kind: :literal, type: [:Atom]},
-                         %{body: :map, context: [], keyword: [], kind: :structure}
+                         %{
+                           context: [],
+                           keyword: [],
+                           type: [:Map]
+                         }
                        ],
-                       body: :tuple,
-                       kind: :structure
+                       type: [:Tuple]
                      }
                    ],
                    functions: [
                      %{
-                       arguments: [%{body: "bar", kind: :literal, type: [:Variable]}],
+                       arguments: [%{body: "bar", kind: :variable, type: [:Variable]}],
                        body: "foo",
                        kind: :call
                      },
                      %{
-                       arguments: [%{type: [:Variable], body: "baz", kind: :literal}],
+                       arguments: [%{type: [:Variable], body: "baz", kind: :variable}],
                        body: "bar",
                        kind: :call
                      }
@@ -413,7 +415,7 @@ defmodule Umwelt.Parser.RootTest do
                    guards: [],
                    functions: [
                      %{
-                       arguments: [%{type: [:Variable], body: "bar", kind: :literal}],
+                       arguments: [%{type: [:Variable], body: "bar", kind: :variable}],
                        body: "foo",
                        kind: :call
                      }

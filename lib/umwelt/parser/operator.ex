@@ -43,32 +43,50 @@ defmodule Umwelt.Parser.Operator do
 
   # qualified call node
   def parse({{:., _, [{:__aliases__, _, module}, term]}, _, arguments}, aliases)
-      when is_atom(term) do
-    %{
-      body: to_string(term),
-      context: module,
-      kind: :call,
-      arguments: Parser.parse(arguments, aliases)
-    }
-  end
+      when is_atom(term),
+      do: %{
+        body: to_string(term),
+        context: module,
+        kind: :call,
+        arguments: Parser.parse(arguments, aliases)
+      }
 
   def parse(
         {{:., [from_brackets: true, line: _], [Access, :get]}, [from_brackets: true, line: _],
          [from, key]},
         aliases
-      ) do
-    %{
-      kind: :access,
-      source: Parser.parse(from, aliases),
-      key: Parser.parse(key, aliases)
-    }
-  end
+      ),
+      do: %{
+        kind: :access,
+        source: Parser.parse(from, aliases),
+        key: Parser.parse(key, aliases)
+      }
 
   def parse({:=, _, [left, {name, _, nil}]}, aliases),
     do: %{
       body: to_string(name),
       kind: :match,
       term: Parser.parse(left, aliases)
+    }
+
+  def parse({:\\, _, [arg, []]}, aliases) do
+    arg
+    |> Parser.parse(aliases)
+    |> Map.put_new(:default, %{type: [:List]})
+  end
+
+  def parse({:\\, _, [arg, default]}, aliases) do
+    arg
+    |> Parser.parse(aliases)
+    |> Map.put_new(:default, Parser.parse(default, aliases))
+  end
+
+  def parse({:in, _, [left, right]}, aliases) when is_list(right),
+    do: %{
+      body: "membership",
+      kind: :operator,
+      left: Parser.parse(left, aliases),
+      right: Parser.parse(right, aliases)
     }
 
   # def parse({:^, _, [left, {name, _, nil}]}, aliases),
@@ -92,38 +110,18 @@ defmodule Umwelt.Parser.Operator do
   #     term: Parser.parse(left, aliases)
   #   }
 
-  def parse({:\\, _, [arg, default]}, aliases) do
-    %{
-      default_arg: %{
-        arg: Parser.parse(arg, aliases),
-        default_value: Parser.parse(default, aliases)
-      }
-    }
-  end
-
-  def parse({:in, _, [left, right]}, aliases) when is_list(right) do
-    %{
-      body: "membership",
-      kind: :operator,
-      left: Parser.parse(left, aliases),
-      right: Parser.parse(right, aliases)
-    }
-  end
-
-  def parse({term, _, [expr]}, aliases) when is_unary(term) do
-    %{
+  def parse({term, _, [expr]}, aliases) when is_unary(term),
+    do: %{
       body: to_string(term),
       kind: :operator,
       expr: Parser.parse(expr, aliases)
     }
-  end
 
-  def parse({term, _, [left, right]}, aliases) do
-    %{
+  def parse({term, _, [left, right]}, aliases),
+    do: %{
       body: to_string(term),
       kind: :operator,
       left: Parser.parse(left, aliases),
       right: Parser.parse(right, aliases)
     }
-  end
 end

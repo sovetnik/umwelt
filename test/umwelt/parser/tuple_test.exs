@@ -7,8 +7,7 @@ defmodule Umwelt.Parser.TupleTest do
     {:ok, ast} = Code.string_to_quoted("{}")
 
     assert %{
-             body: :tuple,
-             kind: :structure,
+             type: [:Tuple],
              elements: []
            } == Tuple.parse(ast, [])
   end
@@ -17,8 +16,7 @@ defmodule Umwelt.Parser.TupleTest do
     {:ok, ast} = Code.string_to_quoted("{:foo}")
 
     assert %{
-             body: :tuple,
-             kind: :structure,
+             type: [:Tuple],
              elements: [%{body: "foo", kind: :literal, type: [:Atom]}]
            } ==
              Tuple.parse(ast, [])
@@ -28,11 +26,10 @@ defmodule Umwelt.Parser.TupleTest do
     {:ok, ast} = Code.string_to_quoted("{:ok, result}")
 
     assert %{
-             body: :tuple,
-             kind: :structure,
+             type: [:Tuple],
              elements: [
                %{body: "ok", kind: :literal, type: [:Atom]},
-               %{body: "result", kind: :literal, type: [:Variable]}
+               %{body: "result", kind: :variable, type: [:Variable]}
              ]
            } == Tuple.parse(ast, [])
   end
@@ -41,8 +38,7 @@ defmodule Umwelt.Parser.TupleTest do
     {:ok, ast} = Code.string_to_quoted("{:ok, \"binary\"}")
 
     assert %{
-             body: :tuple,
-             kind: :structure,
+             type: [:Tuple],
              elements: [
                %{body: "ok", kind: :literal, type: [:Atom]},
                %{body: "binary", kind: :literal, type: [:Binary]}
@@ -54,8 +50,7 @@ defmodule Umwelt.Parser.TupleTest do
     {:ok, ast} = Code.string_to_quoted("{:ok, 13}")
 
     assert %{
-             body: :tuple,
-             kind: :structure,
+             type: [:Tuple],
              elements: [
                %{body: "ok", kind: :literal, type: [:Atom]},
                %{body: "13", kind: :literal, type: [:Integer]}
@@ -67,14 +62,13 @@ defmodule Umwelt.Parser.TupleTest do
     {:ok, ast} = Code.string_to_quoted("{:ok, %Result{} = result}")
 
     assert %{
-             body: :tuple,
-             kind: :structure,
+             type: [:Tuple],
              elements: [
                %{body: "ok", kind: :literal, type: [:Atom]},
                %{
                  body: "result",
                  kind: :match,
-                 term: %{context: [:Result], body: :map, kind: :structure, keyword: []}
+                 term: %{context: [:Result], type: [:Map], keyword: []}
                }
              ]
            } == Tuple.parse(ast, [])
@@ -84,12 +78,11 @@ defmodule Umwelt.Parser.TupleTest do
     {:ok, ast} = Code.string_to_quoted("{:error, msg, details}")
 
     assert %{
-             body: :tuple,
-             kind: :structure,
+             type: [:Tuple],
              elements: [
                %{body: "error", kind: :literal, type: [:Atom]},
-               %{body: "msg", kind: :literal, type: [:Variable]},
-               %{body: "details", kind: :literal, type: [:Variable]}
+               %{body: "msg", kind: :variable, type: [:Variable]},
+               %{body: "details", kind: :variable, type: [:Variable]}
              ]
            } == Tuple.parse(ast, [])
   end
