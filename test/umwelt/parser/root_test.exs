@@ -42,7 +42,7 @@ defmodule Umwelt.Parser.RootTest do
                    context: [:Foo, :Bar],
                    attrs: [
                      %{
-                       value: [%{type: [:Atom], body: "bar", kind: :literal}],
+                       value: [%{type: [:Atom], body: "bar", kind: :value}],
                        body: "foo",
                        kind: :attr
                      }
@@ -68,7 +68,7 @@ defmodule Umwelt.Parser.RootTest do
                      functions: [
                        %{
                          arguments: [%{type: [:Variable], body: "baz", kind: :variable}],
-                         impl: %{type: [:Boolean], body: "true", kind: :literal},
+                         impl: %{type: [:Boolean], body: "true", kind: :value},
                          body: "bar",
                          kind: :call
                        }
@@ -351,14 +351,14 @@ defmodule Umwelt.Parser.RootTest do
                    fields: [
                      %{
                        elements: [
-                         %{body: "foo", kind: :literal, type: [:Atom]},
-                         %{body: "", kind: :literal, type: [:Atom]}
+                         %{body: "foo", kind: :value, type: [:Atom]},
+                         %{body: "", kind: :value, type: [:Atom]}
                        ],
                        type: [:Tuple]
                      },
                      %{
                        elements: [
-                         %{body: "tree", kind: :literal, type: [:Atom]},
+                         %{body: "tree", kind: :value, type: [:Atom]},
                          %{
                            context: [],
                            keyword: [],

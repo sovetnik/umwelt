@@ -34,8 +34,8 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        kind: :operator,
                        left: %{type: [:Variable], body: "term", kind: :variable},
                        right: [
-                         %{type: [:Atom], body: "foo", kind: :literal},
-                         %{type: [:Atom], body: "bar", kind: :literal}
+                         %{type: [:Atom], body: "foo", kind: :value},
+                         %{type: [:Atom], body: "bar", kind: :value}
                        ]
                      }
                    }
@@ -91,8 +91,8 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        kind: :operator,
                        left: %{type: [:Variable], body: "term", kind: :variable},
                        right: [
-                         %{type: [:Atom], body: "foo", kind: :literal},
-                         %{type: [:Atom], body: "bar", kind: :literal}
+                         %{type: [:Atom], body: "foo", kind: :value},
+                         %{type: [:Atom], body: "bar", kind: :value}
                        ]
                      }
                    }
@@ -144,20 +144,13 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    %{
                      arguments: [
                        %{
+                         body: "_",
+                         head: %{body: "h", kind: :variable, type: [:Variable]},
                          kind: :value,
-                         type: [:List],
-                         head: %{
-                           values: [
-                             %{type: [:Variable], body: "h", kind: :variable},
-                             %{type: [:Variable], body: "t", kind: :variable}
-                           ],
-                           body: "|",
-                           kind: :pipe
-                         },
-                         tail: [],
-                         body: "_"
+                         tail: %{type: [:Variable], body: "t", kind: :variable},
+                         type: [:List]
                        },
-                       %{body: "outcome", kind: :variable, type: [:Variable]}
+                       %{type: [:Variable], body: "outcome", kind: :variable}
                      ],
                      body: "reverse",
                      kind: :call
@@ -195,14 +188,14 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  fields: [
                    %{
                      elements: [
-                       %{body: "foo", kind: :literal, type: [:Atom]},
-                       %{body: "", kind: :literal, type: [:Atom]}
+                       %{body: "foo", kind: :value, type: [:Atom]},
+                       %{body: "", kind: :value, type: [:Atom]}
                      ],
                      type: [:Tuple]
                    },
                    %{
                      elements: [
-                       %{body: "tree", kind: :literal, type: [:Atom]},
+                       %{body: "tree", kind: :value, type: [:Atom]},
                        %{
                          context: [],
                          keyword: [],
@@ -280,8 +273,8 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      value: [
                        %{
                          elements: [
-                           %{body: "fizz", kind: :literal, type: [:Atom]},
-                           %{body: "buzz", kind: :literal, type: [:Atom]}
+                           %{body: "fizz", kind: :value, type: [:Atom]},
+                           %{body: "buzz", kind: :value, type: [:Atom]}
                          ],
                          type: [:Tuple]
                        }
@@ -385,7 +378,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      %{
                        arguments: [%{body: "baz", kind: :variable, type: [:Variable]}],
                        body: "bar",
-                       impl: %{body: "true", kind: :literal, type: [:Boolean]},
+                       impl: %{body: "true", kind: :value, type: [:Boolean]},
                        kind: :call
                      }
                    ],

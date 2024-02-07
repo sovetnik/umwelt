@@ -17,7 +17,7 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              type: [:Tuple],
-             elements: [%{body: "foo", kind: :literal, type: [:Atom]}]
+             elements: [%{body: "foo", kind: :value, type: [:Atom]}]
            } ==
              Tuple.parse(ast, [])
   end
@@ -28,7 +28,7 @@ defmodule Umwelt.Parser.TupleTest do
     assert %{
              type: [:Tuple],
              elements: [
-               %{body: "ok", kind: :literal, type: [:Atom]},
+               %{body: "ok", kind: :value, type: [:Atom]},
                %{body: "result", kind: :variable, type: [:Variable]}
              ]
            } == Tuple.parse(ast, [])
@@ -40,8 +40,8 @@ defmodule Umwelt.Parser.TupleTest do
     assert %{
              type: [:Tuple],
              elements: [
-               %{body: "ok", kind: :literal, type: [:Atom]},
-               %{body: "binary", kind: :literal, type: [:Binary]}
+               %{body: "ok", kind: :value, type: [:Atom]},
+               %{body: "binary", kind: :value, type: [:Binary]}
              ]
            } == Tuple.parse(ast, [])
   end
@@ -52,8 +52,8 @@ defmodule Umwelt.Parser.TupleTest do
     assert %{
              type: [:Tuple],
              elements: [
-               %{body: "ok", kind: :literal, type: [:Atom]},
-               %{body: "13", kind: :literal, type: [:Integer]}
+               %{body: "ok", kind: :value, type: [:Atom]},
+               %{body: "13", kind: :value, type: [:Integer]}
              ]
            } == Tuple.parse(ast, [])
   end
@@ -64,7 +64,7 @@ defmodule Umwelt.Parser.TupleTest do
     assert %{
              type: [:Tuple],
              elements: [
-               %{body: "ok", kind: :literal, type: [:Atom]},
+               %{body: "ok", kind: :value, type: [:Atom]},
                %{
                  body: "result",
                  kind: :match,
@@ -80,7 +80,7 @@ defmodule Umwelt.Parser.TupleTest do
     assert %{
              type: [:Tuple],
              elements: [
-               %{body: "error", kind: :literal, type: [:Atom]},
+               %{body: "error", kind: :value, type: [:Atom]},
                %{body: "msg", kind: :variable, type: [:Variable]},
                %{body: "details", kind: :variable, type: [:Variable]}
              ]

@@ -20,15 +20,15 @@ defmodule Umwelt.Parser.StructureTest do
              keyword: [
                %{
                  elements: [
-                   %{body: "bar", kind: :literal, type: [:Atom]},
-                   %{body: "baz", kind: :literal, type: [:Atom]}
+                   %{body: "bar", kind: :value, type: [:Atom]},
+                   %{body: "baz", kind: :value, type: [:Atom]}
                  ],
                  type: [:Tuple]
                },
                %{
                  elements: [
-                   %{body: "fizz", kind: :literal, type: [:Atom]},
-                   %{body: "buzz", kind: :literal, type: [:Atom]}
+                   %{body: "fizz", kind: :value, type: [:Atom]},
+                   %{body: "buzz", kind: :value, type: [:Atom]}
                  ],
                  type: [:Tuple]
                }
@@ -45,15 +45,15 @@ defmodule Umwelt.Parser.StructureTest do
              keyword: [
                %{
                  elements: [
-                   %{body: "23", kind: :literal, type: [:Atom]},
-                   %{body: "foo", kind: :literal, type: [:Atom]}
+                   %{body: "23", kind: :value, type: [:Atom]},
+                   %{body: "foo", kind: :value, type: [:Atom]}
                  ],
                  type: [:Tuple]
                },
                %{
                  elements: [
-                   %{body: "bar", kind: :literal, type: [:Atom]},
-                   %{body: "baz", kind: :literal, type: [:Atom]}
+                   %{body: "bar", kind: :value, type: [:Atom]},
+                   %{body: "baz", kind: :value, type: [:Atom]}
                  ],
                  type: [:Tuple]
                }
@@ -70,15 +70,15 @@ defmodule Umwelt.Parser.StructureTest do
              keyword: [
                %{
                  elements: [
-                   [%{body: "23", kind: :literal, type: [:Integer]}],
-                   %{body: "foo", kind: :literal, type: [:Atom]}
+                   [%{body: "23", kind: :value, type: [:Integer]}],
+                   %{body: "foo", kind: :value, type: [:Atom]}
                  ],
                  type: [:Tuple]
                },
                %{
                  elements: [
-                   %{body: "bar", kind: :literal, type: [:Atom]},
-                   %{body: "baz", kind: :literal, type: [:Atom]}
+                   %{body: "bar", kind: :value, type: [:Atom]},
+                   %{body: "baz", kind: :value, type: [:Atom]}
                  ],
                  type: [:Tuple]
                }
@@ -96,8 +96,8 @@ defmodule Umwelt.Parser.StructureTest do
                %{
                  type: [:Tuple],
                  elements: [
-                   %{type: [:Atom], body: "bar", kind: :literal},
-                   %{type: [:Atom], body: "baz", kind: :literal}
+                   %{type: [:Atom], body: "bar", kind: :value},
+                   %{type: [:Atom], body: "baz", kind: :value}
                  ]
                }
              ],

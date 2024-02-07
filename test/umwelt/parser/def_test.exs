@@ -91,12 +91,35 @@ defmodule Umwelt.Parser.DefTest do
                  kind: :variable,
                  type: [:Tuple],
                  elements: [
-                   %{type: [:Atom], body: "ok", kind: :literal},
+                   %{type: [:Atom], body: "ok", kind: :value},
                    %{type: [:Variable], body: "term", kind: :variable}
                  ]
                },
                %{body: "count", kind: :variable, type: [:Variable]}
              ]
+           } == Def.parse(ast, [])
+  end
+
+  test "list match [head | tail] in argument" do
+    {:ok, ast} =
+      """
+        def reverse([head | tail]), 
+          do: reverse(tail, head)
+      """
+      |> Code.string_to_quoted()
+
+    assert %{
+             arguments: [
+               %{
+                 body: "_",
+                 kind: :value,
+                 type: [:List],
+                 head: %{type: [:Variable], body: "head", kind: :variable},
+                 tail: %{type: [:Variable], body: "tail", kind: :variable}
+               }
+             ],
+             body: "reverse",
+             kind: :call
            } == Def.parse(ast, [])
   end
 
@@ -117,10 +140,10 @@ defmodule Umwelt.Parser.DefTest do
                %{
                  body: "project",
                  default: %{
-                   key: %{type: [:Atom], body: "app", kind: :literal},
+                   key: %{type: [:Atom], body: "app", kind: :value},
                    source: %{
                      context: [:Mix, :Project],
-                     arguments: [%{type: [:Atom], body: "dev", kind: :literal}],
+                     arguments: [%{type: [:Atom], body: "dev", kind: :value}],
                      body: "config",
                      kind: :call
                    },
@@ -140,7 +163,7 @@ defmodule Umwelt.Parser.DefTest do
         def parse_tuple_child(ast, _aliases)
           when is_atom(ast) or is_binary(ast) or
           is_integer(ast) or is_float(ast) do
-            Parser.Literal.parse(ast)
+            Parser.value.parse(ast)
         end
         """
         |> Code.string_to_quoted()
@@ -295,7 +318,7 @@ defmodule Umwelt.Parser.DefTest do
                    %{type: [:Variable], body: "num", kind: :variable},
                    %{
                      body: "add",
-                     default: %{type: [:Integer], body: "1", kind: :literal},
+                     default: %{type: [:Integer], body: "1", kind: :value},
                      kind: :variable,
                      type: [:Variable]
                    }

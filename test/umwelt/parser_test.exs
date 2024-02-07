@@ -130,7 +130,7 @@ defmodule Umwelt.ParserTest do
                  context: [:Root],
                  attrs: [
                    %{
-                     value: [%{type: [:Atom], body: "root_attribute", kind: :literal}],
+                     value: [%{type: [:Atom], body: "root_attribute", kind: :value}],
                      body: "root_attr",
                      kind: :attr
                    }
@@ -156,12 +156,12 @@ defmodule Umwelt.ParserTest do
                  context: [:Root, :Foo],
                  attrs: [
                    %{
-                     value: [%{type: [:Atom], body: "baz_attribute", kind: :literal}],
+                     value: [%{type: [:Atom], body: "baz_attribute", kind: :value}],
                      body: "baz_attr",
                      kind: :attr
                    },
                    %{
-                     value: [%{type: [:Atom], body: "bar_attribute", kind: :literal}],
+                     value: [%{type: [:Atom], body: "bar_attribute", kind: :value}],
                      body: "bar_attr",
                      kind: :attr
                    }
@@ -277,18 +277,18 @@ defmodule Umwelt.ParserTest do
       assert %{
                type: [:Tuple],
                elements: [
-                 %{body: "ok", kind: :literal, type: [:Atom]},
+                 %{body: "ok", kind: :value, type: [:Atom]},
                  %{body: "msg", kind: :variable, type: [:Variable]}
                ]
              } == Parser.parse(ast, [[:Foo, :Bar]])
     end
 
-    test "string literal" do
+    test "string value" do
       {:ok, ast} = Code.string_to_quoted("\"foo\"")
 
       assert %{
                body: "foo",
-               kind: :literal,
+               kind: :value,
                type: [:Binary]
              } == Parser.parse(ast, [[:Foo, :Bar]])
     end
@@ -299,26 +299,26 @@ defmodule Umwelt.ParserTest do
       assert %{
                type: [:Bitstring],
                bits: [
-                 %{type: [:Integer], body: "1", kind: :literal},
-                 %{type: [:Integer], body: "2", kind: :literal},
-                 %{type: [:Integer], body: "3", kind: :literal}
+                 %{type: [:Integer], body: "1", kind: :value},
+                 %{type: [:Integer], body: "2", kind: :value},
+                 %{type: [:Integer], body: "3", kind: :value}
                ]
              } == Parser.parse(ast, [[:Foo, :Bar]])
     end
 
-    test "tuple literal" do
+    test "tuple value" do
       {:ok, ast} = Code.string_to_quoted("{:ok, 13}")
 
       assert %{
                type: [:Tuple],
                elements: [
-                 %{body: "ok", kind: :literal, type: [:Atom]},
-                 %{body: "13", kind: :literal, type: [:Integer]}
+                 %{body: "ok", kind: :value, type: [:Atom]},
+                 %{body: "13", kind: :value, type: [:Integer]}
                ]
              } == Parser.parse(ast, [[:Foo, :Bar]])
     end
 
-    test "literal list with pipe" do
+    test "value list with pipe" do
       {:ok, ast} = Code.string_to_quoted("[head | tail]")
 
       assert [

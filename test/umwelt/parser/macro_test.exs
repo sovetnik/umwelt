@@ -177,9 +177,9 @@ defmodule Umwelt.Parser.MacroTest do
       assert %{
                type: [:Tuple],
                elements: [
-                 %{body: "ok", kind: :literal, type: [:Atom]},
+                 %{body: "ok", kind: :value, type: [:Atom]},
                  %{body: "one", kind: :variable, type: [:Variable]},
-                 [%{body: "two", kind: :literal, type: [:Atom]}]
+                 [%{body: "two", kind: :value, type: [:Atom]}]
                ]
              } == Macro.parse(ast, [[:Foo, :Bar]])
     end

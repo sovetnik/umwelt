@@ -29,10 +29,9 @@ defmodule Umwelt.Parser.Def do
          arguments: Enum.map(children, &parse_arg(&1, aliases))
        }
 
-  defp parse_arg([], _aliases),
-    do: %{body: "_", type: [:List], kind: :value}
+  defp parse_arg([], _), do: %{body: "_", type: [:List], kind: :value}
 
-  defp parse_arg([head | tail], aliases),
+  defp parse_arg([{:|, _, [head, tail]}], aliases),
     do: %{
       body: "_",
       type: [:List],

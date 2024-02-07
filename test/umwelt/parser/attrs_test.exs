@@ -42,8 +42,8 @@ defmodule Umwelt.Parser.AttrsTest do
                    %{
                      type: [:Tuple],
                      elements: [
-                       %{type: [:Atom], body: "foo", kind: :literal},
-                       %{type: [:Atom], body: "bar", kind: :literal}
+                       %{type: [:Atom], body: "foo", kind: :value},
+                       %{type: [:Atom], body: "bar", kind: :value}
                      ]
                    }
                  ],

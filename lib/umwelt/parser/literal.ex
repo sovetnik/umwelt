@@ -1,24 +1,24 @@
 defmodule Umwelt.Parser.Literal do
-  @moduledoc "Parses Literal AST"
+  @moduledoc "Parses value value AST"
 
-  def parse(literal) when is_binary(literal),
-    do: %{body: literal, kind: :literal, type: [:Binary]}
+  def parse(value) when is_binary(value),
+    do: %{body: value, kind: :value, type: [:Binary]}
 
-  def parse(literal) when is_float(literal),
-    do: %{body: to_string(literal), kind: :literal, type: [:Float]}
+  def parse(value) when is_float(value),
+    do: %{body: to_string(value), kind: :value, type: [:Float]}
 
-  def parse(literal) when is_integer(literal),
-    do: %{body: to_string(literal), kind: :literal, type: [:Integer]}
+  def parse(value) when is_integer(value),
+    do: %{body: to_string(value), kind: :value, type: [:Integer]}
 
   def parse(true),
-    do: %{body: "true", kind: :literal, type: [:Boolean]}
+    do: %{body: "true", kind: :value, type: [:Boolean]}
 
   def parse(false),
-    do: %{body: "false", kind: :literal, type: [:Boolean]}
+    do: %{body: "false", kind: :value, type: [:Boolean]}
 
-  def parse(literal) when is_atom(literal),
-    do: %{body: to_string(literal), kind: :literal, type: [:Atom]}
+  def parse(value) when is_atom(value),
+    do: %{body: to_string(value), kind: :value, type: [:Atom]}
 
-  def parse({literal, _, nil}) when is_atom(literal),
-    do: %{body: to_string(literal), kind: :variable, type: [:Variable]}
+  def parse({value, _, nil}) when is_atom(value),
+    do: %{body: to_string(value), kind: :variable, type: [:Variable]}
 end
