@@ -17,25 +17,25 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  attrs: [],
                  body: "Bar",
-                 kind: :space,
+                 kind: :Space,
                  context: [:Foo, :Bar],
                  functions: [],
                  guards: [
                    %{
                      body: "when",
-                     kind: :operator,
+                     kind: :Operator,
                      left: %{
-                       arguments: [%{type: [:Variable], body: "term", kind: :variable}],
+                       arguments: [%{type: [:Variable], body: "term", kind: :Variable}],
                        body: "is_foobar",
-                       kind: :call
+                       kind: :Call
                      },
                      right: %{
                        body: "membership",
-                       kind: :operator,
-                       left: %{type: [:Variable], body: "term", kind: :variable},
+                       kind: :Operator,
+                       left: %{type: [:Variable], body: "term", kind: :Variable},
                        right: [
-                         %{type: [:Atom], body: "foo", kind: :value},
-                         %{type: [:Atom], body: "bar", kind: :value}
+                         %{type: [:Atom], body: "foo", kind: :Value},
+                         %{type: [:Atom], body: "bar", kind: :Value}
                        ]
                      }
                    }
@@ -59,40 +59,40 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Bar",
-                 kind: :space,
+                 kind: :Space,
                  context: [:Foo, :Bar],
                  functions: [
                    %{
                      body: "when",
-                     kind: :operator,
+                     kind: :Operator,
                      left: %{
-                       arguments: [%{type: [:Variable], body: "term", kind: :variable}],
+                       arguments: [%{type: [:Variable], body: "term", kind: :Variable}],
                        body: "foobar",
-                       kind: :call
+                       kind: :Call
                      },
                      right: %{
-                       arguments: [%{type: [:Variable], body: "term", kind: :variable}],
+                       arguments: [%{type: [:Variable], body: "term", kind: :Variable}],
                        body: "is_foobar",
-                       kind: :call
+                       kind: :Call
                      }
                    }
                  ],
                  guards: [
                    %{
                      body: "when",
-                     kind: :operator,
+                     kind: :Operator,
                      left: %{
-                       arguments: [%{type: [:Variable], body: "term", kind: :variable}],
+                       arguments: [%{type: [:Variable], body: "term", kind: :Variable}],
                        body: "is_foobar",
-                       kind: :call
+                       kind: :Call
                      },
                      right: %{
                        body: "membership",
-                       kind: :operator,
-                       left: %{type: [:Variable], body: "term", kind: :variable},
+                       kind: :Operator,
+                       left: %{type: [:Variable], body: "term", kind: :Variable},
                        right: [
-                         %{type: [:Atom], body: "foo", kind: :value},
-                         %{type: [:Atom], body: "bar", kind: :value}
+                         %{type: [:Atom], body: "foo", kind: :Value},
+                         %{type: [:Atom], body: "bar", kind: :Value}
                        ]
                      }
                    }
@@ -122,41 +122,41 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  functions: [
                    %{
                      arguments: [
-                       %{body: "income", kind: :variable, type: [:Variable]},
+                       %{body: "income", kind: :Variable, type: [:Variable]},
                        %{
                          body: "outcome",
                          default: %{type: [:List]},
-                         kind: :variable,
+                         kind: :Variable,
                          type: [:Variable]
                        }
                      ],
                      body: "reverse",
-                     kind: :call
+                     kind: :Call
                    },
                    %{
                      arguments: [
-                       %{type: [:List], kind: :value, body: "_"},
-                       %{body: "outcome", kind: :variable, type: [:Variable]}
+                       %{type: [:List], kind: :Value, body: "_"},
+                       %{body: "outcome", kind: :Variable, type: [:Variable]}
                      ],
                      body: "reverse",
-                     kind: :call
+                     kind: :Call
                    },
                    %{
                      arguments: [
                        %{
                          body: "_",
-                         head: %{body: "h", kind: :variable, type: [:Variable]},
-                         kind: :value,
-                         tail: %{type: [:Variable], body: "t", kind: :variable},
+                         head: %{body: "h", kind: :Variable, type: [:Variable]},
+                         kind: :Value,
+                         tail: %{type: [:Variable], body: "t", kind: :Variable},
                          type: [:List]
                        },
-                       %{type: [:Variable], body: "outcome", kind: :variable}
+                       %{type: [:Variable], body: "outcome", kind: :Variable}
                      ],
                      body: "reverse",
-                     kind: :call
+                     kind: :Call
                    }
                  ],
-                 kind: :space
+                 kind: :Space
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -181,40 +181,43 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  body: "Bar",
                  note: "Foobar description",
-                 kind: :space,
+                 kind: :Space,
                  context: [:Foo, :Bar],
                  attrs: [],
                  guards: [],
                  fields: [
                    %{
                      elements: [
-                       %{body: "foo", kind: :value, type: [:Atom]},
-                       %{body: "", kind: :value, type: [:Atom]}
+                       %{body: "foo", kind: :Value, type: [:Atom]},
+                       %{body: "", kind: :Value, type: [:Atom]}
                      ],
+                     kind: :Value,
                      type: [:Tuple]
                    },
                    %{
                      elements: [
-                       %{body: "tree", kind: :value, type: [:Atom]},
+                       %{body: "tree", kind: :Value, type: [:Atom]},
                        %{
                          context: [],
                          keyword: [],
+                         kind: :Value,
                          type: [:Map]
                        }
                      ],
+                     kind: :Value,
                      type: [:Tuple]
                    }
                  ],
                  functions: [
                    %{
-                     arguments: [%{body: "bar", kind: :variable, type: [:Variable]}],
+                     arguments: [%{body: "bar", kind: :Variable, type: [:Variable]}],
                      body: "foo",
-                     kind: :call
+                     kind: :Call
                    },
                    %{
-                     arguments: [%{type: [:Variable], body: "baz", kind: :variable}],
+                     arguments: [%{type: [:Variable], body: "baz", kind: :Variable}],
                      body: "bar",
-                     kind: :call
+                     kind: :Call
                    }
                  ]
                }
@@ -236,15 +239,15 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Bar",
-                 kind: :space,
+                 kind: :Space,
                  context: [:Foo, :Bar],
                  attrs: [],
                  guards: [],
                  functions: [
                    %{
-                     arguments: [%{type: [:Variable], body: "bar", kind: :variable}],
+                     arguments: [%{type: [:Variable], body: "bar", kind: :Variable}],
                      body: "foo",
-                     kind: :call
+                     kind: :Call
                    }
                  ],
                  note: "Foobar description"
@@ -265,17 +268,18 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  context: [:Foo, :Bar],
                  body: "Bar",
-                 kind: :space,
+                 kind: :Space,
                  attrs: [
                    %{
                      body: "fizbuzz",
-                     kind: :attr,
+                     kind: :Attr,
                      value: [
                        %{
                          elements: [
-                           %{body: "fizz", kind: :value, type: [:Atom]},
-                           %{body: "buzz", kind: :value, type: [:Atom]}
+                           %{body: "fizz", kind: :Value, type: [:Atom]},
+                           %{body: "buzz", kind: :Value, type: [:Atom]}
                          ],
+                         kind: :Value,
                          type: [:Tuple]
                        }
                      ]
@@ -300,7 +304,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  context: [:Foo, :Bar],
                  body: "Bar",
-                 kind: :space,
+                 kind: :Space,
                  note: "Foobar description",
                  attrs: [],
                  guards: [],
@@ -321,7 +325,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  context: [:Foo, :Bar],
                  body: "Bar",
-                 kind: :space,
+                 kind: :Space,
                  attrs: [],
                  guards: [],
                  functions: []
@@ -359,13 +363,19 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  guards: [],
                  functions: [
                    %{
-                     arguments: [%{body: "bar", kind: :variable, type: [:Variable]}],
+                     arguments: [
+                       %{
+                         body: "bar",
+                         kind: :Variable,
+                         type: [:Variable]
+                       }
+                     ],
                      body: "foo",
-                     kind: :call,
+                     kind: :Call,
                      note: "bar -> baz"
                    }
                  ],
-                 kind: :space,
+                 kind: :Space,
                  note: "Foobar description"
                },
                [
@@ -376,13 +386,13 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    guards: [],
                    functions: [
                      %{
-                       arguments: [%{body: "baz", kind: :variable, type: [:Variable]}],
+                       arguments: [%{body: "baz", kind: :Variable, type: [:Variable]}],
                        body: "bar",
-                       impl: %{body: "true", kind: :value, type: [:Boolean]},
-                       kind: :call
+                       impl: %{body: "true", kind: :Value, type: [:Boolean]},
+                       kind: :Call
                      }
                    ],
-                   kind: :space,
+                   kind: :Space,
                    note: "Baz description"
                  }
                ]
@@ -426,53 +436,53 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  functions: [
                    %{
-                     arguments: [%{type: [:Variable], body: "once", kind: :variable}],
+                     arguments: [%{type: [:Variable], body: "once", kind: :Variable}],
                      body: "root_one",
-                     kind: :call
+                     kind: :Call
                    },
                    %{
-                     arguments: [%{type: [:Variable], body: "twice", kind: :variable}],
+                     arguments: [%{type: [:Variable], body: "twice", kind: :Variable}],
                      body: "root_two",
-                     kind: :call
+                     kind: :Call
                    }
                  ],
                  context: [:Root],
                  attrs: [],
                  guards: [],
                  body: "Root",
-                 kind: :space,
+                 kind: :Space,
                  note: "Root description"
                },
                [
                  %{
                    functions: [
                      %{
-                       arguments: [%{type: [:Variable], body: "bar", kind: :variable}],
+                       arguments: [%{type: [:Variable], body: "bar", kind: :Variable}],
                        body: "foo",
-                       kind: :call
+                       kind: :Call
                      }
                    ],
                    context: [:Root, :Foo],
                    attrs: [],
                    guards: [],
                    body: "Foo",
-                   kind: :space,
+                   kind: :Space,
                    note: "Foo description"
                  },
                  [
                    %{
                      functions: [
                        %{
-                         arguments: [%{type: [:Variable], body: "baz", kind: :variable}],
+                         arguments: [%{type: [:Variable], body: "baz", kind: :Variable}],
                          body: "bar",
-                         kind: :call
+                         kind: :Call
                        }
                      ],
                      context: [:Root, :Foo, :Bar],
                      attrs: [],
                      guards: [],
                      body: "Bar",
-                     kind: :space,
+                     kind: :Space,
                      note: "Bar description"
                    }
                  ],
@@ -480,16 +490,16 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    %{
                      functions: [
                        %{
-                         arguments: [%{type: [:Variable], body: "foo", kind: :variable}],
+                         arguments: [%{type: [:Variable], body: "foo", kind: :Variable}],
                          body: "baz",
-                         kind: :call
+                         kind: :Call
                        }
                      ],
                      context: [:Root, :Foo, :Baz],
                      attrs: [],
                      guards: [],
                      body: "Baz",
-                     kind: :space,
+                     kind: :Space,
                      note: "Baz description"
                    }
                  ]
@@ -512,7 +522,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Foo",
-                 kind: :space,
+                 kind: :Space,
                  context: [:Foo],
                  attrs: [],
                  guards: [],
@@ -521,7 +531,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                [
                  %{
                    body: "Bar",
-                   kind: :space,
+                   kind: :Space,
                    context: [:Foo, :Bar],
                    attrs: [],
                    guards: [],
@@ -530,7 +540,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  [
                    %{
                      body: "Baz",
-                     kind: :space,
+                     kind: :Space,
                      attrs: [],
                      guards: [],
                      context: [:Foo, :Bar, :Baz],
@@ -555,7 +565,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  context: [:Foo, :Bar],
                  body: "Bar",
-                 kind: :space,
+                 kind: :Space,
                  attrs: [],
                  guards: [],
                  functions: []
@@ -564,7 +574,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  %{
                    context: [:Foo, :Bar, :Baz],
                    body: "Baz",
-                   kind: :space,
+                   kind: :Space,
                    attrs: [],
                    guards: [],
                    functions: []

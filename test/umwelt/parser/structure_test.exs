@@ -20,19 +20,22 @@ defmodule Umwelt.Parser.StructureTest do
              keyword: [
                %{
                  elements: [
-                   %{body: "bar", kind: :value, type: [:Atom]},
-                   %{body: "baz", kind: :value, type: [:Atom]}
+                   %{body: "bar", kind: :Value, type: [:Atom]},
+                   %{body: "baz", kind: :Value, type: [:Atom]}
                  ],
+                 kind: :Value,
                  type: [:Tuple]
                },
                %{
                  elements: [
-                   %{body: "fizz", kind: :value, type: [:Atom]},
-                   %{body: "buzz", kind: :value, type: [:Atom]}
+                   %{body: "fizz", kind: :Value, type: [:Atom]},
+                   %{body: "buzz", kind: :Value, type: [:Atom]}
                  ],
+                 kind: :Value,
                  type: [:Tuple]
                }
              ],
+             kind: :Value,
              type: [:Map]
            } == Structure.parse(ast, [])
   end
@@ -45,19 +48,22 @@ defmodule Umwelt.Parser.StructureTest do
              keyword: [
                %{
                  elements: [
-                   %{body: "23", kind: :value, type: [:Atom]},
-                   %{body: "foo", kind: :value, type: [:Atom]}
+                   %{body: "23", kind: :Value, type: [:Atom]},
+                   %{body: "foo", kind: :Value, type: [:Atom]}
                  ],
+                 kind: :Value,
                  type: [:Tuple]
                },
                %{
                  elements: [
-                   %{body: "bar", kind: :value, type: [:Atom]},
-                   %{body: "baz", kind: :value, type: [:Atom]}
+                   %{body: "bar", kind: :Value, type: [:Atom]},
+                   %{body: "baz", kind: :Value, type: [:Atom]}
                  ],
+                 kind: :Value,
                  type: [:Tuple]
                }
              ],
+             kind: :Value,
              type: [:Map]
            } == Structure.parse(ast, [])
   end
@@ -70,19 +76,22 @@ defmodule Umwelt.Parser.StructureTest do
              keyword: [
                %{
                  elements: [
-                   [%{body: "23", kind: :value, type: [:Integer]}],
-                   %{body: "foo", kind: :value, type: [:Atom]}
+                   [%{body: "23", kind: :Value, type: [:Integer]}],
+                   %{body: "foo", kind: :Value, type: [:Atom]}
                  ],
+                 kind: :Value,
                  type: [:Tuple]
                },
                %{
                  elements: [
-                   %{body: "bar", kind: :value, type: [:Atom]},
-                   %{body: "baz", kind: :value, type: [:Atom]}
+                   %{body: "bar", kind: :Value, type: [:Atom]},
+                   %{body: "baz", kind: :Value, type: [:Atom]}
                  ],
+                 kind: :Value,
                  type: [:Tuple]
                }
              ],
+             kind: :Value,
              type: [:Map]
            } == Structure.parse(ast, [])
   end
@@ -94,13 +103,15 @@ defmodule Umwelt.Parser.StructureTest do
              context: [:Foo],
              keyword: [
                %{
+                 kind: :Value,
                  type: [:Tuple],
                  elements: [
-                   %{type: [:Atom], body: "bar", kind: :value},
-                   %{type: [:Atom], body: "baz", kind: :value}
+                   %{type: [:Atom], body: "bar", kind: :Value},
+                   %{type: [:Atom], body: "baz", kind: :Value}
                  ]
                }
              ],
+             kind: :Value,
              type: [:Map]
            } == Structure.parse(ast, [])
   end
@@ -110,6 +121,7 @@ defmodule Umwelt.Parser.StructureTest do
 
     assert %{
              context: [:Foo],
+             kind: :Value,
              type: [:Map],
              keyword: []
            } == Structure.parse(ast, [])

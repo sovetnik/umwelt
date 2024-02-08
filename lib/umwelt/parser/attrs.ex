@@ -20,7 +20,7 @@ defmodule Umwelt.Parser.Attrs do
       [{constant, _, children} | _] ->
         %{
           body: to_string(constant),
-          kind: :attr,
+          kind: :Attr,
           value: Parser.parse(children, [])
         }
 

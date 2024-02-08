@@ -15,7 +15,7 @@ defmodule Umwelt.Parser.DefTest do
     assert %{
              arguments: [],
              body: "div",
-             kind: :call
+             kind: :Call
            } == Def.parse(ast, [])
   end
 
@@ -30,11 +30,11 @@ defmodule Umwelt.Parser.DefTest do
 
     assert %{
              arguments: [
-               %{body: "a", kind: :variable, type: [:Variable]},
-               %{body: "b", kind: :variable, type: [:Variable]}
+               %{body: "a", kind: :Variable, type: [:Variable]},
+               %{body: "b", kind: :Variable, type: [:Variable]}
              ],
              body: "div",
-             kind: :call
+             kind: :Call
            } == Def.parse(ast, [])
   end
 
@@ -46,13 +46,13 @@ defmodule Umwelt.Parser.DefTest do
                %{
                  body: "bar",
                  context: [:Bar, :Baz],
-                 kind: :variable,
+                 kind: :Variable,
                  type: [:Map],
                  keyword: []
                }
              ],
              body: "foo",
-             kind: :call
+             kind: :Call
            } == Def.parse(ast, [])
   end
 
@@ -61,13 +61,13 @@ defmodule Umwelt.Parser.DefTest do
 
     assert %{
              body: "foo",
-             kind: :call,
+             kind: :Call,
              arguments: [
                %{
                  body: "bar",
                  context: [:Foo, :Bar, :Baz],
                  keyword: [],
-                 kind: :variable,
+                 kind: :Variable,
                  type: [:Map]
                }
              ]
@@ -83,19 +83,19 @@ defmodule Umwelt.Parser.DefTest do
       |> Code.string_to_quoted()
 
     assert %{
-             kind: :call,
+             kind: :Call,
              body: "foo",
              arguments: [
                %{
                  body: "result",
-                 kind: :variable,
+                 kind: :Variable,
                  type: [:Tuple],
                  elements: [
-                   %{type: [:Atom], body: "ok", kind: :value},
-                   %{type: [:Variable], body: "term", kind: :variable}
+                   %{type: [:Atom], body: "ok", kind: :Value},
+                   %{type: [:Variable], body: "term", kind: :Variable}
                  ]
                },
-               %{body: "count", kind: :variable, type: [:Variable]}
+               %{body: "count", kind: :Variable, type: [:Variable]}
              ]
            } == Def.parse(ast, [])
   end
@@ -112,14 +112,14 @@ defmodule Umwelt.Parser.DefTest do
              arguments: [
                %{
                  body: "_",
-                 kind: :value,
+                 kind: :Value,
                  type: [:List],
-                 head: %{type: [:Variable], body: "head", kind: :variable},
-                 tail: %{type: [:Variable], body: "tail", kind: :variable}
+                 head: %{type: [:Variable], body: "head", kind: :Variable},
+                 tail: %{type: [:Variable], body: "tail", kind: :Variable}
                }
              ],
              body: "reverse",
-             kind: :call
+             kind: :Call
            } == Def.parse(ast, [])
   end
 
@@ -134,22 +134,22 @@ defmodule Umwelt.Parser.DefTest do
 
     assert %{
              body: "list_from_root",
-             kind: :call,
+             kind: :Call,
              arguments: [
-               %{body: "path", kind: :variable, type: [:Variable]},
+               %{body: "path", kind: :Variable, type: [:Variable]},
                %{
                  body: "project",
                  default: %{
-                   key: %{type: [:Atom], body: "app", kind: :value},
+                   key: %{type: [:Atom], body: "app", kind: :Value},
                    source: %{
                      context: [:Mix, :Project],
-                     arguments: [%{type: [:Atom], body: "dev", kind: :value}],
+                     arguments: [%{type: [:Atom], body: "dev", kind: :Value}],
                      body: "config",
-                     kind: :call
+                     kind: :Call
                    },
-                   kind: :access
+                   kind: :Access
                  },
-                 kind: :variable,
+                 kind: :Variable,
                  type: [:Variable]
                }
              ]
@@ -170,52 +170,52 @@ defmodule Umwelt.Parser.DefTest do
 
       assert %{
                body: "when",
-               kind: :operator,
+               kind: :Operator,
                left: %{
                  arguments: [
-                   %{type: [:Variable], body: "ast", kind: :variable},
-                   %{type: [:Variable], body: "_aliases", kind: :variable}
+                   %{type: [:Variable], body: "ast", kind: :Variable},
+                   %{type: [:Variable], body: "_aliases", kind: :Variable}
                  ],
                  body: "parse_tuple_child",
-                 kind: :call
+                 kind: :Call
                },
                right: %{
                  body: "or",
-                 kind: :operator,
+                 kind: :Operator,
                  left: %{
                    body: "or",
-                   kind: :operator,
+                   kind: :Operator,
                    left: %{
                      body: "or",
-                     kind: :operator,
+                     kind: :Operator,
                      left: %{
                        body: "is_atom",
-                       kind: :call,
+                       kind: :Call,
                        arguments: [
-                         %{type: [:Variable], body: "ast", kind: :variable}
+                         %{type: [:Variable], body: "ast", kind: :Variable}
                        ]
                      },
                      right: %{
                        body: "is_binary",
-                       kind: :call,
+                       kind: :Call,
                        arguments: [
-                         %{type: [:Variable], body: "ast", kind: :variable}
+                         %{type: [:Variable], body: "ast", kind: :Variable}
                        ]
                      }
                    },
                    right: %{
                      body: "is_integer",
-                     kind: :call,
+                     kind: :Call,
                      arguments: [
-                       %{type: [:Variable], body: "ast", kind: :variable}
+                       %{type: [:Variable], body: "ast", kind: :Variable}
                      ]
                    }
                  },
                  right: %{
                    body: "is_float",
-                   kind: :call,
+                   kind: :Call,
                    arguments: [
-                     %{type: [:Variable], body: "ast", kind: :variable}
+                     %{type: [:Variable], body: "ast", kind: :Variable}
                    ]
                  }
                }
@@ -234,28 +234,28 @@ defmodule Umwelt.Parser.DefTest do
 
       assert %{
                body: "when",
-               kind: :operator,
+               kind: :Operator,
                left: %{
                  arguments: [
-                   %{type: [:Variable], body: "bar", kind: :variable},
-                   %{type: [:Variable], body: "baz", kind: :variable}
+                   %{type: [:Variable], body: "bar", kind: :Variable},
+                   %{type: [:Variable], body: "baz", kind: :Variable}
                  ],
                  body: "foo",
-                 kind: :call
+                 kind: :Call
                },
                right: %{
                  left: %{
-                   arguments: [%{type: [:Variable], body: "bar", kind: :variable}],
+                   arguments: [%{type: [:Variable], body: "bar", kind: :Variable}],
                    body: "is_integer",
-                   kind: :call
+                   kind: :Call
                  },
                  right: %{
-                   arguments: [%{type: [:Variable], body: "baz", kind: :variable}],
+                   arguments: [%{type: [:Variable], body: "baz", kind: :Variable}],
                    body: "is_float",
-                   kind: :call
+                   kind: :Call
                  },
                  body: "or",
-                 kind: :operator
+                 kind: :Operator
                }
              } == Def.parse(ast, [])
     end
@@ -272,28 +272,28 @@ defmodule Umwelt.Parser.DefTest do
 
       assert %{
                body: "when",
-               kind: :operator,
+               kind: :Operator,
                left: %{
                  arguments: [
-                   %{type: [:Variable], body: "bar", kind: :variable},
-                   %{type: [:Variable], body: "baz", kind: :variable}
+                   %{type: [:Variable], body: "bar", kind: :Variable},
+                   %{type: [:Variable], body: "baz", kind: :Variable}
                  ],
                  body: "foo",
-                 kind: :call
+                 kind: :Call
                },
                right: %{
                  left: %{
-                   arguments: [%{type: [:Variable], body: "bar", kind: :variable}],
+                   arguments: [%{type: [:Variable], body: "bar", kind: :Variable}],
                    body: "is_integer",
-                   kind: :call
+                   kind: :Call
                  },
                  right: %{
-                   arguments: [%{type: [:Variable], body: "baz", kind: :variable}],
+                   arguments: [%{type: [:Variable], body: "baz", kind: :Variable}],
                    body: "is_float",
-                   kind: :call
+                   kind: :Call
                  },
                  body: "when",
-                 kind: :operator
+                 kind: :Operator
                }
              } == Def.parse(ast, [])
     end
@@ -310,32 +310,36 @@ defmodule Umwelt.Parser.DefTest do
 
       assert %{
                body: "when",
-               kind: :operator,
+               kind: :Operator,
                left: %{
                  body: "increase",
-                 kind: :call,
+                 kind: :Call,
                  arguments: [
-                   %{type: [:Variable], body: "num", kind: :variable},
+                   %{type: [:Variable], body: "num", kind: :Variable},
                    %{
                      body: "add",
-                     default: %{type: [:Integer], body: "1", kind: :value},
-                     kind: :variable,
+                     default: %{
+                       type: [:Integer],
+                       body: "1",
+                       kind: :Value
+                     },
+                     kind: :Variable,
                      type: [:Variable]
                    }
                  ]
                },
                right: %{
                  body: "or",
-                 kind: :operator,
+                 kind: :Operator,
                  left: %{
-                   arguments: [%{type: [:Variable], body: "num", kind: :variable}],
+                   arguments: [%{type: [:Variable], body: "num", kind: :Variable}],
                    body: "is_integer",
-                   kind: :call
+                   kind: :Call
                  },
                  right: %{
-                   arguments: [%{type: [:Variable], body: "num", kind: :variable}],
+                   arguments: [%{type: [:Variable], body: "num", kind: :Variable}],
                    body: "is_float",
-                   kind: :call
+                   kind: :Call
                  }
                }
              } == Def.parse(ast, [])

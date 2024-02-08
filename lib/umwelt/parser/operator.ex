@@ -47,7 +47,7 @@ defmodule Umwelt.Parser.Operator do
       do: %{
         body: to_string(term),
         context: module,
-        kind: :call,
+        kind: :Call,
         arguments: Parser.parse(arguments, aliases)
       }
 
@@ -57,7 +57,7 @@ defmodule Umwelt.Parser.Operator do
         aliases
       ),
       do: %{
-        kind: :access,
+        kind: :Access,
         source: Parser.parse(from, aliases),
         key: Parser.parse(key, aliases)
       }
@@ -65,7 +65,7 @@ defmodule Umwelt.Parser.Operator do
   def parse({:=, _, [left, {name, _, nil}]}, aliases),
     do: %{
       body: to_string(name),
-      kind: :match,
+      kind: :Match,
       term: Parser.parse(left, aliases)
     }
 
@@ -84,7 +84,7 @@ defmodule Umwelt.Parser.Operator do
   def parse({:in, _, [left, right]}, aliases) when is_list(right),
     do: %{
       body: "membership",
-      kind: :operator,
+      kind: :Operator,
       left: Parser.parse(left, aliases),
       right: Parser.parse(right, aliases)
     }
@@ -113,14 +113,14 @@ defmodule Umwelt.Parser.Operator do
   def parse({term, _, [expr]}, aliases) when is_unary(term),
     do: %{
       body: to_string(term),
-      kind: :operator,
+      kind: :Operator,
       expr: Parser.parse(expr, aliases)
     }
 
   def parse({term, _, [left, right]}, aliases),
     do: %{
       body: to_string(term),
-      kind: :operator,
+      kind: :Operator,
       left: Parser.parse(left, aliases),
       right: Parser.parse(right, aliases)
     }

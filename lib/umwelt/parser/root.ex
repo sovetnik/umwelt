@@ -9,7 +9,7 @@ defmodule Umwelt.Parser.Root do
   defp do_parse(block_children, [module]) do
     block_children
     |> Parser.Defmodule.parse_block([module])
-    |> Parser.Defmodule.combine(dummy(module, [module], :root))
+    |> Parser.Defmodule.combine(dummy(module, [module], :Root))
   end
 
   defp do_parse(block_children, module) do
@@ -18,16 +18,16 @@ defmodule Umwelt.Parser.Root do
     append_dummy(rest, [
       block_children
       |> Parser.Defmodule.parse_block(module)
-      |> Parser.Defmodule.combine(dummy(this_module, module, :space))
+      |> Parser.Defmodule.combine(dummy(this_module, module, :Space))
     ])
   end
 
   defp append_dummy([module], block) do
-    [dummy(module, [module], :root) | block]
+    [dummy(module, [module], :Root) | block]
   end
 
   defp append_dummy([this_module | rest] = module, block) do
-    append_dummy(rest, [[dummy(this_module, Enum.reverse(module), :space) | block]])
+    append_dummy(rest, [[dummy(this_module, Enum.reverse(module), :Space) | block]])
   end
 
   defp dummy(this_module, context, kind) do

@@ -20,7 +20,7 @@ defmodule Umwelt.Parser.Pipe do
   def parse({term, _, children}, aliases),
     do: %{
       body: to_string(term),
-      kind: :pipe,
+      kind: :Pipe,
       values: Parser.parse(children, aliases)
     }
 end

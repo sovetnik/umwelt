@@ -24,18 +24,18 @@ defmodule Umwelt.Parser.Def do
   defp parse_call({term, _, children} = ast, aliases)
        when is_atom_macro(ast),
        do: %{
-         kind: :call,
+         kind: :Call,
          body: to_string(term),
          arguments: Enum.map(children, &parse_arg(&1, aliases))
        }
 
-  defp parse_arg([], _), do: %{body: "_", type: [:List], kind: :value}
+  defp parse_arg([], _), do: %{body: "_", type: [:List], kind: :Value}
 
   defp parse_arg([{:|, _, [head, tail]}], aliases),
     do: %{
       body: "_",
       type: [:List],
-      kind: :value,
+      kind: :Value,
       head: Parser.parse(head, aliases),
       tail: Parser.parse(tail, aliases)
     }
@@ -43,14 +43,14 @@ defmodule Umwelt.Parser.Def do
   defp parse_arg({:=, _, [left, {name, _, nil}]}, aliases) do
     left
     |> Parser.parse(aliases)
-    |> Map.put_new(:body, to_string(name))
-    |> Map.put_new(:kind, :variable)
+    |> Map.put(:body, to_string(name))
+    |> Map.put(:kind, :Variable)
   end
 
   defp parse_arg(ast, aliases) do
     ast
     |> Parser.parse(aliases)
     |> Map.put_new(:body, "_")
-    |> Map.put_new(:kind, :value)
+    |> Map.put_new(:kind, :Value)
   end
 end

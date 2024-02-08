@@ -28,25 +28,27 @@ defmodule Umwelt.Parser.AttrsTest do
   test "parse attr with struct" do
     {:ok, ast} =
       """
-      @attr %{foo: :bar}
+      @attribute %{foo: :bar}
       """
       |> Code.string_to_quoted()
 
     assert %{
-             body: "attr",
-             kind: :attr,
+             body: "attribute",
+             kind: :Attr,
              value: [
                %{
                  context: [],
                  keyword: [
                    %{
+                     kind: :Value,
                      type: [:Tuple],
                      elements: [
-                       %{type: [:Atom], body: "foo", kind: :value},
-                       %{type: [:Atom], body: "bar", kind: :value}
+                       %{type: [:Atom], body: "foo", kind: :Value},
+                       %{type: [:Atom], body: "bar", kind: :Value}
                      ]
                    }
                  ],
+                 kind: :Value,
                  type: [:Map]
                }
              ]

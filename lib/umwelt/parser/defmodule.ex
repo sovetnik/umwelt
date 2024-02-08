@@ -16,7 +16,7 @@ defmodule Umwelt.Parser.Defmodule do
       body: to_string(List.last(module)),
       attrs: [],
       guards: [],
-      kind: :space,
+      kind: :Space,
       context: context ++ module
     })
   end
@@ -79,7 +79,7 @@ defmodule Umwelt.Parser.Defmodule do
       %{defguard: value}, %{guards: attrs} = module ->
         Map.put(module, :guards, [value | attrs])
 
-      %{kind: :attr} = value, %{attrs: attrs} = module ->
+      %{kind: :Attr} = value, %{attrs: attrs} = module ->
         Map.put(module, :attrs, [value | attrs])
 
       _other, module ->
@@ -95,10 +95,10 @@ defmodule Umwelt.Parser.Defmodule do
       %{impl: [value]}, [head | rest] ->
         [Map.put(head, :impl, value) | rest]
 
-      %{kind: :call} = function, [head | rest] ->
+      %{kind: :Call} = function, [head | rest] ->
         [%{}, Map.merge(head, function) | rest]
 
-      %{kind: :operator, body: "when"} = function, [head | rest] ->
+      %{kind: :Operator, body: "when"} = function, [head | rest] ->
         [%{}, Map.merge(head, function) | rest]
 
       _other, acc ->
