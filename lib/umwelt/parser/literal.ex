@@ -1,5 +1,5 @@
 defmodule Umwelt.Parser.Literal do
-  @moduledoc "Parses value value AST"
+  @moduledoc "Parses value AST"
 
   def parse(value) when is_binary(value),
     do: %{body: value, kind: :Value, type: [:Binary]}

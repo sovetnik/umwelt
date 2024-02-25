@@ -177,6 +177,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
         """
         |> Code.string_to_quoted()
 
+
       assert [
                %{
                  body: "Bar",
@@ -273,16 +274,14 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    %{
                      body: "fizbuzz",
                      kind: :Attr,
-                     value: [
-                       %{
-                         elements: [
-                           %{body: "fizz", kind: :Value, type: [:Atom]},
-                           %{body: "buzz", kind: :Value, type: [:Atom]}
-                         ],
-                         kind: :Value,
-                         type: [:Tuple]
-                       }
-                     ]
+                     value: %{
+                       elements: [
+                         %{body: "fizz", kind: :Value, type: [:Atom]},
+                         %{body: "buzz", kind: :Value, type: [:Atom]}
+                       ],
+                       kind: :Value,
+                       type: [:Tuple]
+                     }
                    }
                  ],
                  guards: [],

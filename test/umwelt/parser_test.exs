@@ -130,7 +130,7 @@ defmodule Umwelt.ParserTest do
                  context: [:Root],
                  attrs: [
                    %{
-                     value: [%{type: [:Atom], body: "root_attribute", kind: :Value}],
+                     value: %{type: [:Atom], body: "root_attribute", kind: :Value},
                      body: "root_attr",
                      kind: :Attr
                    }
@@ -148,7 +148,7 @@ defmodule Umwelt.ParserTest do
                      kind: :Call
                    }
                  ],
-                 kind: :Space,
+                 kind: :Root,
                  note: "Root description"
                },
                [:Root, :Foo] => %{
@@ -156,12 +156,12 @@ defmodule Umwelt.ParserTest do
                  context: [:Root, :Foo],
                  attrs: [
                    %{
-                     value: [%{type: [:Atom], body: "baz_attribute", kind: :Value}],
+                     value: %{type: [:Atom], body: "baz_attribute", kind: :Value},
                      body: "baz_attr",
                      kind: :Attr
                    },
                    %{
-                     value: [%{type: [:Atom], body: "bar_attribute", kind: :Value}],
+                     value: %{type: [:Atom], body: "bar_attribute", kind: :Value},
                      body: "bar_attr",
                      kind: :Attr
                    }
@@ -210,7 +210,7 @@ defmodule Umwelt.ParserTest do
              } ==
                {:ok, code}
                |> Parser.read_ast()
-               |> Parser.parse()
+               |> Parser.parse_root()
     end
 
     test "weird pipe operator" do

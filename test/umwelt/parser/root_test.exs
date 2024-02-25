@@ -42,7 +42,7 @@ defmodule Umwelt.Parser.RootTest do
                    context: [:Foo, :Bar],
                    attrs: [
                      %{
-                       value: [%{type: [:Atom], body: "bar", kind: :Value}],
+                       value: %{type: [:Atom], body: "bar", kind: :Value},
                        body: "foo",
                        kind: :Attr
                      }
