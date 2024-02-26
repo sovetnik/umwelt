@@ -35,6 +35,9 @@ defmodule Umwelt.Parser.Macro do
   def parse({:defmodule, _, _} = ast, context) when is_macro(ast),
     do: Parser.Defmodule.parse(ast, context)
 
+  def parse({:defstruct, _, _} = ast, context) when is_macro(ast),
+    do: Parser.Defstruct.parse(ast, context)
+
   def parse({:defguard, _, [{:when, _, _} = when_ast]}, context),
     do: %{defguard: parse(when_ast, context)}
 

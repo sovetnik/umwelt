@@ -44,7 +44,7 @@ defmodule Umwelt.Parser.Defmodule do
     do: Parser.parse(ast, context)
 
   defp parse_block_child({:defstruct, _, fields}, _context, aliases) do
-    %{defstruct: Parser.parse(fields, aliases)}
+    Parser.parse({:defstruct, [], fields}, aliases)
   end
 
   defp parse_block_child(_ast, _, _), do: nil
@@ -73,8 +73,8 @@ defmodule Umwelt.Parser.Defmodule do
       %{moduledoc: [value]}, module ->
         Map.put(module, :note, value)
 
-      %{defstruct: [value]}, module ->
-        Map.put(module, :fields, value)
+      %{defstruct: fields}, module ->
+        Map.put(module, :fields, fields)
 
       %{defguard: value}, %{guards: attrs} = module ->
         Map.put(module, :guards, [value | attrs])

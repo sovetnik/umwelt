@@ -350,25 +350,16 @@ defmodule Umwelt.Parser.RootTest do
                    guards: [],
                    fields: [
                      %{
-                       elements: [
-                         %{body: "foo", kind: :Value, type: [:Atom]},
-                         %{body: "", kind: :Value, type: [:Atom]}
-                       ],
-                       kind: :Value,
-                       type: [:Tuple]
+                       kind: :Field,
+                       type: [:Variable],
+                       body: "foo",
+                       value: %{type: [:Atom], body: "nil", kind: :Value}
                      },
                      %{
-                       elements: [
-                         %{body: "tree", kind: :Value, type: [:Atom]},
-                         %{
-                           context: [],
-                           keyword: [],
-                           kind: :Value,
-                           type: [:Map]
-                         }
-                       ],
-                       kind: :Value,
-                       type: [:Tuple]
+                       kind: :Field,
+                       type: [:Variable],
+                       body: "tree",
+                       value: %{type: [:Map], context: [], kind: :Value, keyword: []}
                      }
                    ],
                    functions: [

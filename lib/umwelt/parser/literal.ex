@@ -16,6 +16,9 @@ defmodule Umwelt.Parser.Literal do
   def parse(false),
     do: %{body: "false", kind: :Value, type: [:Boolean]}
 
+  def parse(nil),
+    do: %{body: "nil", kind: :Value, type: [:Atom]}
+
   def parse(value) when is_atom(value),
     do: %{body: to_string(value), kind: :Value, type: [:Atom]}
 
