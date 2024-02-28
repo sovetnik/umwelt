@@ -11,7 +11,7 @@ defmodule Mix.Tasks.Dump do
   defp parse_into(filename) do
     Mix.Project.config()[:app]
     |> to_string()
-    |> Umwelt.parse_source()
+    |> Umwelt.Parser.parse_source()
     |> :erlang.term_to_binary()
     |> dump(filename)
 

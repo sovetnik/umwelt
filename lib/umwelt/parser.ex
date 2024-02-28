@@ -1,9 +1,16 @@
 defmodule Umwelt.Parser do
   @moduledoc "Extracts metadata from AST"
 
-  alias Umwelt.Parser
-
   import Umwelt.Parser.Macro, only: [is_macro: 1]
+
+  alias Umwelt.{Files, Parser}
+
+  def parse_source(project) do
+    Map.merge(
+      parse_root_source(project),
+      parse_other_sources(project)
+    )
+  end
 
   def read_ast({:error, msg}), do: {:error, msg}
 
@@ -63,5 +70,20 @@ defmodule Umwelt.Parser do
         List.wrap(context)
         # _ -> []
     end)
+  end
+
+  defp parse_root_source(project) do
+    project
+    |> Files.root_module()
+    |> File.read()
+    |> Parser.read_ast()
+    |> Parser.parse_root()
+  end
+
+  defp parse_other_sources(project) do
+    project
+    |> Files.list_root_dir()
+    |> Enum.map(&(&1 |> File.read() |> Parser.read_ast() |> Parser.parse()))
+    |> Enum.reduce(&Map.merge/2)
   end
 end
