@@ -54,10 +54,9 @@ defmodule Umwelt.Parser.MacroTest do
                body: "bar",
                kind: :Match,
                term: %{
-                 context: [:Bar],
                  kind: :Value,
-                 type: [:Map],
-                 keyword: []
+                 keyword: [],
+                 type: [:Bar]
                }
              } == Macro.parse(ast, [])
     end
@@ -69,9 +68,8 @@ defmodule Umwelt.Parser.MacroTest do
                body: "bar",
                kind: :Match,
                term: %{
-                 context: [:Bar, :Baz],
                  kind: :Value,
-                 type: [:Map],
+                 type: [:Bar, :Baz],
                  keyword: []
                }
              } == Macro.parse(ast, [])
@@ -84,9 +82,8 @@ defmodule Umwelt.Parser.MacroTest do
                body: "bar",
                kind: :Match,
                term: %{
-                 context: [:Foo, :Bar, :Baz],
                  kind: :Value,
-                 type: [:Map],
+                 type: [:Foo, :Bar, :Baz],
                  keyword: []
                }
              } == Macro.parse(ast, [[:Foo, :Bar]])
@@ -161,9 +158,8 @@ defmodule Umwelt.Parser.MacroTest do
                body: "msg",
                kind: :Match,
                term: %{
-                 context: [:Foo],
                  kind: :Value,
-                 type: [:Map],
+                 type: [:Foo],
                  keyword: []
                }
              } == Macro.parse(ast, [])
@@ -172,7 +168,7 @@ defmodule Umwelt.Parser.MacroTest do
     test "struct macro" do
       {:ok, ast} = Code.string_to_quoted("%Foo{}")
 
-      assert %{context: [:Foo], kind: :Value, type: [:Map], keyword: []} == Macro.parse(ast, [])
+      assert %{kind: :Value, type: [:Foo], keyword: []} == Macro.parse(ast, [])
     end
 
     test "tuple macro" do

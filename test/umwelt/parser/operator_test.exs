@@ -116,9 +116,8 @@ defmodule Umwelt.Parser.OperatorTest do
                body: "bar",
                kind: :Match,
                term: %{
-                 context: [:Bar],
                  kind: :Value,
-                 type: [:Map],
+                 type: [:Bar],
                  keyword: []
                }
              } == Operator.parse(ast, [])

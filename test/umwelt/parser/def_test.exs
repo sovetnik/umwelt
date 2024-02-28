@@ -45,9 +45,8 @@ defmodule Umwelt.Parser.DefTest do
              arguments: [
                %{
                  body: "bar",
-                 context: [:Bar, :Baz],
                  kind: :Variable,
-                 type: [:Map],
+                 type: [:Bar, :Baz],
                  keyword: []
                }
              ],
@@ -65,10 +64,9 @@ defmodule Umwelt.Parser.DefTest do
              arguments: [
                %{
                  body: "bar",
-                 context: [:Foo, :Bar, :Baz],
                  keyword: [],
                  kind: :Variable,
-                 type: [:Map]
+                 type: [:Foo, :Bar, :Baz]
                }
              ]
            } == Def.parse(ast, [[:Foo, :Bar]])

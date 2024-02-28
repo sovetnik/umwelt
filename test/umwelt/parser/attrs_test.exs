@@ -53,7 +53,6 @@ defmodule Umwelt.Parser.AttrsTest do
              body: "attribute",
              kind: :Attr,
              value: %{
-               context: [],
                keyword: [
                  %{
                    kind: :Value,

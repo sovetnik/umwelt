@@ -74,7 +74,7 @@ defmodule Umwelt.Parser.TupleTest do
                %{
                  body: "result",
                  kind: :Match,
-                 term: %{context: [:Result], kind: :Value, type: [:Map], keyword: []}
+                 term: %{kind: :Value, type: [:Result], keyword: []}
                }
              ]
            } == Tuple.parse(ast, [])

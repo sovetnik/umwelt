@@ -196,7 +196,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      kind: :Field,
                      type: [:Variable],
                      body: "tree",
-                     value: %{type: [:Map], context: [], kind: :Value, keyword: []}
+                     value: %{type: [:Map], kind: :Value, keyword: []}
                    }
                  ],
                  functions: [

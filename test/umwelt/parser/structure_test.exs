@@ -13,19 +13,10 @@ defmodule Umwelt.Parser.StructureTest do
   end
 
   test "%{} map macro" do
-    {:ok, ast} = Code.string_to_quoted("%{bar: :baz, fizz: :buzz}")
+    {:ok, ast} = Code.string_to_quoted("%{fizz: :buzz}")
 
     assert %{
-             context: [],
              keyword: [
-               %{
-                 elements: [
-                   %{body: "bar", kind: :Value, type: [:Atom]},
-                   %{body: "baz", kind: :Value, type: [:Atom]}
-                 ],
-                 kind: :Value,
-                 type: [:Tuple]
-               },
                %{
                  elements: [
                    %{body: "fizz", kind: :Value, type: [:Atom]},
@@ -40,11 +31,29 @@ defmodule Umwelt.Parser.StructureTest do
            } == Structure.parse(ast, [])
   end
 
+  test "typed %Buzz{} map macro" do
+    {:ok, ast} = Code.string_to_quoted("%Foobar{fizz: :buzz}")
+
+    assert %{
+             keyword: [
+               %{
+                 elements: [
+                   %{body: "fizz", kind: :Value, type: [:Atom]},
+                   %{body: "buzz", kind: :Value, type: [:Atom]}
+                 ],
+                 kind: :Value,
+                 type: [:Tuple]
+               }
+             ],
+             kind: :Value,
+             type: [:Foobar]
+           } == Structure.parse(ast, [])
+  end
+
   test "%{ => } map macro" do
     {:ok, ast} = Code.string_to_quoted("%{:\"23\" => :foo, :bar => :baz}")
 
     assert %{
-             context: [],
              keyword: [
                %{
                  elements: [
@@ -72,7 +81,6 @@ defmodule Umwelt.Parser.StructureTest do
     {:ok, ast} = Code.string_to_quoted("%{[23] => :foo, :bar => :baz}")
 
     assert %{
-             context: [],
              keyword: [
                %{
                  elements: [
@@ -100,7 +108,6 @@ defmodule Umwelt.Parser.StructureTest do
     {:ok, ast} = Code.string_to_quoted("%Foo{bar: :baz}")
 
     assert %{
-             context: [:Foo],
              keyword: [
                %{
                  kind: :Value,
@@ -112,18 +119,13 @@ defmodule Umwelt.Parser.StructureTest do
                }
              ],
              kind: :Value,
-             type: [:Map]
+             type: [:Foo]
            } == Structure.parse(ast, [])
   end
 
   test "% macro" do
     {:ok, ast} = Code.string_to_quoted("%Foo{}")
 
-    assert %{
-             context: [:Foo],
-             kind: :Value,
-             type: [:Map],
-             keyword: []
-           } == Structure.parse(ast, [])
+    assert %{kind: :Value, type: [:Foo], keyword: []} == Structure.parse(ast, [])
   end
 end
