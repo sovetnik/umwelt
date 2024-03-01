@@ -336,24 +336,4 @@ defmodule Umwelt.ParserTest do
              ] == Parser.parse(ast, [])
     end
   end
-
-  describe "expandind modules via aliases" do
-    test "nothing to expand" do
-      module = [:Foo]
-      aliases = []
-      assert [:Foo] == Parser.expand_module(module, aliases)
-    end
-
-    test "aliases not match" do
-      module = [:Foo, :Bar]
-      aliases = [[:Bar, :Baz]]
-      assert [:Bar] == Parser.expand_module(module, aliases)
-    end
-
-    test "aliases match and module expanded" do
-      module = [:Bar, :Baz]
-      aliases = [[:Foo, :Bar]]
-      assert [:Foo, :Bar, :Baz] == Parser.expand_module(module, aliases)
-    end
-  end
 end

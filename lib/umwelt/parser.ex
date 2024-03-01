@@ -35,15 +35,6 @@ defmodule Umwelt.Parser do
   def parse(ast, _aliases),
     do: Parser.Literal.parse(ast)
 
-  def expand_module(module, []), do: module
-
-  def expand_module([head | rest], aliases) do
-    aliases
-    |> Enum.filter(&match?([^head | _], Enum.reverse(&1)))
-    |> List.flatten()
-    |> Kernel.++(rest)
-  end
-
   defp index(parsed) do
     parsed
     |> inner_modules()

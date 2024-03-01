@@ -39,7 +39,7 @@ defmodule Umwelt.Parser.DefTest do
   end
 
   test "typed variable Bar.Baz" do
-    {:ok, ast} = Code.string_to_quoted("def foo( %Bar.Baz{} = bar)")
+    {:ok, ast} = Code.string_to_quoted("def foo(%Bar.Baz{} = bar)")
 
     assert %{
              arguments: [

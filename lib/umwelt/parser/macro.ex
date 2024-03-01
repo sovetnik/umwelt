@@ -29,8 +29,8 @@ defmodule Umwelt.Parser.Macro do
   def parse({:@, _, _} = ast, _aliases),
     do: Parser.Attrs.parse(ast)
 
-  def parse({:__aliases__, _, module}, aliases),
-    do: Parser.expand_module(module, aliases)
+  def parse({:__aliases__, _, _} = ast, aliases),
+    do: Parser.Aliases.parse(ast, aliases)
 
   def parse({:defmodule, _, _} = ast, context) when is_macro(ast),
     do: Parser.Defmodule.parse(ast, context)

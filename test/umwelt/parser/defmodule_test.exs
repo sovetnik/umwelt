@@ -4,6 +4,71 @@ defmodule Umwelt.Parser.DefmoduleTest do
   alias Umwelt.Parser.Defmodule
 
   describe "module children" do
+    test "module with aliased argument in function" do
+      {:ok, ast} =
+        ~S"""
+          defmodule Foo.Bar do
+            alias Foo.Bar
+            alias Foo.Baz
+            def foobar(%Bar{} = bar, %Baz{} = baz) do
+            end
+          end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 attrs: [],
+                 body: "Bar",
+                 kind: :Space,
+                 context: [:Foo, :Bar],
+                 functions: [
+                   %{
+                     arguments: [
+                       %{type: [:Foo, :Bar], body: "bar", kind: :Variable, keyword: []},
+                       %{type: [:Foo, :Baz], body: "baz", kind: :Variable, keyword: []}
+                     ],
+                     body: "foobar",
+                     kind: :Call
+                   }
+                 ],
+                 guards: []
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+
+    test "module with combined aliases of argument in function" do
+      {:ok, ast} =
+        ~S"""
+          defmodule Foo.Bar do
+            alias Foo.{ Bar, Baz }
+            def foobar(%Bar{} = bar, %Baz{} = baz) do
+            end
+          end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 attrs: [],
+                 body: "Bar",
+                 kind: :Space,
+                 context: [:Foo, :Bar],
+                 functions: [
+                   %{
+                     arguments: [
+                       %{type: [:Foo, :Bar], body: "bar", kind: :Variable, keyword: []},
+                       %{type: [:Foo, :Baz], body: "baz", kind: :Variable, keyword: []}
+                     ],
+                     body: "foobar",
+                     kind: :Call
+                   }
+                 ],
+                 guards: []
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+
     test "module with defguard only" do
       {:ok, ast} =
         ~S"""
