@@ -4,7 +4,7 @@ Client for umwelt.dev
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+[available in Hex](https://hex.pm/packages/umwelt), the package can be installed
 by adding `umwelt` to your list of dependencies in `mix.exs`:
 
 ```elixir
@@ -15,7 +15,7 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/umwelt>.
+## Usage
 
+Right now it is a proof of concept, and in this version parser can parse itself,
+via `mix dump`.
