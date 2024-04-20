@@ -6,7 +6,7 @@ defmodule Umwelt.Parser.LiteralTest do
   test "undefined variable" do
     {:ok, ast} = Code.string_to_quoted("foo")
 
-    assert %{:body => "foo", kind: :Variable, type: [:Variable]} == Literal.parse(ast)
+    assert %{:body => "foo", kind: :Variable, type: [:Anything]} == Literal.parse(ast)
   end
 
   test "atom" do

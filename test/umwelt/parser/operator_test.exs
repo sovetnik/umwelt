@@ -58,7 +58,7 @@ defmodule Umwelt.Parser.OperatorTest do
       assert %{
                body: "membership",
                kind: :Operator,
-               left: %{body: "foobar", kind: :Variable, type: [:Variable]},
+               left: %{body: "foobar", kind: :Variable, type: [:Anything]},
                right: [
                  %{body: "foo", kind: :Value, type: [:Atom]},
                  %{body: "bar", kind: :Value, type: [:Atom]},
@@ -77,7 +77,7 @@ defmodule Umwelt.Parser.OperatorTest do
                  body: "membership",
                  kind: :Operator,
                  left: %{
-                   type: [:Variable],
+                   type: [:Anything],
                    body: "foobar",
                    kind: :Variable
                  },
@@ -103,7 +103,7 @@ defmodule Umwelt.Parser.OperatorTest do
                  type: [:Tuple],
                  elements: [
                    %{type: [:Atom], body: "ok", kind: :Value},
-                   %{type: [:Variable], body: "foo", kind: :Variable}
+                   %{type: [:Anything], body: "foo", kind: :Variable}
                  ]
                }
              } == Operator.parse(ast, [])
@@ -198,7 +198,7 @@ defmodule Umwelt.Parser.OperatorTest do
       assert %{
                body: "===",
                kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: [:Variable]},
+               left: %{body: "foo", kind: :Variable, type: [:Anything]},
                right: %{body: "bar", kind: :Value, type: [:Atom]}
              } == Operator.parse(ast, [])
     end
@@ -222,7 +222,7 @@ defmodule Umwelt.Parser.OperatorTest do
       assert %{
                body: "==",
                kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: [:Variable]},
+               left: %{body: "foo", kind: :Variable, type: [:Anything]},
                right: %{body: "bar", kind: :Value, type: [:Atom]}
              } == Operator.parse(ast, [])
     end
@@ -233,7 +233,7 @@ defmodule Umwelt.Parser.OperatorTest do
       assert %{
                body: "!=",
                kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: [:Variable]},
+               left: %{body: "foo", kind: :Variable, type: [:Anything]},
                right: %{body: "bar", kind: :Value, type: [:Atom]}
              } == Operator.parse(ast, [])
     end
@@ -246,7 +246,7 @@ defmodule Umwelt.Parser.OperatorTest do
       assert %{
                body: "<",
                kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: [:Variable]},
+               left: %{body: "foo", kind: :Variable, type: [:Anything]},
                right: %{body: "5", kind: :Value, type: [:Integer]}
              } == Operator.parse(ast, [])
     end
@@ -257,7 +257,7 @@ defmodule Umwelt.Parser.OperatorTest do
       assert %{
                body: ">",
                kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: [:Variable]},
+               left: %{body: "foo", kind: :Variable, type: [:Anything]},
                right: %{body: "5", kind: :Value, type: [:Integer]}
              } == Operator.parse(ast, [])
     end
@@ -268,7 +268,7 @@ defmodule Umwelt.Parser.OperatorTest do
       assert %{
                body: "<=",
                kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: [:Variable]},
+               left: %{body: "foo", kind: :Variable, type: [:Anything]},
                right: %{body: "5", kind: :Value, type: [:Integer]}
              } == Operator.parse(ast, [])
     end
@@ -279,7 +279,7 @@ defmodule Umwelt.Parser.OperatorTest do
       assert %{
                body: ">=",
                kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: [:Variable]},
+               left: %{body: "foo", kind: :Variable, type: [:Anything]},
                right: %{body: "5", kind: :Value, type: [:Integer]}
              } == Operator.parse(ast, [])
     end

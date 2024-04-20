@@ -23,5 +23,5 @@ defmodule Umwelt.Parser.Literal do
     do: %{body: to_string(value), kind: :Value, type: [:Atom]}
 
   def parse({value, _, nil}) when is_atom(value),
-    do: %{body: to_string(value), kind: :Variable, type: [:Variable]}
+    do: %{body: to_string(value), kind: :Variable, type: [:Anything]}
 end

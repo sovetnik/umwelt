@@ -24,7 +24,7 @@ defmodule Umwelt.Parser.Def do
   defp parse_call({term, _, children} = ast, aliases)
        when is_atom_macro(ast),
        do: %{
-         kind: :Call,
+         kind: :Function,
          body: to_string(term),
          arguments: Enum.map(children, &parse_arg(&1, aliases))
        }

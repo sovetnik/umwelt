@@ -138,14 +138,14 @@ defmodule Umwelt.ParserTest do
                  guards: [],
                  functions: [
                    %{
-                     arguments: [%{type: [:Variable], body: "once", kind: :Variable}],
+                     arguments: [%{type: [:Anything], body: "once", kind: :Variable}],
                      body: "root_one",
-                     kind: :Call
+                     kind: :Function
                    },
                    %{
-                     arguments: [%{type: [:Variable], body: "twice", kind: :Variable}],
+                     arguments: [%{type: [:Anything], body: "twice", kind: :Variable}],
                      body: "root_two",
-                     kind: :Call
+                     kind: :Function
                    }
                  ],
                  kind: :Root,
@@ -169,9 +169,9 @@ defmodule Umwelt.ParserTest do
                  guards: [],
                  functions: [
                    %{
-                     arguments: [%{type: [:Variable], body: "bar", kind: :Variable}],
+                     arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
                      body: "foo",
-                     kind: :Call
+                     kind: :Function
                    }
                  ],
                  kind: :Space,
@@ -184,9 +184,9 @@ defmodule Umwelt.ParserTest do
                  guards: [],
                  functions: [
                    %{
-                     arguments: [%{type: [:Variable], body: "baz", kind: :Variable}],
+                     arguments: [%{type: [:Anything], body: "baz", kind: :Variable}],
                      body: "bar",
-                     kind: :Call
+                     kind: :Function
                    }
                  ],
                  kind: :Space,
@@ -199,9 +199,9 @@ defmodule Umwelt.ParserTest do
                  guards: [],
                  functions: [
                    %{
-                     arguments: [%{type: [:Variable], body: "foo", kind: :Variable}],
+                     arguments: [%{type: [:Anything], body: "foo", kind: :Variable}],
                      body: "baz",
-                     kind: :Call
+                     kind: :Function
                    }
                  ],
                  kind: :Space,
@@ -227,8 +227,8 @@ defmodule Umwelt.ParserTest do
                kind: :Operator,
                left: %{
                  arguments: [
-                   %{body: "a", kind: :Variable, type: [:Variable]},
-                   %{body: "b", kind: :Variable, type: [:Variable]}
+                   %{body: "a", kind: :Variable, type: [:Anything]},
+                   %{body: "b", kind: :Variable, type: [:Anything]}
                  ],
                  body: "bar",
                  kind: :Call
@@ -236,8 +236,8 @@ defmodule Umwelt.ParserTest do
                right: %{
                  body: "and",
                  kind: :Operator,
-                 left: %{body: "a", kind: :Variable, type: [:Variable]},
-                 right: %{body: "b", kind: :Variable, type: [:Variable]}
+                 left: %{body: "a", kind: :Variable, type: [:Anything]},
+                 right: %{body: "b", kind: :Variable, type: [:Anything]}
                }
              } == Parser.parse(ast, [])
     end
@@ -256,8 +256,8 @@ defmodule Umwelt.ParserTest do
                kind: :Operator,
                left: %{
                  arguments: [
-                   %{body: "a", kind: :Variable, type: [:Variable]},
-                   %{body: "b", kind: :Variable, type: [:Variable]}
+                   %{body: "a", kind: :Variable, type: [:Anything]},
+                   %{body: "b", kind: :Variable, type: [:Anything]}
                  ],
                  body: "bar",
                  kind: :Call
@@ -265,8 +265,8 @@ defmodule Umwelt.ParserTest do
                right: %{
                  body: "and",
                  kind: :Operator,
-                 left: %{body: "a", kind: :Variable, type: [:Variable]},
-                 right: %{body: "b", kind: :Variable, type: [:Variable]}
+                 left: %{body: "a", kind: :Variable, type: [:Anything]},
+                 right: %{body: "b", kind: :Variable, type: [:Anything]}
                }
              } == Parser.parse(ast, [])
     end
@@ -279,7 +279,7 @@ defmodule Umwelt.ParserTest do
                type: [:Tuple],
                elements: [
                  %{body: "ok", kind: :Value, type: [:Atom]},
-                 %{body: "msg", kind: :Variable, type: [:Variable]}
+                 %{body: "msg", kind: :Variable, type: [:Anything]}
                ]
              } == Parser.parse(ast, [[:Foo, :Bar]])
     end
@@ -327,8 +327,8 @@ defmodule Umwelt.ParserTest do
       assert [
                %{
                  values: [
-                   %{type: [:Variable], body: "head", kind: :Variable},
-                   %{type: [:Variable], body: "tail", kind: :Variable}
+                   %{type: [:Anything], body: "head", kind: :Variable},
+                   %{type: [:Anything], body: "tail", kind: :Variable}
                  ],
                  body: "|",
                  kind: :Pipe

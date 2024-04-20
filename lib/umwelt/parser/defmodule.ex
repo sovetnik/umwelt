@@ -95,7 +95,7 @@ defmodule Umwelt.Parser.Defmodule do
       %{impl: [value]}, [head | rest] ->
         [Map.put(head, :impl, value) | rest]
 
-      %{kind: :Call} = function, [head | rest] ->
+      %{kind: :Function} = function, [head | rest] ->
         [%{}, Map.merge(head, function) | rest]
 
       %{kind: :Operator, body: "when"} = function, [head | rest] ->

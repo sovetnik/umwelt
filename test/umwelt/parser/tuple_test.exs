@@ -32,7 +32,7 @@ defmodule Umwelt.Parser.TupleTest do
              type: [:Tuple],
              elements: [
                %{body: "ok", kind: :Value, type: [:Atom]},
-               %{body: "result", kind: :Variable, type: [:Variable]}
+               %{body: "result", kind: :Variable, type: [:Anything]}
              ]
            } == Tuple.parse(ast, [])
   end
@@ -88,8 +88,8 @@ defmodule Umwelt.Parser.TupleTest do
              type: [:Tuple],
              elements: [
                %{body: "error", kind: :Value, type: [:Atom]},
-               %{body: "msg", kind: :Variable, type: [:Variable]},
-               %{body: "details", kind: :Variable, type: [:Variable]}
+               %{body: "msg", kind: :Variable, type: [:Anything]},
+               %{body: "details", kind: :Variable, type: [:Anything]}
              ]
            } == Tuple.parse(ast, [])
   end

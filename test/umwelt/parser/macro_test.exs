@@ -43,7 +43,7 @@ defmodule Umwelt.Parser.MacroTest do
       assert %{
                body: "foo",
                kind: :Variable,
-               type: [:Variable]
+               type: [:Anything]
              } == Macro.parse(ast, [])
     end
 
@@ -98,8 +98,8 @@ defmodule Umwelt.Parser.MacroTest do
                body: "|",
                kind: :Pipe,
                values: [
-                 %{type: [:Variable], body: "head", kind: :Variable},
-                 %{type: [:Variable], body: "tail", kind: :Variable}
+                 %{type: [:Anything], body: "head", kind: :Variable},
+                 %{type: [:Anything], body: "tail", kind: :Variable}
                ]
              } == Parser.parse(ast, [])
     end
@@ -124,9 +124,9 @@ defmodule Umwelt.Parser.MacroTest do
                  guards: [],
                  functions: [
                    %{
-                     arguments: [%{type: [:Variable], body: "bar", kind: :Variable}],
+                     arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
                      body: "foo",
-                     kind: :Call
+                     kind: :Function
                    }
                  ],
                  kind: :Space,
@@ -147,7 +147,7 @@ defmodule Umwelt.Parser.MacroTest do
       assert %{
                arguments: [],
                body: "div",
-               kind: :Call
+               kind: :Function
              } == Macro.parse(ast, [])
     end
 
@@ -179,7 +179,7 @@ defmodule Umwelt.Parser.MacroTest do
                type: [:Tuple],
                elements: [
                  %{body: "ok", kind: :Value, type: [:Atom]},
-                 %{body: "one", kind: :Variable, type: [:Variable]},
+                 %{body: "one", kind: :Variable, type: [:Anything]},
                  [%{body: "two", kind: :Value, type: [:Atom]}]
                ]
              } == Macro.parse(ast, [[:Foo, :Bar]])
