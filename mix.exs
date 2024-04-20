@@ -5,11 +5,16 @@ defmodule Umwelt.MixProject do
     [
       app: :umwelt,
       version: "0.1.0",
-      elixir: "~> 1.14",
+      elixir: "~> 1.15",
       compilers: [:leex, :yecc] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      dialyzer: [plt_add_apps: [:mix]]
+      dialyzer: [plt_add_apps: [:mix]],
+      name: "Umwelt",
+      description: "Umwelt is an Elixir parser for umwelt.dev",
+      package: [licenses: ["Apache-2.0"]],
+      homepage_url: "https://umwelt.dev/",
+      source_url: "https://github.com/sovetnik/umwelt"
     ]
   end
 
