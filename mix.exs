@@ -12,7 +12,7 @@ defmodule Umwelt.MixProject do
       dialyzer: [plt_add_apps: [:mix]],
       name: "Umwelt",
       description: "Umwelt is an Elixir parser for umwelt.dev",
-      package: [licenses: ["Apache-2.0"]],
+      package: package(),
       homepage_url: "https://umwelt.dev/",
       source_url: "https://github.com/sovetnik/umwelt"
     ]
@@ -29,7 +29,15 @@ defmodule Umwelt.MixProject do
   defp deps do
     [
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.29", only: :dev, runtime: false}
+    ]
+  end
+
+  defp package do
+    [
+      licenses: ["Apache-2.0"],
+      links: %{"GitHub" => "https://github.com/sovetnik/umwelt"}
     ]
   end
 end
