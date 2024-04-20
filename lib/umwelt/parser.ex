@@ -26,7 +26,7 @@ defmodule Umwelt.Parser do
   def parse(ast, aliases) when is_macro(ast),
     do: Parser.Macro.parse(ast, aliases)
 
-  def parse(ast, aliases) when is_tuple(ast) and tuple_size(ast) == 2,
+  def parse({_, _} = ast, aliases),
     do: Parser.Tuple.parse(ast, aliases)
 
   def parse(ast, aliases) when is_list(ast),
