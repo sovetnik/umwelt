@@ -5,7 +5,10 @@ defmodule Mix.Tasks.Dump do
   use Mix.Task
 
   @impl Mix.Task
-  def run([]), do: parse_into("umwelt.bin")
+  def run([]) do
+    parse_into("#{Mix.Project.config()[:app]}.bin")
+  end
+
   def run([filename]), do: parse_into(filename)
 
   defp parse_into(filename) do
