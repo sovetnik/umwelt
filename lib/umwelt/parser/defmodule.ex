@@ -1,6 +1,8 @@
 defmodule Umwelt.Parser.Defmodule do
   @moduledoc "Parses Module AST"
 
+  require Logger
+  @log_message "Unknown AST skipped in Defmodule.parse"
   alias Umwelt.Parser
 
   def parse({:defmodule, _meta, children}, context),
@@ -28,11 +30,18 @@ defmodule Umwelt.Parser.Defmodule do
   end
 
   def parse_block({term, _, _} = ast, context)
-      when term in [:@, :defguard, :defmodule],
+      when term in [:@, :defguard, :defmodule, :defstruct],
       do: [Parser.parse(ast, context)]
+
+  def parse_block(ast, _) do
+    Logger.warning("#{@log_message}_block/2\n #{inspect(ast)}")
+    []
+  end
 
   defp parse_block_child({:@, _, _} = ast, _, _),
     do: Parser.parse(ast, [])
+
+  defp parse_block_child({:alias, _, _}, _, _), do: nil
 
   defp parse_block_child({:def, _, _} = ast, _, aliases),
     do: Parser.parse(ast, aliases)
@@ -47,7 +56,12 @@ defmodule Umwelt.Parser.Defmodule do
     Parser.parse({:defstruct, [], fields}, aliases)
   end
 
-  defp parse_block_child(_ast, _, _), do: nil
+  defp parse_block_child({kind, _, _}, _, _) when kind in [:alias, :defp], do: nil
+
+  defp parse_block_child(ast, _, _) do
+    Logger.warning("#{@log_message}_block_child/3\n #{inspect(ast)}")
+    nil
+  end
 
   defp aliases(children) do
     Enum.flat_map(children, fn

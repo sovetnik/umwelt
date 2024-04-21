@@ -230,6 +230,41 @@ defmodule Umwelt.Parser.DefmoduleTest do
       {:ok, ast} =
         """
           defmodule Foo.Bar do
+            defstruct foo: nil, tree: %{}
+          end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 body: "Bar",
+                 kind: :Space,
+                 context: [:Foo, :Bar],
+                 attrs: [],
+                 guards: [],
+                 fields: [
+                   %{
+                     kind: :Field,
+                     type: [:Anything],
+                     body: "foo",
+                     value: %{type: [:Atom], body: "nil", kind: :Value}
+                   },
+                   %{
+                     kind: :Field,
+                     type: [:Anything],
+                     body: "tree",
+                     value: %{type: [:Map], kind: :Value, keyword: []}
+                   }
+                 ],
+                 functions: []
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+
+    test "module with defstruct and functions" do
+      {:ok, ast} =
+        """
+          defmodule Foo.Bar do
             @moduledoc "Foobar description"
             defstruct foo: nil, tree: %{}
             def foo(bar) do
