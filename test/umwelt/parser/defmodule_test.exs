@@ -3,6 +3,211 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
   alias Umwelt.Parser.Defmodule
 
+  describe "import, use and require" do
+    test "import in defmodule" do
+      {:ok, ast} =
+        ~S"""
+        defmodule Math do
+        import List, only: [duplicate: 2]
+          def some_function do
+            duplicate(:ok, 10)
+          end
+        end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 body: "Math",
+                 context: [:Math],
+                 attrs: [],
+                 calls: [
+                   %{
+                     arguments: [
+                       [:List],
+                       [
+                         %{
+                           type: [:Tuple],
+                           kind: :Value,
+                           elements: [
+                             %{type: [:Atom], body: "only", kind: :Value},
+                             [
+                               %{
+                                 type: [:Tuple],
+                                 kind: :Value,
+                                 elements: [
+                                   %{type: [:Atom], body: "duplicate", kind: :Value},
+                                   %{type: [:Integer], body: "2", kind: :Value}
+                                 ]
+                               }
+                             ]
+                           ]
+                         }
+                       ]
+                     ],
+                     body: "import",
+                     kind: :Call
+                   }
+                 ],
+                 functions: [
+                   %{arguments: [], body: "some_function", kind: :Function}
+                 ],
+                 guards: [],
+                 kind: :Space
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+
+    test "import in def skipped as bad design" do
+      {:ok, ast} =
+        ~S"""
+        defmodule Math do
+          def some_function do
+            import List, only: [duplicate: 2]
+            duplicate(:ok, 10)
+          end
+        end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 body: "Math",
+                 context: [:Math],
+                 attrs: [],
+                 calls: [],
+                 functions: [%{arguments: [], body: "some_function", kind: :Function}],
+                 guards: [],
+                 kind: :Space
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+
+    test "just one use" do
+      {:ok, ast} =
+        ~S"""
+        defmodule Cryptoid.Mailer do
+          use Swoosh.Mailer, otp_app: :cryptoid
+        end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 attrs: [],
+                 body: "Mailer",
+                 calls: [
+                   %{
+                     arguments: [
+                       [:Swoosh, :Mailer],
+                       [
+                         %{
+                           type: [:Tuple],
+                           kind: :Value,
+                           elements: [
+                             %{type: [:Atom], body: "otp_app", kind: :Value},
+                             %{type: [:Atom], body: "cryptoid", kind: :Value}
+                           ]
+                         }
+                       ]
+                     ],
+                     body: "use",
+                     kind: :Call
+                   }
+                 ],
+                 context: [:Cryptoid, :Mailer],
+                 functions: [],
+                 guards: [],
+                 kind: :Space
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+
+    test "use in def skipped as bad design" do
+      {:ok, ast} =
+        ~S"""
+        defmodule Example do
+          @moduledoc "use the feature"
+          use Feature, option: :value
+        end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 attrs: [],
+                 body: "Example",
+                 calls: [
+                   %{
+                     arguments: [
+                       [:Feature],
+                       [
+                         %{
+                           elements: [
+                             %{body: "option", kind: :Value, type: [:Atom]},
+                             %{body: "value", kind: :Value, type: [:Atom]}
+                           ],
+                           kind: :Value,
+                           type: [:Tuple]
+                         }
+                       ]
+                     ],
+                     body: "use",
+                     kind: :Call
+                   }
+                 ],
+                 context: [:Example],
+                 functions: [],
+                 guards: [],
+                 kind: :Space,
+                 note: "use the feature"
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+
+    test "require in defmodule" do
+      {:ok, ast} =
+        ~S"""
+        defmodule Example do
+          require Feature
+          Feature.__using__(option: :value)
+        end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 attrs: [],
+                 body: "Example",
+                 calls: [
+                   %{
+                     arguments: [
+                       [
+                         %{
+                           type: [:Tuple],
+                           kind: :Value,
+                           elements: [
+                             %{type: [:Atom], body: "option", kind: :Value},
+                             %{type: [:Atom], body: "value", kind: :Value}
+                           ]
+                         }
+                       ]
+                     ],
+                     body: "__using__",
+                     kind: :Call,
+                     context: [:Feature]
+                   },
+                   %{arguments: [[:Feature]], body: "require", kind: :Call}
+                 ],
+                 context: [:Example],
+                 functions: [],
+                 guards: [],
+                 kind: :Space
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+  end
+
   describe "module children" do
     test "module with aliased argument in function" do
       {:ok, ast} =
@@ -18,10 +223,11 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
       assert [
                %{
-                 attrs: [],
                  body: "Bar",
                  kind: :Space,
                  context: [:Foo, :Bar],
+                 attrs: [],
+                 calls: [],
                  functions: [
                    %{
                      arguments: [
@@ -50,10 +256,11 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
       assert [
                %{
-                 attrs: [],
                  body: "Bar",
                  kind: :Space,
                  context: [:Foo, :Bar],
+                 attrs: [],
+                 calls: [],
                  functions: [
                    %{
                      arguments: [
@@ -80,10 +287,11 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
       assert [
                %{
-                 attrs: [],
                  body: "Bar",
                  kind: :Space,
                  context: [:Foo, :Bar],
+                 attrs: [],
+                 calls: [],
                  functions: [],
                  guards: [
                    %{
@@ -162,7 +370,8 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      }
                    }
                  ],
-                 attrs: []
+                 attrs: [],
+                 calls: []
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -183,6 +392,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  body: "Enumeric",
                  context: [:Enumeric],
                  attrs: [],
+                 calls: [],
                  guards: [],
                  functions: [
                    %{
@@ -241,6 +451,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  kind: :Space,
                  context: [:Foo, :Bar],
                  attrs: [],
+                 calls: [],
                  guards: [],
                  fields: [
                    %{
@@ -284,6 +495,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  kind: :Space,
                  context: [:Foo, :Bar],
                  attrs: [],
+                 calls: [],
                  guards: [],
                  fields: [
                    %{
@@ -333,6 +545,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  kind: :Space,
                  context: [:Foo, :Bar],
                  attrs: [],
+                 calls: [],
                  guards: [],
                  functions: [
                    %{
@@ -374,6 +587,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      }
                    }
                  ],
+                 calls: [],
                  guards: [],
                  functions: []
                }
@@ -396,6 +610,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  kind: :Space,
                  note: "Foobar description",
                  attrs: [],
+                 calls: [],
                  guards: [],
                  functions: []
                }
@@ -416,6 +631,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  body: "Bar",
                  kind: :Space,
                  attrs: [],
+                 calls: [],
                  guards: [],
                  functions: []
                }
@@ -449,6 +665,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  body: "Bar",
                  context: [:Foo, :Bar],
                  attrs: [],
+                 calls: [],
                  guards: [],
                  functions: [
                    %{
@@ -472,6 +689,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    body: "Baz",
                    context: [:Foo, :Bar, :Baz],
                    attrs: [],
+                   calls: [],
                    guards: [],
                    functions: [
                      %{
@@ -537,6 +755,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  ],
                  context: [:Root],
                  attrs: [],
+                 calls: [],
                  guards: [],
                  body: "Root",
                  kind: :Space,
@@ -553,6 +772,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    ],
                    context: [:Root, :Foo],
                    attrs: [],
+                   calls: [],
                    guards: [],
                    body: "Foo",
                    kind: :Space,
@@ -569,6 +789,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      ],
                      context: [:Root, :Foo, :Bar],
                      attrs: [],
+                     calls: [],
                      guards: [],
                      body: "Bar",
                      kind: :Space,
@@ -586,6 +807,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      ],
                      context: [:Root, :Foo, :Baz],
                      attrs: [],
+                     calls: [],
                      guards: [],
                      body: "Baz",
                      kind: :Space,
@@ -614,6 +836,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  kind: :Space,
                  context: [:Foo],
                  attrs: [],
+                 calls: [],
                  guards: [],
                  functions: []
                },
@@ -623,6 +846,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    kind: :Space,
                    context: [:Foo, :Bar],
                    attrs: [],
+                   calls: [],
                    guards: [],
                    functions: []
                  },
@@ -631,6 +855,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      body: "Baz",
                      kind: :Space,
                      attrs: [],
+                     calls: [],
                      guards: [],
                      context: [:Foo, :Bar, :Baz],
                      functions: []
@@ -656,6 +881,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  body: "Bar",
                  kind: :Space,
                  attrs: [],
+                 calls: [],
                  guards: [],
                  functions: []
                },
@@ -665,6 +891,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    body: "Baz",
                    kind: :Space,
                    attrs: [],
+                   calls: [],
                    guards: [],
                    functions: []
                  }

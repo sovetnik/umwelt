@@ -135,6 +135,7 @@ defmodule Umwelt.ParserTest do
                      kind: :Attr
                    }
                  ],
+                 calls: [],
                  guards: [],
                  functions: [
                    %{
@@ -166,6 +167,7 @@ defmodule Umwelt.ParserTest do
                      kind: :Attr
                    }
                  ],
+                 calls: [],
                  guards: [],
                  functions: [
                    %{
@@ -181,6 +183,7 @@ defmodule Umwelt.ParserTest do
                  body: "Bar",
                  context: [:Root, :Foo, :Bar],
                  attrs: [],
+                 calls: [],
                  guards: [],
                  functions: [
                    %{
@@ -196,6 +199,7 @@ defmodule Umwelt.ParserTest do
                  body: "Baz",
                  context: [:Root, :Foo, :Baz],
                  attrs: [],
+                 calls: [],
                  guards: [],
                  functions: [
                    %{

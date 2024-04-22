@@ -36,6 +36,7 @@ defmodule Umwelt.Parser.Root do
       kind: kind,
       context: context,
       attrs: [],
+      calls: [],
       functions: [],
       guards: []
     }

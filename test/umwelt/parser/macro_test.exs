@@ -121,6 +121,7 @@ defmodule Umwelt.Parser.MacroTest do
                  body: "Bar",
                  context: [:Foo, :Bar],
                  attrs: [],
+                 calls: [],
                  guards: [],
                  functions: [
                    %{

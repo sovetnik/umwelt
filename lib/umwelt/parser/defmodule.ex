@@ -3,6 +3,9 @@ defmodule Umwelt.Parser.Defmodule do
 
   require Logger
   @log_message "Unknown AST skipped in Defmodule.parse"
+
+  import Umwelt.Parser.Macro, only: [is_macro: 1]
+
   alias Umwelt.Parser
 
   def parse({:defmodule, _meta, children}, context),
@@ -17,6 +20,7 @@ defmodule Umwelt.Parser.Defmodule do
     |> combine(%{
       body: to_string(List.last(module)),
       attrs: [],
+      calls: [],
       guards: [],
       kind: :Space,
       context: context ++ module
@@ -28,6 +32,10 @@ defmodule Umwelt.Parser.Defmodule do
     |> Enum.map(&parse_block_child(&1, context, aliases(block_children)))
     |> Enum.reject(&is_nil(&1))
   end
+
+  def parse_block({term, _, block_children} = ast, _context)
+      when term in ~w|def import require use|a,
+      do: [Parser.parse(ast, aliases(block_children))]
 
   def parse_block({term, _, _} = ast, context)
       when term in [:@, :defguard, :defmodule, :defstruct],
@@ -43,14 +51,17 @@ defmodule Umwelt.Parser.Defmodule do
 
   defp parse_block_child({:alias, _, _}, _, _), do: nil
 
-  defp parse_block_child({:def, _, _} = ast, _, aliases),
-    do: Parser.parse(ast, aliases)
+  defp parse_block_child({term, _, _} = ast, _, aliases)
+       when is_macro(term),
+       do: Parser.parse(ast, aliases)
 
-  defp parse_block_child({:defguard, _, _} = ast, context, _aliases),
-    do: Parser.parse(ast, context)
+  defp parse_block_child({term, _, _} = ast, _, aliases)
+       when term in ~w|def import require use|a,
+       do: Parser.parse(ast, aliases)
 
-  defp parse_block_child({:defmodule, _, _} = ast, context, _aliases),
-    do: Parser.parse(ast, context)
+  defp parse_block_child({term, _, _} = ast, context, _aliases)
+       when term in ~w|defguard defmodule|a,
+       do: Parser.parse(ast, context)
 
   defp parse_block_child({:defstruct, _, fields}, _context, aliases) do
     Parser.parse({:defstruct, [], fields}, aliases)
@@ -96,7 +107,25 @@ defmodule Umwelt.Parser.Defmodule do
       %{kind: :Attr} = value, %{attrs: attrs} = module ->
         Map.put(module, :attrs, [value | attrs])
 
-      _other, module ->
+      %{kind: :Call} = value, %{calls: calls} = module ->
+        Map.put(module, :calls, [value | calls])
+
+      # doc and impl related to function and parsed in functions
+      %{doc: _}, module ->
+        module
+
+      %{impl: _}, module ->
+        module
+
+      %{kind: kind}, module
+      when kind in [:Function, :Operator] ->
+        module
+
+      children, module when is_list(children) ->
+        module
+
+      other, module ->
+        Logger.warning("#{@log_message}_combine_module/1\n #{inspect(other, pretty: true)}")
         module
     end)
   end
