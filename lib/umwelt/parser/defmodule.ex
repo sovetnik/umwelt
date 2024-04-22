@@ -22,7 +22,7 @@ defmodule Umwelt.Parser.Defmodule do
       attrs: [],
       calls: [],
       guards: [],
-      kind: :Space,
+      kind: :Concept,
       context: context ++ module
     })
   end

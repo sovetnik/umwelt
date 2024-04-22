@@ -53,7 +53,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    %{arguments: [], body: "some_function", kind: :Function}
                  ],
                  guards: [],
-                 kind: :Space
+                 kind: :Concept
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -78,7 +78,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  calls: [],
                  functions: [%{arguments: [], body: "some_function", kind: :Function}],
                  guards: [],
-                 kind: :Space
+                 kind: :Concept
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -118,7 +118,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  context: [:Cryptoid, :Mailer],
                  functions: [],
                  guards: [],
-                 kind: :Space
+                 kind: :Concept
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -159,7 +159,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  context: [:Example],
                  functions: [],
                  guards: [],
-                 kind: :Space,
+                 kind: :Concept,
                  note: "use the feature"
                }
              ] == Defmodule.parse(ast, [])
@@ -202,7 +202,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  context: [:Example],
                  functions: [],
                  guards: [],
-                 kind: :Space
+                 kind: :Concept
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -224,7 +224,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Bar",
-                 kind: :Space,
+                 kind: :Concept,
                  context: [:Foo, :Bar],
                  attrs: [],
                  calls: [],
@@ -257,7 +257,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Bar",
-                 kind: :Space,
+                 kind: :Concept,
                  context: [:Foo, :Bar],
                  attrs: [],
                  calls: [],
@@ -288,7 +288,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Bar",
-                 kind: :Space,
+                 kind: :Concept,
                  context: [:Foo, :Bar],
                  attrs: [],
                  calls: [],
@@ -332,7 +332,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Bar",
-                 kind: :Space,
+                 kind: :Concept,
                  context: [:Foo, :Bar],
                  functions: [
                    %{
@@ -431,7 +431,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      kind: :Function
                    }
                  ],
-                 kind: :Space
+                 kind: :Concept
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -448,7 +448,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Bar",
-                 kind: :Space,
+                 kind: :Concept,
                  context: [:Foo, :Bar],
                  attrs: [],
                  calls: [],
@@ -492,7 +492,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  body: "Bar",
                  note: "Foobar description",
-                 kind: :Space,
+                 kind: :Concept,
                  context: [:Foo, :Bar],
                  attrs: [],
                  calls: [],
@@ -542,7 +542,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Bar",
-                 kind: :Space,
+                 kind: :Concept,
                  context: [:Foo, :Bar],
                  attrs: [],
                  calls: [],
@@ -572,7 +572,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  context: [:Foo, :Bar],
                  body: "Bar",
-                 kind: :Space,
+                 kind: :Concept,
                  attrs: [
                    %{
                      body: "fizbuzz",
@@ -607,7 +607,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  context: [:Foo, :Bar],
                  body: "Bar",
-                 kind: :Space,
+                 kind: :Concept,
                  note: "Foobar description",
                  attrs: [],
                  calls: [],
@@ -629,7 +629,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  context: [:Foo, :Bar],
                  body: "Bar",
-                 kind: :Space,
+                 kind: :Concept,
                  attrs: [],
                  calls: [],
                  guards: [],
@@ -681,7 +681,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      note: "bar -> baz"
                    }
                  ],
-                 kind: :Space,
+                 kind: :Concept,
                  note: "Foobar description"
                },
                [
@@ -699,7 +699,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        kind: :Function
                      }
                    ],
-                   kind: :Space,
+                   kind: :Concept,
                    note: "Baz description"
                  }
                ]
@@ -758,7 +758,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  calls: [],
                  guards: [],
                  body: "Root",
-                 kind: :Space,
+                 kind: :Concept,
                  note: "Root description"
                },
                [
@@ -775,7 +775,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    calls: [],
                    guards: [],
                    body: "Foo",
-                   kind: :Space,
+                   kind: :Concept,
                    note: "Foo description"
                  },
                  [
@@ -792,7 +792,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      calls: [],
                      guards: [],
                      body: "Bar",
-                     kind: :Space,
+                     kind: :Concept,
                      note: "Bar description"
                    }
                  ],
@@ -810,7 +810,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      calls: [],
                      guards: [],
                      body: "Baz",
-                     kind: :Space,
+                     kind: :Concept,
                      note: "Baz description"
                    }
                  ]
@@ -833,7 +833,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Foo",
-                 kind: :Space,
+                 kind: :Concept,
                  context: [:Foo],
                  attrs: [],
                  calls: [],
@@ -843,7 +843,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                [
                  %{
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    context: [:Foo, :Bar],
                    attrs: [],
                    calls: [],
@@ -853,7 +853,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  [
                    %{
                      body: "Baz",
-                     kind: :Space,
+                     kind: :Concept,
                      attrs: [],
                      calls: [],
                      guards: [],
@@ -879,7 +879,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  context: [:Foo, :Bar],
                  body: "Bar",
-                 kind: :Space,
+                 kind: :Concept,
                  attrs: [],
                  calls: [],
                  guards: [],
@@ -889,7 +889,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  %{
                    context: [:Foo, :Bar, :Baz],
                    body: "Baz",
-                   kind: :Space,
+                   kind: :Concept,
                    attrs: [],
                    calls: [],
                    guards: [],

@@ -176,7 +176,7 @@ defmodule Umwelt.ParserTest do
                      kind: :Function
                    }
                  ],
-                 kind: :Space,
+                 kind: :Concept,
                  note: "Foo description"
                },
                [:Root, :Foo, :Bar] => %{
@@ -192,7 +192,7 @@ defmodule Umwelt.ParserTest do
                      kind: :Function
                    }
                  ],
-                 kind: :Space,
+                 kind: :Concept,
                  note: "Bar description"
                },
                [:Root, :Foo, :Baz] => %{
@@ -208,7 +208,7 @@ defmodule Umwelt.ParserTest do
                      kind: :Function
                    }
                  ],
-                 kind: :Space,
+                 kind: :Concept,
                  note: "Baz description"
                }
              } ==

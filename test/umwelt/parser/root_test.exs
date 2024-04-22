@@ -38,7 +38,7 @@ defmodule Umwelt.Parser.RootTest do
                [
                  %{
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    note: "Foobar description",
                    context: [:Foo, :Bar],
                    attrs: [
@@ -62,7 +62,7 @@ defmodule Umwelt.Parser.RootTest do
                  [
                    %{
                      body: "Baz",
-                     kind: :Space,
+                     kind: :Concept,
                      note: "Baz description",
                      context: [:Foo, :Bar, :Baz],
                      attrs: [],
@@ -151,7 +151,7 @@ defmodule Umwelt.Parser.RootTest do
                    calls: [],
                    guards: [],
                    body: "Foo",
-                   kind: :Space,
+                   kind: :Concept,
                    note: "Foo description"
                  },
                  [
@@ -168,7 +168,7 @@ defmodule Umwelt.Parser.RootTest do
                      calls: [],
                      guards: [],
                      body: "Bar",
-                     kind: :Space,
+                     kind: :Concept,
                      note: "Bar description"
                    }
                  ],
@@ -186,7 +186,7 @@ defmodule Umwelt.Parser.RootTest do
                      calls: [],
                      guards: [],
                      body: "Baz",
-                     kind: :Space,
+                     kind: :Concept,
                      note: "Baz description"
                    }
                  ]
@@ -219,7 +219,7 @@ defmodule Umwelt.Parser.RootTest do
                [
                  %{
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    context: [:Foo, :Bar],
                    attrs: [],
                    calls: [],
@@ -229,7 +229,7 @@ defmodule Umwelt.Parser.RootTest do
                  [
                    %{
                      body: "Baz",
-                     kind: :Space,
+                     kind: :Concept,
                      context: [:Foo, :Bar, :Baz],
                      attrs: [],
                      calls: [],
@@ -265,7 +265,7 @@ defmodule Umwelt.Parser.RootTest do
                  %{
                    context: [:Foo, :Bar],
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    attrs: [],
                    calls: [],
                    guards: [],
@@ -275,7 +275,7 @@ defmodule Umwelt.Parser.RootTest do
                    %{
                      context: [:Foo, :Bar, :Baz],
                      body: "Baz",
-                     kind: :Space,
+                     kind: :Concept,
                      attrs: [],
                      calls: [],
                      guards: [],
@@ -308,7 +308,7 @@ defmodule Umwelt.Parser.RootTest do
                  %{
                    context: [:Foo, :Bar],
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    attrs: [],
                    calls: [],
                    guards: [],
@@ -318,7 +318,7 @@ defmodule Umwelt.Parser.RootTest do
                    %{
                      context: [:Foo, :Bar, :Baz],
                      body: "Baz",
-                     kind: :Space,
+                     kind: :Concept,
                      attrs: [],
                      calls: [],
                      guards: [],
@@ -361,7 +361,7 @@ defmodule Umwelt.Parser.RootTest do
                  %{
                    body: "Bar",
                    note: "Foobar description",
-                   kind: :Space,
+                   kind: :Concept,
                    context: [:Foo, :Bar],
                    attrs: [],
                    calls: [],
@@ -422,7 +422,7 @@ defmodule Umwelt.Parser.RootTest do
                [
                  %{
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    context: [:Foo, :Bar],
                    attrs: [],
                    calls: [],
@@ -462,7 +462,7 @@ defmodule Umwelt.Parser.RootTest do
                [
                  %{
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    context: [:Foo, :Bar],
                    note: "Foobar description",
                    attrs: [],

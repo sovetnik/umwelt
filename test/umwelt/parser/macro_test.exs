@@ -130,7 +130,7 @@ defmodule Umwelt.Parser.MacroTest do
                      kind: :Function
                    }
                  ],
-                 kind: :Space,
+                 kind: :Concept,
                  note: "Foobar description"
                }
              ] == Macro.parse(ast, [])
