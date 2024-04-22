@@ -25,6 +25,28 @@ defmodule Umwelt.Parser.AttrsTest do
              Attrs.parse(ast)
   end
 
+  test "parse function spec" do
+    {:ok, ast} =
+      """
+      @spec foobar(fizz :: atom, buzz :: any) :: boolean
+      """
+      |> Code.string_to_quoted()
+
+    assert %{
+             spec: [
+               {:"::", [line: 1],
+                [
+                  {:foobar, [line: 1],
+                   [
+                     {:"::", [line: 1], [{:fizz, [line: 1], nil}, {:atom, [line: 1], nil}]},
+                     {:"::", [line: 1], [{:buzz, [line: 1], nil}, {:any, [line: 1], nil}]}
+                   ]},
+                  {:boolean, [line: 1], nil}
+                ]}
+             ]
+           } == Attrs.parse(ast)
+  end
+
   test "parse attr with list" do
     {:ok, ast} =
       """
