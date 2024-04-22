@@ -19,23 +19,23 @@ jobs:
         otp: [25.3.2.7, 26.2.2]
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
 
       - name: Setup
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@v1.17.5
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4.0.1
         id: mix-cache
         with:
           path: |
@@ -64,23 +64,23 @@ jobs:
         otp: [25.3.2.7, 26.2.2]
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
 
       - name: Setup
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@v1.17.5
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4.0.1
         id: mix-cache
         with:
           path: |
@@ -129,23 +129,23 @@ jobs:
         otp: [25.3.2.7, 26.2.2]
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
 
       - name: Setup
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@v1.17.5
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4.0.1
         id: mix-cache
         with:
           path: |
