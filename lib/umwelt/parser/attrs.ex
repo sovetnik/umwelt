@@ -1,6 +1,8 @@
 defmodule Umwelt.Parser.Attrs do
   @moduledoc "Parses @attr AST"
 
+  require Logger
+  @log_message "Unknown AST skipped in Attrs.parse"
   alias Umwelt.Parser
 
   def parse({:@, _, children}) do
@@ -14,6 +16,8 @@ defmodule Umwelt.Parser.Attrs do
       [{:impl, _, children} | _] ->
         %{:impl => Parser.parse(children, [])}
 
+      # parse it with function,
+      # to determine arguments types
       [{:spec, _, children} | _] ->
         %{:spec => children}
 
@@ -23,6 +27,10 @@ defmodule Umwelt.Parser.Attrs do
           kind: :Attr,
           value: Parser.parse(child, [])
         }
+
+      ast ->
+        Logger.warning("#{@log_message}_block/2\n #{inspect(ast)}")
+        %{unknown: "unknown attr"}
     end
   end
 end

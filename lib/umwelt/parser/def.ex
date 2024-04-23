@@ -1,6 +1,8 @@
 defmodule Umwelt.Parser.Def do
   @moduledoc "Parses Function AST"
 
+  require Logger
+  @log_message "Unknown AST skipped in Def.parse"
   alias Umwelt.Parser
 
   import Umwelt.Parser.Macro, only: [is_atom_macro: 1]
@@ -19,6 +21,11 @@ defmodule Umwelt.Parser.Def do
   def parse({:def, _, [function]}, aliases)
       when is_atom_macro(function),
       do: parse_call(function, aliases)
+
+  def parse(ast, _aliases) do
+    Logger.warning("#{@log_message}/2\n #{inspect(ast)}")
+    nil
+  end
 
   # simple call node
   defp parse_call({term, _, children} = ast, aliases)

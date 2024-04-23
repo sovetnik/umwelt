@@ -9,6 +9,8 @@ defmodule Umwelt.Parser.Operator do
     :: - type operator
   """
 
+  require Logger
+  @log_message "Unknown AST skipped in Operator.parse"
   alias Umwelt.Parser
 
   defguard is_special_operator(term)
@@ -124,4 +126,9 @@ defmodule Umwelt.Parser.Operator do
       left: Parser.parse(left, aliases),
       right: Parser.parse(right, aliases)
     }
+
+  def parse(ast, _aliases) do
+    Logger.warning("#{@log_message}/2\n #{inspect(ast)}")
+    nil
+  end
 end

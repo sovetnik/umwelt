@@ -96,7 +96,7 @@ defmodule Umwelt.Parser.Defmodule do
   defp combine_module(block_children, module) do
     Enum.reduce(block_children, module, fn
       %{moduledoc: [value]}, module ->
-        Map.put(module, :note, value)
+        Map.put(module, :note, string_or(value, "Description of #{module.body}"))
 
       %{defstruct: fields}, module ->
         Map.put(module, :fields, fields)
@@ -133,7 +133,7 @@ defmodule Umwelt.Parser.Defmodule do
   defp extract_functions(block_children) do
     Enum.reduce([[%{}] | block_children], fn
       %{doc: [value]}, [head | rest] ->
-        [Map.put(head, :note, value) | rest]
+        [Map.put(head, :note, string_or(value, "fun description")) | rest]
 
       %{impl: [value]}, [head | rest] ->
         [Map.put(head, :impl, value) | rest]
@@ -149,5 +149,21 @@ defmodule Umwelt.Parser.Defmodule do
     end)
     |> Enum.reject(&Enum.empty?/1)
     |> Enum.reverse()
+  end
+
+  defp string_or(value, replace) do
+    case value do
+      value when is_binary(value) ->
+        if String.length(value) < 255 do
+          value
+          |> String.split("\n")
+          |> List.first()
+        else
+          replace
+        end
+
+      _ ->
+        replace
+    end
   end
 end
