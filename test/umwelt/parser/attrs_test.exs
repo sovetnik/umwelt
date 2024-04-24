@@ -64,6 +64,20 @@ defmodule Umwelt.Parser.AttrsTest do
            } == Attrs.parse(ast)
   end
 
+  test "parse attr with nil" do
+    {:ok, ast} =
+      """
+      @options_schema nil
+      """
+      |> Code.string_to_quoted()
+
+    assert %{
+             body: "options_schema",
+             kind: :Attr,
+             value: %{kind: :Value, type: [:Atom], body: "nil"}
+           } == Attrs.parse(ast)
+  end
+
   test "parse attr with struct" do
     {:ok, ast} =
       """

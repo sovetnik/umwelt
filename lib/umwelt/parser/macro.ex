@@ -26,8 +26,8 @@ defmodule Umwelt.Parser.Macro do
   def parse({_, _, nil} = ast, _aliases),
     do: Parser.Literal.parse(ast)
 
-  def parse({:@, _, _} = ast, _aliases),
-    do: Parser.Attrs.parse(ast)
+  def parse({:@, _, [{_, _, nil}]} = ast, _aliases),
+    do: Parser.Literal.parse(ast)
 
   def parse({:__aliases__, _, _} = ast, aliases),
     do: Parser.Aliases.parse(ast, aliases)

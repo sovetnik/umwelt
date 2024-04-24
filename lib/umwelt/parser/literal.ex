@@ -1,6 +1,10 @@
 defmodule Umwelt.Parser.Literal do
   @moduledoc "Parses value AST"
 
+  def parse({:@, _, [{term, _, nil}]}) do
+    %{body: to_string(term), kind: :Value, type: [:ReadAttr]}
+  end
+
   def parse(value) when is_binary(value),
     do: %{body: value, kind: :Value, type: [:Binary]}
 

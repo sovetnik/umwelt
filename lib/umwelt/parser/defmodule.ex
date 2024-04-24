@@ -4,6 +4,8 @@ defmodule Umwelt.Parser.Defmodule do
   require Logger
   @log_message "Unknown AST skipped in Defmodule.parse"
 
+  @skip_terms ~w{ |> = alias defdelegate defp defimpl defmacro defmacrop if case }a
+
   import Umwelt.Parser.Macro, only: [is_macro: 1]
 
   alias Umwelt.Parser
@@ -33,6 +35,9 @@ defmodule Umwelt.Parser.Defmodule do
     |> Enum.reject(&is_nil(&1))
   end
 
+  def parse_block({:@, _, _} = ast, _context),
+    do: [Parser.Attrs.parse(ast)]
+
   def parse_block({term, _, block_children} = ast, _context)
       when term in ~w|def import require use|a,
       do: [Parser.parse(ast, aliases(block_children))]
@@ -47,7 +52,7 @@ defmodule Umwelt.Parser.Defmodule do
   end
 
   defp parse_block_child({:@, _, _} = ast, _, _),
-    do: Parser.parse(ast, [])
+    do: Parser.Attrs.parse(ast)
 
   defp parse_block_child({:alias, _, _}, _, _), do: nil
 
@@ -67,7 +72,7 @@ defmodule Umwelt.Parser.Defmodule do
     Parser.parse({:defstruct, [], fields}, aliases)
   end
 
-  defp parse_block_child({kind, _, _}, _, _) when kind in [:alias, :defp], do: nil
+  defp parse_block_child({kind, _, _}, _, _) when kind in @skip_terms, do: nil
 
   defp parse_block_child(ast, _, _) do
     Logger.warning("#{@log_message}_block_child/3\n #{inspect(ast)}")
@@ -117,6 +122,9 @@ defmodule Umwelt.Parser.Defmodule do
       %{impl: _}, module ->
         module
 
+      %{spec: _}, module ->
+        module
+
       %{kind: kind}, module
       when kind in [:Function, :Operator] ->
         module
@@ -135,6 +143,9 @@ defmodule Umwelt.Parser.Defmodule do
       %{doc: [value]}, [head | rest] ->
         [Map.put(head, :note, string_or(value, "fun description")) | rest]
 
+      %{spec: [value]}, [head | rest] ->
+        [Map.put(head, :spec, string_or(value, "fun description")) | rest]
+
       %{impl: [value]}, [head | rest] ->
         [Map.put(head, :impl, value) | rest]
 
@@ -145,6 +156,7 @@ defmodule Umwelt.Parser.Defmodule do
         [%{}, Map.merge(head, function) | rest]
 
       _other, acc ->
+        # Logger.warning("#{@log_message}_extract_functions/1\n #{inspect(other, pretty: true)}")
         acc
     end)
     |> Enum.reject(&Enum.empty?/1)
