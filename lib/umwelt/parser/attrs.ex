@@ -5,21 +5,25 @@ defmodule Umwelt.Parser.Attrs do
   @log_message "Unknown AST skipped in Attrs.parse"
   alias Umwelt.Parser
 
-  def parse({:@, _, children}) do
+  def parse({:@, _, children}, context \\ []) do
     case children do
       [{:moduledoc, _, children} | _] ->
-        %{:moduledoc => children}
-
-      [{:doc, _, children} | _] ->
-        %{:doc => children}
+        %{moduledoc: children}
 
       [{:impl, _, children} | _] ->
-        %{:impl => Parser.parse(children, [])}
+        %{impl: Parser.parse(children, [])}
 
-      # parse it with function,
-      # to determine arguments types
+      [{:doc, _, children} | _] ->
+        %{doc: children}
+
       [{:spec, _, children} | _] ->
-        %{:spec => children}
+        %{spec: Parser.Typespec.parse(children, [], context)}
+
+      [{:type, _, children} | _] ->
+        %{type: Parser.Typespec.parse(children, [], context)}
+
+      [{:typedoc, _, children} | _] ->
+        %{typedoc: Parser.parse(children, [])}
 
       [{constant, _, [child]} | _] ->
         %{

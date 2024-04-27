@@ -9,6 +9,12 @@ defmodule Umwelt.Parser.LiteralTest do
     assert %{:body => "foo", kind: :Variable, type: [:Anything]} == Literal.parse(ast)
   end
 
+  test "read attr" do
+    {:ok, ast} = Code.string_to_quoted("@foo")
+
+    assert %{body: "foo", kind: :Value, type: [:ReadAttr]} == Literal.parse(ast)
+  end
+
   test "atom" do
     {:ok, ast} = Code.string_to_quoted(":foo")
 

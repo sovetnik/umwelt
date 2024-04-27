@@ -38,7 +38,8 @@ defmodule Umwelt.Parser.Root do
       attrs: [],
       calls: [],
       functions: [],
-      guards: []
+      guards: [],
+      types: []
     }
   end
 end

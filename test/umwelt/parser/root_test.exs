@@ -32,6 +32,7 @@ defmodule Umwelt.Parser.RootTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: [],
                  kind: :Root
                },
@@ -50,6 +51,7 @@ defmodule Umwelt.Parser.RootTest do
                    ],
                    calls: [],
                    guards: [],
+                   types: [],
                    functions: [
                      %{
                        arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
@@ -68,6 +70,7 @@ defmodule Umwelt.Parser.RootTest do
                      attrs: [],
                      calls: [],
                      guards: [],
+                     types: [],
                      functions: [
                        %{
                          arguments: [%{type: [:Anything], body: "baz", kind: :Variable}],
@@ -133,6 +136,7 @@ defmodule Umwelt.Parser.RootTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  body: "Root",
                  kind: :Root,
                  note: "Root description"
@@ -150,6 +154,7 @@ defmodule Umwelt.Parser.RootTest do
                    attrs: [],
                    calls: [],
                    guards: [],
+                   types: [],
                    body: "Foo",
                    kind: :Concept,
                    note: "Foo description"
@@ -167,6 +172,7 @@ defmodule Umwelt.Parser.RootTest do
                      attrs: [],
                      calls: [],
                      guards: [],
+                     types: [],
                      body: "Bar",
                      kind: :Concept,
                      note: "Bar description"
@@ -185,6 +191,7 @@ defmodule Umwelt.Parser.RootTest do
                      attrs: [],
                      calls: [],
                      guards: [],
+                     types: [],
                      body: "Baz",
                      kind: :Concept,
                      note: "Baz description"
@@ -214,6 +221,7 @@ defmodule Umwelt.Parser.RootTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: []
                },
                [
@@ -224,6 +232,7 @@ defmodule Umwelt.Parser.RootTest do
                    attrs: [],
                    calls: [],
                    guards: [],
+                   types: [],
                    functions: []
                  },
                  [
@@ -234,6 +243,7 @@ defmodule Umwelt.Parser.RootTest do
                      attrs: [],
                      calls: [],
                      guards: [],
+                     types: [],
                      functions: []
                    }
                  ]
@@ -259,6 +269,7 @@ defmodule Umwelt.Parser.RootTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: []
                },
                [
@@ -269,6 +280,7 @@ defmodule Umwelt.Parser.RootTest do
                    attrs: [],
                    calls: [],
                    guards: [],
+                   types: [],
                    functions: []
                  },
                  [
@@ -279,6 +291,7 @@ defmodule Umwelt.Parser.RootTest do
                      attrs: [],
                      calls: [],
                      guards: [],
+                     types: [],
                      functions: []
                    }
                  ]
@@ -302,6 +315,7 @@ defmodule Umwelt.Parser.RootTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: []
                },
                [
@@ -312,6 +326,7 @@ defmodule Umwelt.Parser.RootTest do
                    attrs: [],
                    calls: [],
                    guards: [],
+                   types: [],
                    functions: []
                  },
                  [
@@ -322,6 +337,7 @@ defmodule Umwelt.Parser.RootTest do
                      attrs: [],
                      calls: [],
                      guards: [],
+                     types: [],
                      functions: []
                    }
                  ]
@@ -354,6 +370,7 @@ defmodule Umwelt.Parser.RootTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: [],
                  kind: :Root
                },
@@ -366,6 +383,7 @@ defmodule Umwelt.Parser.RootTest do
                    attrs: [],
                    calls: [],
                    guards: [],
+                   types: [],
                    fields: [
                      %{
                        kind: :Field,
@@ -416,6 +434,7 @@ defmodule Umwelt.Parser.RootTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: [],
                  kind: :Root
                },
@@ -427,6 +446,7 @@ defmodule Umwelt.Parser.RootTest do
                    attrs: [],
                    calls: [],
                    guards: [],
+                   types: [],
                    functions: [
                      %{
                        arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
@@ -457,6 +477,7 @@ defmodule Umwelt.Parser.RootTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: []
                },
                [
@@ -468,6 +489,7 @@ defmodule Umwelt.Parser.RootTest do
                    attrs: [],
                    calls: [],
                    guards: [],
+                   types: [],
                    functions: []
                  }
                ]

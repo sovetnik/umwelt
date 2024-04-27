@@ -3,12 +3,229 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
   alias Umwelt.Parser.Defmodule
 
+  test "example from official docs" do
+    {:ok, ast} =
+      """
+      defmodule StringHelpers do
+        @typedoc "A word from the dictionary"
+        @type word() :: String.t()
+
+        @spec long_word?(word()) :: boolean()
+        def long_word?(word) when is_binary(word) do
+          String.length(word) > 8
+        end
+      end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             %{
+               attrs: [],
+               body: "StringHelpers",
+               calls: [],
+               context: [:StringHelpers],
+               functions: [
+                 %{
+                   body: "when",
+                   kind: :Operator,
+                   left: %{
+                     arguments: [%{body: "word", kind: :Variable, type: [:Anything]}],
+                     body: "long_word?",
+                     kind: :Call
+                   },
+                   right: %{
+                     arguments: [%{body: "word", kind: :Variable, type: [:Anything]}],
+                     body: "is_binary",
+                     kind: :Call
+                   },
+                   spec: %{
+                     type: %{arguments: [], body: "boolean", kind: :Call},
+                     arguments: [%{arguments: [], body: "word", kind: :Call}],
+                     body: "long_word?",
+                     kind: :Call
+                   }
+                 }
+               ],
+               guards: [],
+               kind: :Concept,
+               types: [
+                 %{
+                   type: %{context: [:String], arguments: [], body: "t", kind: :Call},
+                   arguments: [],
+                   body: "word",
+                   kind: :Call,
+                   note: "A word from the dictionary"
+                 }
+               ]
+             }
+           ] == Defmodule.parse(ast, [])
+  end
+
+  describe "parse part of itself" do
+    test "module" do
+      {:ok, ast} =
+        """
+        defmodule Umwelt.Parser.Typespec do
+          @moduledoc "Parses Typespec definition AST"
+
+          def parse([{type, _, [left, right]}], aliases, _context) do
+            %{
+              kind: :Typespec,
+              body: to_string(type),
+              type: Parser.parse(left, aliases),
+              spec: Parser.parse(right, aliases)
+            }
+          end
+        end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 functions: [
+                   %{
+                     arguments: [
+                       %{
+                         type: [:List],
+                         values: [
+                           %{
+                             type: [:Tuple],
+                             kind: :Value,
+                             elements: [
+                               %{type: [:Anything], body: "type", kind: :Variable},
+                               %{type: [:Anything], body: "_", kind: :Variable},
+                               [
+                                 %{type: [:Anything], body: "left", kind: :Variable},
+                                 %{type: [:Anything], body: "right", kind: :Variable}
+                               ]
+                             ]
+                           }
+                         ],
+                         body: "_",
+                         kind: :Value
+                       },
+                       %{type: [:Anything], body: "aliases", kind: :Variable},
+                       %{type: [:Anything], body: "_context", kind: :Variable}
+                     ],
+                     body: "parse",
+                     kind: :Function
+                   }
+                 ],
+                 context: [:Umwelt, :Parser, :Typespec],
+                 body: "Typespec",
+                 kind: :Concept,
+                 guards: [],
+                 types: [],
+                 attrs: [],
+                 calls: [],
+                 note: "Parses Typespec definition AST"
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+  end
+
+  describe "types" do
+    test "complex typedoc" do
+      {:ok, ast} =
+        ~s[
+          defmodule StringHelpers do
+            @moduledoc "Helpers for string"
+            @typedoc ~S"""
+              A word from the dictionary:
+              ```
+                ~w|foo bar baz|
+              ```
+
+              Type describes any word form a given dictionary
+
+            """
+            @type word() :: String.t()
+          end
+        ]
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 attrs: [],
+                 body: "StringHelpers",
+                 calls: [],
+                 context: [:StringHelpers],
+                 functions: [],
+                 guards: [],
+                 kind: :Concept,
+                 types: [
+                   %{
+                     arguments: [],
+                     body: "word",
+                     kind: :Call,
+                     note: "Description of type",
+                     type: %{arguments: [], body: "t", context: [:String], kind: :Call}
+                   }
+                 ],
+                 note: "Helpers for string"
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+  end
+
+  describe "@doc; @spec; def" do
+    test "combo defmodule" do
+      {:ok, ast} =
+        ~S"""
+        defmodule Calendar do
+          @moduledoc "Calndar concept"
+          @doc "days between past date and today"
+          @spec days_since_epoch(year :: integer, month :: integer, day :: integer) :: integer
+          def days_since_epoch(year, month, day) do
+          # fun body
+          end
+        end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 functions: [
+                   %{
+                     spec: %{
+                       type: [:Integer],
+                       arguments: [
+                         %{type: [:Integer], body: "year", kind: :Variable},
+                         %{type: [:Integer], body: "month", kind: :Variable},
+                         %{type: [:Integer], body: "day", kind: :Variable}
+                       ],
+                       body: "days_since_epoch",
+                       kind: :Call
+                     },
+                     arguments: [
+                       %{type: [:Anything], body: "year", kind: :Variable},
+                       %{type: [:Anything], body: "month", kind: :Variable},
+                       %{type: [:Anything], body: "day", kind: :Variable}
+                     ],
+                     body: "days_since_epoch",
+                     kind: :Function,
+                     note: "days between past date and today"
+                   }
+                 ],
+                 context: [:Calendar],
+                 body: "Calendar",
+                 kind: :Concept,
+                 guards: [],
+                 types: [],
+                 attrs: [],
+                 calls: [],
+                 note: "Calndar concept"
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+  end
+
   describe "import, use and require" do
     test "import in defmodule" do
       {:ok, ast} =
         ~S"""
         defmodule Math do
-        import List, only: [duplicate: 2]
+          import List, only: [duplicate: 2]
           def some_function do
             duplicate(:ok, 10)
           end
@@ -53,6 +270,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    %{arguments: [], body: "some_function", kind: :Function}
                  ],
                  guards: [],
+                 types: [],
                  kind: :Concept
                }
              ] == Defmodule.parse(ast, [])
@@ -78,6 +296,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  calls: [],
                  functions: [%{arguments: [], body: "some_function", kind: :Function}],
                  guards: [],
+                 types: [],
                  kind: :Concept
                }
              ] == Defmodule.parse(ast, [])
@@ -118,6 +337,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  context: [:Cryptoid, :Mailer],
                  functions: [],
                  guards: [],
+                 types: [],
                  kind: :Concept
                }
              ] == Defmodule.parse(ast, [])
@@ -159,6 +379,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  context: [:Example],
                  functions: [],
                  guards: [],
+                 types: [],
                  kind: :Concept,
                  note: "use the feature"
                }
@@ -202,6 +423,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  context: [:Example],
                  functions: [],
                  guards: [],
+                 types: [],
                  kind: :Concept
                }
              ] == Defmodule.parse(ast, [])
@@ -238,7 +460,8 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      kind: :Function
                    }
                  ],
-                 guards: []
+                 guards: [],
+                 types: []
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -271,7 +494,8 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      kind: :Function
                    }
                  ],
-                 guards: []
+                 guards: [],
+                 types: []
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -312,7 +536,8 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        ]
                      }
                    }
-                 ]
+                 ],
+                 types: []
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -371,7 +596,8 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    }
                  ],
                  attrs: [],
-                 calls: []
+                 calls: [],
+                 types: []
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -394,6 +620,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: [
                    %{
                      arguments: [
@@ -453,6 +680,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  fields: [
                    %{
                      kind: :Field,
@@ -497,6 +725,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  fields: [
                    %{
                      kind: :Field,
@@ -547,6 +776,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: [
                    %{
                      arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
@@ -589,12 +819,13 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  ],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: []
                }
              ] == Defmodule.parse(ast, [])
     end
 
-    test "just a module with moduledoc only" do
+    test "just a module with simple moduledoc only" do
       {:ok, ast} =
         """
           defmodule Foo.Bar do
@@ -612,7 +843,43 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: []
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+
+    test "just a module with complex moduledoc only" do
+      {:ok, ast} =
+        ~S[
+        defmodule Formulae do
+          @moduledoc ~S"""
+            A set of functions to deal with analytical formulae.
+
+            Now the formula is compiled and might be invoked by calling `Formulae.eval/2`
+            passing a formula _and_ bindings. First call to `eval/2` would lazily compile
+            the module if needed.
+
+            ```elixir
+            iex|2 ▶ f.eval.(a: 3, b: 4, c: 2)
+            0.9968146982068622
+            ```
+          """
+        end
+  ]
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 attrs: [],
+                 body: "Formulae",
+                 calls: [],
+                 context: [:Formulae],
+                 functions: [],
+                 guards: [],
+                 kind: :Concept,
+                 note: "Description of Formulae",
+                 types: []
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -632,6 +899,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  kind: :Concept,
                  attrs: [],
                  calls: [],
+                 types: [],
                  guards: [],
                  functions: []
                }
@@ -667,6 +935,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: [
                    %{
                      arguments: [
@@ -691,6 +960,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    attrs: [],
                    calls: [],
                    guards: [],
+                   types: [],
                    functions: [
                      %{
                        arguments: [%{body: "baz", kind: :Variable, type: [:Anything]}],
@@ -757,6 +1027,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  body: "Root",
                  kind: :Concept,
                  note: "Root description"
@@ -774,6 +1045,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    attrs: [],
                    calls: [],
                    guards: [],
+                   types: [],
                    body: "Foo",
                    kind: :Concept,
                    note: "Foo description"
@@ -791,6 +1063,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      attrs: [],
                      calls: [],
                      guards: [],
+                     types: [],
                      body: "Bar",
                      kind: :Concept,
                      note: "Bar description"
@@ -809,6 +1082,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      attrs: [],
                      calls: [],
                      guards: [],
+                     types: [],
                      body: "Baz",
                      kind: :Concept,
                      note: "Baz description"
@@ -838,6 +1112,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: []
                },
                [
@@ -848,6 +1123,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    attrs: [],
                    calls: [],
                    guards: [],
+                   types: [],
                    functions: []
                  },
                  [
@@ -857,6 +1133,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      attrs: [],
                      calls: [],
                      guards: [],
+                     types: [],
                      context: [:Foo, :Bar, :Baz],
                      functions: []
                    }
@@ -883,6 +1160,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: []
                },
                [
@@ -893,6 +1171,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    attrs: [],
                    calls: [],
                    guards: [],
+                   types: [],
                    functions: []
                  }
                ]

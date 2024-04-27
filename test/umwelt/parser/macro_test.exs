@@ -123,6 +123,7 @@ defmodule Umwelt.Parser.MacroTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: [
                    %{
                      arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],

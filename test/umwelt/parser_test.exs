@@ -137,6 +137,7 @@ defmodule Umwelt.ParserTest do
                  ],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: [
                    %{
                      arguments: [%{type: [:Anything], body: "once", kind: :Variable}],
@@ -169,6 +170,7 @@ defmodule Umwelt.ParserTest do
                  ],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: [
                    %{
                      arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
@@ -185,6 +187,7 @@ defmodule Umwelt.ParserTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: [
                    %{
                      arguments: [%{type: [:Anything], body: "baz", kind: :Variable}],
@@ -201,6 +204,7 @@ defmodule Umwelt.ParserTest do
                  attrs: [],
                  calls: [],
                  guards: [],
+                 types: [],
                  functions: [
                    %{
                      arguments: [%{type: [:Anything], body: "foo", kind: :Variable}],

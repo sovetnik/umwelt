@@ -1,6 +1,8 @@
 defmodule Umwelt.Parser.Defmodule do
   @moduledoc "Parses Module AST"
 
+  import Umwelt.Helpers
+
   require Logger
   @log_message "Unknown AST skipped in Defmodule.parse"
 
@@ -24,6 +26,7 @@ defmodule Umwelt.Parser.Defmodule do
       attrs: [],
       calls: [],
       guards: [],
+      types: [],
       kind: :Concept,
       context: context ++ module
     })
@@ -35,8 +38,8 @@ defmodule Umwelt.Parser.Defmodule do
     |> Enum.reject(&is_nil(&1))
   end
 
-  def parse_block({:@, _, _} = ast, _context),
-    do: [Parser.Attrs.parse(ast)]
+  def parse_block({:@, _, _} = ast, context),
+    do: Parser.Attrs.parse(ast, context)
 
   def parse_block({term, _, block_children} = ast, _context)
       when term in ~w|def import require use|a,
@@ -94,11 +97,12 @@ defmodule Umwelt.Parser.Defmodule do
       block_children
       |> combine_module(module)
       |> Map.put(:functions, extract_functions(block_children))
+      |> Map.put(:types, extract_types(block_children))
 
     [this_module | Enum.filter(block_children, &is_list(&1))]
   end
 
-  defp combine_module(block_children, module) do
+  defp combine_module(block_children, module) when is_list(block_children) do
     Enum.reduce(block_children, module, fn
       %{moduledoc: [value]}, module ->
         Map.put(module, :note, string_or(value, "Description of #{module.body}"))
@@ -116,6 +120,12 @@ defmodule Umwelt.Parser.Defmodule do
         Map.put(module, :calls, [value | calls])
 
       # doc and impl related to function and parsed in functions
+      %{type: %{kind: :Call}}, module ->
+        module
+
+      %{typedoc: _}, module ->
+        module
+
       %{doc: _}, module ->
         module
 
@@ -138,13 +148,17 @@ defmodule Umwelt.Parser.Defmodule do
     end)
   end
 
+  defp combine_module(block_children, module) do
+    combine_module([block_children], module)
+  end
+
   defp extract_functions(block_children) do
     Enum.reduce([[%{}] | block_children], fn
       %{doc: [value]}, [head | rest] ->
         [Map.put(head, :note, string_or(value, "fun description")) | rest]
 
-      %{spec: [value]}, [head | rest] ->
-        [Map.put(head, :spec, string_or(value, "fun description")) | rest]
+      %{spec: value}, [head | rest] ->
+        [Map.put(head, :spec, value) | rest]
 
       %{impl: [value]}, [head | rest] ->
         [Map.put(head, :impl, value) | rest]
@@ -163,19 +177,22 @@ defmodule Umwelt.Parser.Defmodule do
     |> Enum.reverse()
   end
 
-  defp string_or(value, replace) do
-    case value do
-      value when is_binary(value) ->
-        if String.length(value) < 255 do
-          value
-          |> String.split("\n")
-          |> List.first()
-        else
-          replace
-        end
+  defp extract_types(block_children) do
+    Enum.reduce([[%{}] | block_children], fn
+      %{typedoc: [%{type: [:Binary], body: body, kind: :Value}]}, [head | rest] ->
+        [Map.put(head, :note, string_or(body, "Description of type")) | rest]
 
-      _ ->
-        replace
-    end
+      %{typedoc: value}, [head | rest] ->
+        [Map.put(head, :note, string_or(value, "Description of type")) | rest]
+
+      %{type: value}, [head | rest] ->
+        [%{}, Map.merge(head, value) | rest]
+
+      _other, acc ->
+        # Logger.warning("#{@log_message}_extract_types/1\n #{inspect(other, pretty: true)}")
+        acc
+    end)
+    |> Enum.reject(&Enum.empty?/1)
+    |> Enum.reverse()
   end
 end
