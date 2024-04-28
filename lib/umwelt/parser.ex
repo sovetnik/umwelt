@@ -17,6 +17,15 @@ defmodule Umwelt.Parser do
   def read_ast({:ok, code}),
     do: Code.string_to_quoted(code)
 
+  def maybe_list_parse(ast, aliases) when is_list(ast),
+    do: parse_list(ast, aliases)
+
+  def maybe_list_parse(ast, aliases),
+    do: parse(ast, aliases)
+
+  def parse_list(ast, aliases) when is_list(ast),
+    do: Enum.map(ast, &parse(&1, aliases))
+
   def parse({:ok, ast}),
     do: ast |> parse([]) |> index()
 
@@ -30,7 +39,11 @@ defmodule Umwelt.Parser do
     do: Parser.Tuple.parse(ast, aliases)
 
   def parse(ast, aliases) when is_list(ast),
-    do: Enum.map(ast, &parse(&1, aliases))
+    do: %{
+      kind: :Value,
+      type: [:List],
+      values: parse_list(ast, aliases)
+    }
 
   def parse(ast, _aliases),
     do: Parser.Literal.parse(ast)

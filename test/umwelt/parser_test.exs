@@ -332,16 +332,20 @@ defmodule Umwelt.ParserTest do
     test "value list with pipe" do
       {:ok, ast} = Code.string_to_quoted("[head | tail]")
 
-      assert [
-               %{
-                 values: [
-                   %{type: [:Anything], body: "head", kind: :Variable},
-                   %{type: [:Anything], body: "tail", kind: :Variable}
-                 ],
-                 body: "|",
-                 kind: :Pipe
-               }
-             ] == Parser.parse(ast, [])
+      assert %{
+               type: [:List],
+               values: [
+                 %{
+                   values: [
+                     %{type: [:Anything], body: "head", kind: :Variable},
+                     %{type: [:Anything], body: "tail", kind: :Variable}
+                   ],
+                   body: "|",
+                   kind: :Pipe
+                 }
+               ],
+               kind: :Value
+             } == Parser.parse(ast, [])
     end
   end
 end

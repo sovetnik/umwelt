@@ -3,6 +3,7 @@ defmodule Umwelt.Parser.Attrs do
 
   require Logger
   @log_message "Unknown AST skipped in Attrs.parse"
+
   alias Umwelt.Parser
 
   def parse({:@, _, children}, context \\ []) do
@@ -11,7 +12,7 @@ defmodule Umwelt.Parser.Attrs do
         %{moduledoc: children}
 
       [{:impl, _, children} | _] ->
-        %{impl: Parser.parse(children, [])}
+        %{impl: Parser.maybe_list_parse(children, [])}
 
       [{:doc, _, children} | _] ->
         %{doc: children}
@@ -23,7 +24,7 @@ defmodule Umwelt.Parser.Attrs do
         %{type: Parser.Typespec.parse(children, [], context)}
 
       [{:typedoc, _, children} | _] ->
-        %{typedoc: Parser.parse(children, [])}
+        %{typedoc: Parser.maybe_list_parse(children, [])}
 
       [{constant, _, [child]} | _] ->
         %{

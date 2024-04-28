@@ -55,10 +55,14 @@ defmodule Umwelt.Parser.AttrsTest do
     assert %{
              body: "attribute",
              kind: :Attr,
-             value: [
-               %{type: [:Atom], body: "foo", kind: :Value},
-               %{type: [:Atom], body: "bar", kind: :Value}
-             ]
+             value: %{
+               type: [:List],
+               values: [
+                 %{type: [:Atom], body: "foo", kind: :Value},
+                 %{type: [:Atom], body: "bar", kind: :Value}
+               ],
+               kind: :Value
+             }
            } == Attrs.parse(ast)
   end
 

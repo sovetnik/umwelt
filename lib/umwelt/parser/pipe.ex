@@ -21,6 +21,6 @@ defmodule Umwelt.Parser.Pipe do
     do: %{
       body: to_string(term),
       kind: :Pipe,
-      values: Parser.parse(children, aliases)
+      values: Parser.parse_list(children, aliases)
     }
 end

@@ -7,14 +7,14 @@ defmodule Umwelt.Parser.Tuple do
     do: %{
       kind: :Value,
       type: [:Tuple],
-      elements: Parser.parse(children, aliases)
+      elements: Parser.parse_list(children, aliases)
     }
 
   def parse(tuple, aliases) when is_tuple(tuple) do
     result =
       tuple
       |> Tuple.to_list()
-      |> Parser.parse(aliases)
+      |> Parser.parse_list(aliases)
 
     %{
       kind: :Value,

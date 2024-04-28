@@ -31,6 +31,26 @@ defmodule Umwelt.Parser.StructureTest do
            } == Structure.parse(ast, [])
   end
 
+  test "%var{} map macro" do
+    {:ok, ast} = Code.string_to_quoted("%var{fizz: :buzz}")
+
+    assert %{
+             body: "var",
+             kind: :Variable,
+             type: [:Map],
+             keyword: [
+               %{
+                 elements: [
+                   %{body: "fizz", kind: :Value, type: [:Atom]},
+                   %{body: "buzz", kind: :Value, type: [:Atom]}
+                 ],
+                 kind: :Value,
+                 type: [:Tuple]
+               }
+             ]
+           } == Structure.parse(ast, [])
+  end
+
   test "typed %Buzz{} map macro" do
     {:ok, ast} = Code.string_to_quoted("%Foobar{fizz: :buzz}")
 
@@ -46,7 +66,7 @@ defmodule Umwelt.Parser.StructureTest do
                }
              ],
              kind: :Value,
-             type: [:Foobar]
+             type: %{name: :Foobar, path: [:Foobar], kind: :Alias}
            } == Structure.parse(ast, [])
   end
 
@@ -84,7 +104,11 @@ defmodule Umwelt.Parser.StructureTest do
              keyword: [
                %{
                  elements: [
-                   [%{body: "23", kind: :Value, type: [:Integer]}],
+                   %{
+                     type: [:List],
+                     values: [%{type: [:Integer], body: "23", kind: :Value}],
+                     kind: :Value
+                   },
                    %{body: "foo", kind: :Value, type: [:Atom]}
                  ],
                  kind: :Value,

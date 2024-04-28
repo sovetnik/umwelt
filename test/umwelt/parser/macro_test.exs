@@ -56,7 +56,7 @@ defmodule Umwelt.Parser.MacroTest do
                term: %{
                  kind: :Value,
                  keyword: [],
-                 type: [:Bar]
+                 type: %{name: :Bar, path: [:Bar], kind: :Alias}
                }
              } == Macro.parse(ast, [])
     end
@@ -69,7 +69,7 @@ defmodule Umwelt.Parser.MacroTest do
                kind: :Match,
                term: %{
                  kind: :Value,
-                 type: [:Bar, :Baz],
+                 type: %{name: :Baz, path: [:Bar, :Baz], kind: :Alias},
                  keyword: []
                }
              } == Macro.parse(ast, [])
@@ -83,10 +83,10 @@ defmodule Umwelt.Parser.MacroTest do
                kind: :Match,
                term: %{
                  kind: :Value,
-                 type: [:Foo, :Bar, :Baz],
+                 type: %{name: :Baz, path: [:Foo, :Bar, :Baz], kind: :Alias},
                  keyword: []
                }
-             } == Macro.parse(ast, [[:Foo, :Bar]])
+             } == Macro.parse(ast, [%{name: :Bar, path: [:Foo, :Bar], kind: :Alias}])
     end
   end
 
@@ -161,7 +161,7 @@ defmodule Umwelt.Parser.MacroTest do
                kind: :Match,
                term: %{
                  kind: :Value,
-                 type: [:Foo],
+                 type: %{name: :Foo, path: [:Foo], kind: :Alias},
                  keyword: []
                }
              } == Macro.parse(ast, [])
@@ -170,7 +170,11 @@ defmodule Umwelt.Parser.MacroTest do
     test "struct macro" do
       {:ok, ast} = Code.string_to_quoted("%Foo{}")
 
-      assert %{kind: :Value, type: [:Foo], keyword: []} == Macro.parse(ast, [])
+      assert %{
+               keyword: [],
+               kind: :Value,
+               type: %{name: :Foo, path: [:Foo], kind: :Alias}
+             } == Macro.parse(ast, [])
     end
 
     test "tuple macro" do
@@ -182,7 +186,11 @@ defmodule Umwelt.Parser.MacroTest do
                elements: [
                  %{body: "ok", kind: :Value, type: [:Atom]},
                  %{body: "one", kind: :Variable, type: [:Anything]},
-                 [%{body: "two", kind: :Value, type: [:Atom]}]
+                 %{
+                   type: [:List],
+                   values: [%{type: [:Atom], body: "two", kind: :Value}],
+                   kind: :Value
+                 }
                ]
              } == Macro.parse(ast, [[:Foo, :Bar]])
     end

@@ -86,6 +86,7 @@ defmodule Umwelt.Parser.Defmodule do
     Enum.flat_map(children, fn
       {:alias, _, _} = ast ->
         Parser.Aliases.parse(ast, [])
+        |> List.wrap()
 
       _other ->
         []

@@ -45,7 +45,7 @@ defmodule Umwelt.Parser.DefTest do
                %{
                  body: "bar",
                  kind: :Variable,
-                 type: [:Bar, :Baz],
+                 type: %{name: :Baz, path: [:Bar, :Baz], kind: :Alias},
                  keyword: []
                }
              ],
@@ -65,10 +65,14 @@ defmodule Umwelt.Parser.DefTest do
                  body: "bar",
                  keyword: [],
                  kind: :Variable,
-                 type: [:Foo, :Bar, :Baz]
+                 type: %{
+                   name: :Baz,
+                   path: [:Foo, :Bar, :Baz],
+                   kind: :Alias
+                 }
                }
              ]
-           } == Def.parse(ast, [[:Foo, :Bar]])
+           } == Def.parse(ast, [%{name: :Bar, path: [:Foo, :Bar], kind: :Alias}])
   end
 
   test "match in argument" do
@@ -97,7 +101,7 @@ defmodule Umwelt.Parser.DefTest do
            } == Def.parse(ast, [])
   end
 
-  test "list match [head | tail] in argument" do
+  test "list match [head | tail] value in argument" do
     {:ok, ast} =
       """
         def reverse([head | tail]), 
@@ -113,6 +117,37 @@ defmodule Umwelt.Parser.DefTest do
                  type: [:List],
                  head: %{type: [:Anything], body: "head", kind: :Variable},
                  tail: %{type: [:Anything], body: "tail", kind: :Variable}
+               }
+             ],
+             body: "reverse",
+             kind: :Function
+           } == Def.parse(ast, [])
+  end
+
+  test "list match [head | tail] variable in argument" do
+    {:ok, ast} =
+      """
+        def reverse([first | rest] = list), 
+          do: reverse(tail, head)
+      """
+      |> Code.string_to_quoted()
+
+    assert %{
+             arguments: [
+               %{
+                 body: "list",
+                 kind: :Variable,
+                 type: [:List],
+                 values: [
+                   %{
+                     values: [
+                       %{type: [:Anything], body: "first", kind: :Variable},
+                       %{type: [:Anything], body: "rest", kind: :Variable}
+                     ],
+                     body: "|",
+                     kind: :Pipe
+                   }
+                 ]
                }
              ],
              body: "reverse",
