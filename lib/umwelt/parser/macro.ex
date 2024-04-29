@@ -59,6 +59,9 @@ defmodule Umwelt.Parser.Macro do
   def parse({term, _, _} = ast, aliases) when is_pipe_operator(term),
     do: Parser.Pipe.parse(ast, aliases)
 
+  # skip unquote
+  def parse({{:unquote, _, _}, _, _}, _), do: %{unquoted: []}
+
   # simple call node
   def parse({term, _, children} = ast, aliases) when is_atom_macro(ast),
     do: %{

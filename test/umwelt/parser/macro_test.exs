@@ -195,4 +195,12 @@ defmodule Umwelt.Parser.MacroTest do
              } == Macro.parse(ast, [[:Foo, :Bar]])
     end
   end
+
+  describe "skipped macros" do
+    test "unquote" do
+      {:ok, ast} = Code.string_to_quoted("unquote(name)(opts)")
+
+      assert %{unquoted: []} == Macro.parse(ast, [])
+    end
+  end
 end

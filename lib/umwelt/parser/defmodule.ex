@@ -1,13 +1,12 @@
 defmodule Umwelt.Parser.Defmodule do
   @moduledoc "Parses Module AST"
 
-  import Umwelt.Helpers
-
   require Logger
   @log_message "Unknown AST skipped in Defmodule.parse"
 
   @skip_terms ~w{ |> = alias defdelegate defp defimpl defmacro defmacrop if case }a
 
+  import Umwelt.Helpers
   import Umwelt.Parser.Macro, only: [is_macro: 1]
 
   alias Umwelt.Parser
@@ -75,7 +74,7 @@ defmodule Umwelt.Parser.Defmodule do
     Parser.parse({:defstruct, [], fields}, aliases)
   end
 
-  defp parse_block_child({kind, _, _}, _, _) when kind in @skip_terms, do: nil
+  defp parse_block_child({kind, _, _}, _, _) when kind in @skip_terms, do: []
 
   defp parse_block_child(ast, _, _) do
     Logger.warning("#{@log_message}_block_child/3\n #{inspect(ast)}")
