@@ -13,7 +13,7 @@ defmodule Umwelt.Parser.Defstruct do
     %{
       body: to_string(field),
       kind: :Field,
-      type: [:Anything],
+      type: %{kind: :Literal, type: :anything},
       value: Parser.parse(value, aliases)
     }
   end

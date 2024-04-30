@@ -9,8 +9,6 @@ defmodule Umwelt.Parser.Operator do
     :: - type operator
   """
 
-  import Umwelt.Helpers
-
   require Logger
   @log_message "Unknown AST skipped in Operator.parse"
   alias Umwelt.Parser
@@ -83,7 +81,7 @@ defmodule Umwelt.Parser.Operator do
   def parse({:\\, _, [arg, []]}, aliases) do
     arg
     |> Parser.parse(aliases)
-    |> Map.put_new(:default, %{kind: :Value, type: [:List]})
+    |> Map.put_new(:default, %{kind: :Value, type: Parser.Literal.type_of(:list)})
   end
 
   def parse({:\\, _, [arg, default]}, aliases) do
@@ -117,7 +115,7 @@ defmodule Umwelt.Parser.Operator do
   def parse({:"::", _, [left, {type, _, nil}]}, aliases) do
     left
     |> Parser.parse(aliases)
-    |> Map.put(:type, [upper_atom(type)])
+    |> Map.put(:type, Parser.Literal.type_of(type))
   end
 
   def parse({:"::", _, [left, right]}, aliases) do

@@ -6,7 +6,7 @@ defmodule Umwelt.Parser.Tuple do
   def parse({:{}, _, children}, aliases),
     do: %{
       kind: :Value,
-      type: [:Tuple],
+      type: %{kind: :Structure, type: :tuple},
       elements: Parser.parse_list(children, aliases)
     }
 
@@ -18,7 +18,7 @@ defmodule Umwelt.Parser.Tuple do
 
     %{
       kind: :Value,
-      type: [:Tuple],
+      type: %{kind: :Structure, type: :tuple},
       elements: result
     }
   end

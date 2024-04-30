@@ -16,14 +16,14 @@ defmodule Umwelt.Parser.Structure do
     do: %{
       kind: :Variable,
       body: to_string(term),
-      type: [:Map],
+      type: Parser.Literal.type_of(:map),
       keyword: Parser.parse_list(children, aliases)
     }
 
   def parse({:%{}, _, children}, aliases),
     do: %{
       kind: :Value,
-      type: [:Map],
+      type: Parser.Literal.type_of(:map),
       keyword: Parser.parse_list(children, aliases)
     }
 
@@ -35,7 +35,7 @@ defmodule Umwelt.Parser.Structure do
 
     %{
       kind: :Value,
-      type: [:Bitstring],
+      type: Parser.Literal.type_of(:bitstring),
       bits: literal_bits
     }
   end

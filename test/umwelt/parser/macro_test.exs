@@ -43,7 +43,7 @@ defmodule Umwelt.Parser.MacroTest do
       assert %{
                body: "foo",
                kind: :Variable,
-               type: [:Anything]
+               type: %{kind: :Literal, type: :anything}
              } == Macro.parse(ast, [])
     end
 
@@ -98,8 +98,8 @@ defmodule Umwelt.Parser.MacroTest do
                body: "|",
                kind: :Pipe,
                values: [
-                 %{type: [:Anything], body: "head", kind: :Variable},
-                 %{type: [:Anything], body: "tail", kind: :Variable}
+                 %{type: %{kind: :Literal, type: :anything}, body: "head", kind: :Variable},
+                 %{type: %{kind: :Literal, type: :anything}, body: "tail", kind: :Variable}
                ]
              } == Parser.parse(ast, [])
     end
@@ -126,7 +126,9 @@ defmodule Umwelt.Parser.MacroTest do
                  types: [],
                  functions: [
                    %{
-                     arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
+                     arguments: [
+                       %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
+                     ],
                      body: "foo",
                      kind: :Function
                    }
@@ -182,13 +184,13 @@ defmodule Umwelt.Parser.MacroTest do
 
       assert %{
                kind: :Value,
-               type: [:Tuple],
+               type: %{kind: :Structure, type: :tuple},
                elements: [
-                 %{body: "ok", kind: :Value, type: [:Atom]},
-                 %{body: "one", kind: :Variable, type: [:Anything]},
+                 %{body: "ok", kind: :Value, type: %{kind: :Literal, type: :atom}},
+                 %{body: "one", kind: :Variable, type: %{kind: :Literal, type: :anything}},
                  %{
-                   type: [:List],
-                   values: [%{type: [:Atom], body: "two", kind: :Value}],
+                   type: %{kind: :Structure, type: :list},
+                   values: [%{type: %{kind: :Literal, type: :atom}, body: "two", kind: :Value}],
                    kind: :Value
                  }
                ]

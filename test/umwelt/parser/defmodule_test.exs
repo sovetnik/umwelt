@@ -29,12 +29,16 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    body: "when",
                    kind: :Operator,
                    left: %{
-                     arguments: [%{body: "word", kind: :Variable, type: [:Anything]}],
+                     arguments: [
+                       %{body: "word", kind: :Variable, type: %{kind: :Literal, type: :anything}}
+                     ],
                      body: "long_word?",
                      kind: :Call
                    },
                    right: %{
-                     arguments: [%{body: "word", kind: :Variable, type: [:Anything]}],
+                     arguments: [
+                       %{body: "word", kind: :Variable, type: %{kind: :Literal, type: :anything}}
+                     ],
                      body: "is_binary",
                      kind: :Call
                    },
@@ -86,19 +90,35 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    %{
                      arguments: [
                        %{
-                         type: [:List],
+                         type: %{kind: :Structure, type: :list},
                          values: [
                            %{
-                             type: [:Tuple],
+                             type: %{kind: :Structure, type: :tuple},
                              kind: :Value,
                              elements: [
-                               %{type: [:Anything], body: "type", kind: :Variable},
-                               %{type: [:Anything], body: "_", kind: :Variable},
                                %{
-                                 type: [:List],
+                                 type: %{kind: :Literal, type: :anything},
+                                 body: "type",
+                                 kind: :Variable
+                               },
+                               %{
+                                 type: %{kind: :Literal, type: :anything},
+                                 body: "_",
+                                 kind: :Variable
+                               },
+                               %{
+                                 type: %{kind: :Structure, type: :list},
                                  values: [
-                                   %{type: [:Anything], body: "left", kind: :Variable},
-                                   %{type: [:Anything], body: "right", kind: :Variable}
+                                   %{
+                                     type: %{kind: :Literal, type: :anything},
+                                     body: "left",
+                                     kind: :Variable
+                                   },
+                                   %{
+                                     type: %{kind: :Literal, type: :anything},
+                                     body: "right",
+                                     kind: :Variable
+                                   }
                                  ],
                                  kind: :Value
                                }
@@ -108,8 +128,16 @@ defmodule Umwelt.Parser.DefmoduleTest do
                          body: "_",
                          kind: :Value
                        },
-                       %{type: [:Anything], body: "aliases", kind: :Variable},
-                       %{type: [:Anything], body: "_context", kind: :Variable}
+                       %{
+                         type: %{kind: :Literal, type: :anything},
+                         body: "aliases",
+                         kind: :Variable
+                       },
+                       %{
+                         type: %{kind: :Literal, type: :anything},
+                         body: "_context",
+                         kind: :Variable
+                       }
                      ],
                      body: "parse",
                      kind: :Function
@@ -192,19 +220,31 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  functions: [
                    %{
                      spec: %{
-                       type: [:Integer],
+                       type: %{kind: :Literal, type: :integer},
                        arguments: [
-                         %{type: [:Integer], body: "year", kind: :Variable},
-                         %{type: [:Integer], body: "month", kind: :Variable},
-                         %{type: [:Integer], body: "day", kind: :Variable}
+                         %{
+                           type: %{kind: :Literal, type: :integer},
+                           body: "year",
+                           kind: :Variable
+                         },
+                         %{
+                           type: %{kind: :Literal, type: :integer},
+                           body: "month",
+                           kind: :Variable
+                         },
+                         %{type: %{kind: :Literal, type: :integer}, body: "day", kind: :Variable}
                        ],
                        body: "days_since_epoch",
                        kind: :Call
                      },
                      arguments: [
-                       %{type: [:Anything], body: "year", kind: :Variable},
-                       %{type: [:Anything], body: "month", kind: :Variable},
-                       %{type: [:Anything], body: "day", kind: :Variable}
+                       %{type: %{kind: :Literal, type: :anything}, body: "year", kind: :Variable},
+                       %{
+                         type: %{kind: :Literal, type: :anything},
+                         body: "month",
+                         kind: :Variable
+                       },
+                       %{type: %{kind: :Literal, type: :anything}, body: "day", kind: :Variable}
                      ],
                      body: "days_since_epoch",
                      kind: :Function,
@@ -247,22 +287,34 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      arguments: [
                        %{name: :List, path: [:List], kind: :Alias},
                        %{
-                         type: [:List],
+                         type: %{kind: :Structure, type: :list},
                          values: [
                            %{
-                             type: [:Tuple],
+                             type: %{kind: :Structure, type: :tuple},
                              kind: :Value,
                              elements: [
-                               %{type: [:Atom], body: "only", kind: :Value},
                                %{
-                                 type: [:List],
+                                 type: %{kind: :Literal, type: :atom},
+                                 body: "only",
+                                 kind: :Value
+                               },
+                               %{
+                                 type: %{kind: :Structure, type: :list},
                                  values: [
                                    %{
-                                     type: [:Tuple],
+                                     type: %{kind: :Structure, type: :tuple},
                                      kind: :Value,
                                      elements: [
-                                       %{type: [:Atom], body: "duplicate", kind: :Value},
-                                       %{type: [:Integer], body: "2", kind: :Value}
+                                       %{
+                                         type: %{kind: :Literal, type: :atom},
+                                         body: "duplicate",
+                                         kind: :Value
+                                       },
+                                       %{
+                                         type: %{kind: :Literal, type: :integer},
+                                         body: "2",
+                                         kind: :Value
+                                       }
                                      ]
                                    }
                                  ],
@@ -332,14 +384,22 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      arguments: [
                        %{name: :Mailer, path: [:Swoosh, :Mailer], kind: :Alias},
                        %{
-                         type: [:List],
+                         type: %{kind: :Structure, type: :list},
                          values: [
                            %{
-                             type: [:Tuple],
+                             type: %{kind: :Structure, type: :tuple},
                              kind: :Value,
                              elements: [
-                               %{type: [:Atom], body: "otp_app", kind: :Value},
-                               %{type: [:Atom], body: "cryptoid", kind: :Value}
+                               %{
+                                 type: %{kind: :Literal, type: :atom},
+                                 body: "otp_app",
+                                 kind: :Value
+                               },
+                               %{
+                                 type: %{kind: :Literal, type: :atom},
+                                 body: "cryptoid",
+                                 kind: :Value
+                               }
                              ]
                            }
                          ],
@@ -378,14 +438,22 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      arguments: [
                        %{name: :Feature, path: [:Feature], kind: :Alias},
                        %{
-                         type: [:List],
+                         type: %{kind: :Structure, type: :list},
                          values: [
                            %{
-                             type: [:Tuple],
+                             type: %{kind: :Structure, type: :tuple},
                              kind: :Value,
                              elements: [
-                               %{type: [:Atom], body: "option", kind: :Value},
-                               %{type: [:Atom], body: "value", kind: :Value}
+                               %{
+                                 type: %{kind: :Literal, type: :atom},
+                                 body: "option",
+                                 kind: :Value
+                               },
+                               %{
+                                 type: %{kind: :Literal, type: :atom},
+                                 body: "value",
+                                 kind: :Value
+                               }
                              ]
                            }
                          ],
@@ -424,14 +492,22 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    %{
                      arguments: [
                        %{
-                         type: [:List],
+                         type: %{kind: :Structure, type: :list},
                          values: [
                            %{
-                             type: [:Tuple],
+                             type: %{kind: :Structure, type: :tuple},
                              kind: :Value,
                              elements: [
-                               %{type: [:Atom], body: "option", kind: :Value},
-                               %{type: [:Atom], body: "value", kind: :Value}
+                               %{
+                                 type: %{kind: :Literal, type: :atom},
+                                 body: "option",
+                                 kind: :Value
+                               },
+                               %{
+                                 type: %{kind: :Literal, type: :atom},
+                                 body: "value",
+                                 kind: :Value
+                               }
                              ]
                            }
                          ],
@@ -570,17 +646,27 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      body: "when",
                      kind: :Operator,
                      left: %{
-                       arguments: [%{type: [:Anything], body: "term", kind: :Variable}],
+                       arguments: [
+                         %{
+                           type: %{kind: :Literal, type: :anything},
+                           body: "term",
+                           kind: :Variable
+                         }
+                       ],
                        body: "is_foobar",
                        kind: :Call
                      },
                      right: %{
                        body: "membership",
                        kind: :Operator,
-                       left: %{type: [:Anything], body: "term", kind: :Variable},
+                       left: %{
+                         type: %{kind: :Literal, type: :anything},
+                         body: "term",
+                         kind: :Variable
+                       },
                        right: [
-                         %{type: [:Atom], body: "foo", kind: :Value},
-                         %{type: [:Atom], body: "bar", kind: :Value}
+                         %{type: %{kind: :Literal, type: :atom}, body: "foo", kind: :Value},
+                         %{type: %{kind: :Literal, type: :atom}, body: "bar", kind: :Value}
                        ]
                      }
                    }
@@ -612,12 +698,24 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      body: "when",
                      kind: :Operator,
                      left: %{
-                       arguments: [%{type: [:Anything], body: "term", kind: :Variable}],
+                       arguments: [
+                         %{
+                           type: %{kind: :Literal, type: :anything},
+                           body: "term",
+                           kind: :Variable
+                         }
+                       ],
                        body: "foobar",
                        kind: :Call
                      },
                      right: %{
-                       arguments: [%{type: [:Anything], body: "term", kind: :Variable}],
+                       arguments: [
+                         %{
+                           type: %{kind: :Literal, type: :anything},
+                           body: "term",
+                           kind: :Variable
+                         }
+                       ],
                        body: "is_foobar",
                        kind: :Call
                      }
@@ -628,17 +726,27 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      body: "when",
                      kind: :Operator,
                      left: %{
-                       arguments: [%{type: [:Anything], body: "term", kind: :Variable}],
+                       arguments: [
+                         %{
+                           type: %{kind: :Literal, type: :anything},
+                           body: "term",
+                           kind: :Variable
+                         }
+                       ],
                        body: "is_foobar",
                        kind: :Call
                      },
                      right: %{
                        body: "membership",
                        kind: :Operator,
-                       left: %{type: [:Anything], body: "term", kind: :Variable},
+                       left: %{
+                         type: %{kind: :Literal, type: :anything},
+                         body: "term",
+                         kind: :Variable
+                       },
                        right: [
-                         %{type: [:Atom], body: "foo", kind: :Value},
-                         %{type: [:Atom], body: "bar", kind: :Value}
+                         %{type: %{kind: :Literal, type: :atom}, body: "foo", kind: :Value},
+                         %{type: %{kind: :Literal, type: :atom}, body: "bar", kind: :Value}
                        ]
                      }
                    }
@@ -672,12 +780,16 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  functions: [
                    %{
                      arguments: [
-                       %{body: "income", kind: :Variable, type: [:Anything]},
+                       %{
+                         body: "income",
+                         kind: :Variable,
+                         type: %{kind: :Literal, type: :anything}
+                       },
                        %{
                          body: "outcome",
-                         default: %{kind: :Value, type: [:List]},
+                         default: %{kind: :Value, type: %{kind: :Structure, type: :list}},
                          kind: :Variable,
-                         type: [:Anything]
+                         type: %{kind: :Literal, type: :anything}
                        }
                      ],
                      body: "reverse",
@@ -685,8 +797,17 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    },
                    %{
                      arguments: [
-                       %{type: [:List], kind: :Value, body: "_", values: []},
-                       %{body: "outcome", kind: :Variable, type: [:Anything]}
+                       %{
+                         type: %{kind: :Structure, type: :list},
+                         kind: :Value,
+                         body: "_",
+                         values: []
+                       },
+                       %{
+                         body: "outcome",
+                         kind: :Variable,
+                         type: %{kind: :Literal, type: :anything}
+                       }
                      ],
                      body: "reverse",
                      kind: :Function
@@ -695,12 +816,24 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      arguments: [
                        %{
                          body: "_",
-                         head: %{body: "h", kind: :Variable, type: [:Anything]},
+                         head: %{
+                           body: "h",
+                           kind: :Variable,
+                           type: %{kind: :Literal, type: :anything}
+                         },
                          kind: :Value,
-                         tail: %{type: [:Anything], body: "t", kind: :Variable},
-                         type: [:List]
+                         tail: %{
+                           type: %{kind: :Literal, type: :anything},
+                           body: "t",
+                           kind: :Variable
+                         },
+                         type: %{kind: :Structure, type: :list}
                        },
-                       %{type: [:Anything], body: "outcome", kind: :Variable}
+                       %{
+                         type: %{kind: :Literal, type: :anything},
+                         body: "outcome",
+                         kind: :Variable
+                       }
                      ],
                      body: "reverse",
                      kind: :Function
@@ -732,15 +865,15 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  fields: [
                    %{
                      kind: :Field,
-                     type: [:Anything],
+                     type: %{kind: :Literal, type: :anything},
                      body: "foo",
-                     value: %{type: [:Atom], body: "nil", kind: :Value}
+                     value: %{type: %{kind: :Literal, type: :atom}, body: "nil", kind: :Value}
                    },
                    %{
                      kind: :Field,
-                     type: [:Anything],
+                     type: %{kind: :Literal, type: :anything},
                      body: "tree",
-                     value: %{type: [:Map], kind: :Value, keyword: []}
+                     value: %{type: %{kind: :Structure, type: :map}, kind: :Value, keyword: []}
                    }
                  ],
                  functions: []
@@ -777,25 +910,29 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  fields: [
                    %{
                      kind: :Field,
-                     type: [:Anything],
+                     type: %{kind: :Literal, type: :anything},
                      body: "foo",
-                     value: %{type: [:Atom], body: "nil", kind: :Value}
+                     value: %{type: %{kind: :Literal, type: :atom}, body: "nil", kind: :Value}
                    },
                    %{
                      kind: :Field,
-                     type: [:Anything],
+                     type: %{kind: :Literal, type: :anything},
                      body: "tree",
-                     value: %{type: [:Map], kind: :Value, keyword: []}
+                     value: %{type: %{kind: :Structure, type: :map}, kind: :Value, keyword: []}
                    }
                  ],
                  functions: [
                    %{
-                     arguments: [%{body: "bar", kind: :Variable, type: [:Anything]}],
+                     arguments: [
+                       %{body: "bar", kind: :Variable, type: %{kind: :Literal, type: :anything}}
+                     ],
                      body: "foo",
                      kind: :Function
                    },
                    %{
-                     arguments: [%{type: [:Anything], body: "baz", kind: :Variable}],
+                     arguments: [
+                       %{type: %{kind: :Literal, type: :anything}, body: "baz", kind: :Variable}
+                     ],
                      body: "bar",
                      kind: :Function
                    }
@@ -827,7 +964,9 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  types: [],
                  functions: [
                    %{
-                     arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
+                     arguments: [
+                       %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
+                     ],
                      body: "foo",
                      kind: :Function
                    }
@@ -857,11 +996,11 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      kind: :Attr,
                      value: %{
                        elements: [
-                         %{body: "fizz", kind: :Value, type: [:Atom]},
-                         %{body: "buzz", kind: :Value, type: [:Atom]}
+                         %{body: "fizz", kind: :Value, type: %{kind: :Literal, type: :atom}},
+                         %{body: "buzz", kind: :Value, type: %{kind: :Literal, type: :atom}}
                        ],
                        kind: :Value,
-                       type: [:Tuple]
+                       type: %{kind: :Structure, type: :tuple}
                      }
                    }
                  ],
@@ -990,7 +1129,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        %{
                          body: "bar",
                          kind: :Variable,
-                         type: [:Anything]
+                         type: %{kind: :Literal, type: :anything}
                        }
                      ],
                      body: "foo",
@@ -1011,9 +1150,15 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    types: [],
                    functions: [
                      %{
-                       arguments: [%{body: "baz", kind: :Variable, type: [:Anything]}],
+                       arguments: [
+                         %{body: "baz", kind: :Variable, type: %{kind: :Literal, type: :anything}}
+                       ],
                        body: "bar",
-                       impl: %{body: "true", kind: :Value, type: [:Boolean]},
+                       impl: %{
+                         body: "true",
+                         kind: :Value,
+                         type: %{kind: :Literal, type: :boolean}
+                       },
                        kind: :Function
                      }
                    ],
@@ -1061,12 +1206,16 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  functions: [
                    %{
-                     arguments: [%{type: [:Anything], body: "once", kind: :Variable}],
+                     arguments: [
+                       %{type: %{kind: :Literal, type: :anything}, body: "once", kind: :Variable}
+                     ],
                      body: "root_one",
                      kind: :Function
                    },
                    %{
-                     arguments: [%{type: [:Anything], body: "twice", kind: :Variable}],
+                     arguments: [
+                       %{type: %{kind: :Literal, type: :anything}, body: "twice", kind: :Variable}
+                     ],
                      body: "root_two",
                      kind: :Function
                    }
@@ -1084,7 +1233,9 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  %{
                    functions: [
                      %{
-                       arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
+                       arguments: [
+                         %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
+                       ],
                        body: "foo",
                        kind: :Function
                      }
@@ -1102,7 +1253,13 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    %{
                      functions: [
                        %{
-                         arguments: [%{type: [:Anything], body: "baz", kind: :Variable}],
+                         arguments: [
+                           %{
+                             type: %{kind: :Literal, type: :anything},
+                             body: "baz",
+                             kind: :Variable
+                           }
+                         ],
                          body: "bar",
                          kind: :Function
                        }
@@ -1121,7 +1278,13 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    %{
                      functions: [
                        %{
-                         arguments: [%{type: [:Anything], body: "foo", kind: :Variable}],
+                         arguments: [
+                           %{
+                             type: %{kind: :Literal, type: :anything},
+                             body: "foo",
+                             kind: :Variable
+                           }
+                         ],
                          body: "baz",
                          kind: :Function
                        }

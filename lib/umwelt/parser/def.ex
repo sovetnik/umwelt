@@ -39,7 +39,7 @@ defmodule Umwelt.Parser.Def do
   defp parse_arg([{:|, _, [head, tail]}], aliases),
     do: %{
       body: "_",
-      type: [:List],
+      type: Parser.Literal.type_of(:list),
       kind: :Value,
       head: Parser.parse(head, aliases),
       tail: Parser.parse(tail, aliases)
@@ -48,7 +48,7 @@ defmodule Umwelt.Parser.Def do
   defp parse_arg(list_arg, aliases) when is_list(list_arg),
     do: %{
       body: "_",
-      type: [:List],
+      type: Parser.Literal.type_of(:list),
       kind: :Value,
       values: Parser.parse_list(list_arg, aliases)
     }

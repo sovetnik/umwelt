@@ -1,8 +1,6 @@
 defmodule Umwelt.Parser.Typespec do
   @moduledoc "Parses Typespec definition AST"
 
-  import Umwelt.Helpers
-
   alias Umwelt.Parser
 
   def parse(
@@ -22,5 +20,9 @@ defmodule Umwelt.Parser.Typespec do
       type: Parser.parse(left, aliases),
       spec: Parser.parse(right, aliases)
     }
+  end
+
+  defp upper_atom(atom) do
+    atom |> to_string |> Macro.camelize() |> String.to_atom()
   end
 end

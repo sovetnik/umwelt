@@ -44,8 +44,8 @@ defmodule Umwelt.Parser.PipeTest do
                body: "|",
                kind: :Pipe,
                values: [
-                 %{type: [:Anything], body: "head", kind: :Variable},
-                 %{type: [:Anything], body: "tail", kind: :Variable}
+                 %{type: %{kind: :Literal, type: :anything}, body: "head", kind: :Variable},
+                 %{type: %{kind: :Literal, type: :anything}, body: "tail", kind: :Variable}
                ]
              } == Pipe.parse(ast, [])
     end
@@ -57,8 +57,8 @@ defmodule Umwelt.Parser.PipeTest do
                body: "<~>",
                kind: :Pipe,
                values: [
-                 %{type: [:Anything], body: "left", kind: :Variable},
-                 %{type: [:Anything], body: "right", kind: :Variable}
+                 %{type: %{kind: :Literal, type: :anything}, body: "left", kind: :Variable},
+                 %{type: %{kind: :Literal, type: :anything}, body: "right", kind: :Variable}
                ]
              } == Pipe.parse(ast, [])
     end

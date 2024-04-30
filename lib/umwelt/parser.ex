@@ -41,7 +41,7 @@ defmodule Umwelt.Parser do
   def parse(ast, aliases) when is_list(ast),
     do: %{
       kind: :Value,
-      type: [:List],
+      type: %{kind: :Structure, type: :list},
       values: parse_list(ast, aliases)
     }
 

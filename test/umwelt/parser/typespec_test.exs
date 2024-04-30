@@ -13,9 +13,11 @@ defmodule Umwelt.Parser.TypespecTest do
 
       assert %{
                kind: :Spec,
-               spec: %{body: "atom", kind: :Variable, type: [:Anything]},
+               spec: %{body: "atom", kind: :Variable, type: %{kind: :Literal, type: :anything}},
                type: %{
-                 arguments: [%{type: [:Anything], body: "integer", kind: :Variable}],
+                 arguments: [
+                   %{type: %{kind: :Literal, type: :anything}, body: "integer", kind: :Variable}
+                 ],
                  body: "function",
                  kind: :Call
                }
@@ -33,7 +35,9 @@ defmodule Umwelt.Parser.TypespecTest do
                kind: :Spec,
                spec: %{context: [:String], arguments: [], body: "t", kind: :Call},
                type: %{
-                 arguments: [%{body: "num", kind: :Variable, type: [:Integer]}],
+                 arguments: [
+                   %{body: "num", kind: :Variable, type: %{kind: :Literal, type: :integer}}
+                 ],
                  body: "function",
                  kind: :Call
                }
@@ -49,12 +53,12 @@ defmodule Umwelt.Parser.TypespecTest do
 
       assert %{
                kind: :Spec,
-               spec: %{type: [:Anything], body: "integer", kind: :Variable},
+               spec: %{type: %{kind: :Literal, type: :anything}, body: "integer", kind: :Variable},
                type: %{
                  arguments: [
-                   %{type: [:Integer], body: "year", kind: :Variable},
-                   %{type: [:Integer], body: "month", kind: :Variable},
-                   %{type: [:Integer], body: "day", kind: :Variable}
+                   %{type: %{kind: :Literal, type: :integer}, body: "year", kind: :Variable},
+                   %{type: %{kind: :Literal, type: :integer}, body: "month", kind: :Variable},
+                   %{type: %{kind: :Literal, type: :integer}, body: "day", kind: :Variable}
                  ],
                  body: "days_since_epoch",
                  kind: :Call
@@ -73,8 +77,12 @@ defmodule Umwelt.Parser.TypespecTest do
 
       assert %{
                kind: :Type,
-               spec: %{type: [:Anything], body: "boolean", kind: :Variable},
-               type: %{type: [:Anything], body: "type_name", kind: :Variable}
+               spec: %{type: %{kind: :Literal, type: :anything}, body: "boolean", kind: :Variable},
+               type: %{
+                 type: %{kind: :Literal, type: :anything},
+                 body: "type_name",
+                 kind: :Variable
+               }
              } == Typespec.parse(ast, [])
     end
 

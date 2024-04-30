@@ -6,7 +6,6 @@ defmodule Umwelt.Parser.Defmodule do
 
   @skip_terms ~w{ |> = alias defdelegate defp defimpl defmacro defmacrop if case }a
 
-  import Umwelt.Helpers
   import Umwelt.Parser.Macro, only: [is_macro: 1]
 
   alias Umwelt.Parser
@@ -179,7 +178,8 @@ defmodule Umwelt.Parser.Defmodule do
 
   defp extract_types(block_children) do
     Enum.reduce([[%{}] | block_children], fn
-      %{typedoc: [%{type: [:Binary], body: body, kind: :Value}]}, [head | rest] ->
+      %{typedoc: [%{type: %{kind: :Literal, type: :binary}, body: body, kind: :Value}]},
+      [head | rest] ->
         [Map.put(head, :note, string_or(body, "Description of type")) | rest]
 
       %{typedoc: value}, [head | rest] ->
@@ -194,5 +194,24 @@ defmodule Umwelt.Parser.Defmodule do
     end)
     |> Enum.reject(&Enum.empty?/1)
     |> Enum.reverse()
+  end
+
+  defp string_or(value, replace) do
+    case value do
+      value when is_binary(value) ->
+        string =
+          value
+          |> String.split("\n")
+          |> List.first()
+
+        if String.length(string) < 255 do
+          string
+        else
+          replace
+        end
+
+      _ ->
+        replace
+    end
   end
 end

@@ -67,6 +67,6 @@ defmodule Umwelt.Parser.Macro do
     do: %{
       kind: :Call,
       body: to_string(term),
-      arguments: Parser.maybe_list_parse(children, aliases)
+      arguments: Parser.parse_list(children, aliases)
     }
 end
