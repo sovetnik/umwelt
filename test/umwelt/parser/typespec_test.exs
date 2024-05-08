@@ -99,5 +99,41 @@ defmodule Umwelt.Parser.TypespecTest do
                type: %{body: "word", kind: :Call, arguments: []}
              } == Typespec.parse(ast, [])
     end
+
+    test "complex type" do
+      {:ok, ast} =
+        """
+        @type shape :: %{required(atom()) => simple_type() | estructura_type()}
+        """
+        |> Code.string_to_quoted()
+
+      assert %{
+               kind: :Type,
+               spec: %{
+                 kind: :Value,
+                 keyword: [
+                   %{
+                     type: %{type: :tuple, kind: :Structure},
+                     kind: :Value,
+                     elements: [
+                       %{
+                         arguments: [%{arguments: [], body: "atom", kind: :Call}],
+                         body: "required",
+                         kind: :Call
+                       },
+                       %{
+                         left: %{arguments: [], body: "simple_type", kind: :Call},
+                         right: [%{arguments: [], body: "estructura_type", kind: :Call}],
+                         body: "|",
+                         kind: :Pipe
+                       }
+                     ]
+                   }
+                 ],
+                 type: %{type: :map, kind: :Structure}
+               },
+               type: %{body: "shape", kind: :Variable, type: %{type: :anything, kind: :Literal}}
+             } == Typespec.parse(ast, [])
+    end
   end
 end

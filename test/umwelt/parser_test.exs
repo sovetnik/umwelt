@@ -355,18 +355,22 @@ defmodule Umwelt.ParserTest do
       {:ok, ast} = Code.string_to_quoted("[head | tail]")
 
       assert %{
+               kind: :Value,
                type: %{kind: :Structure, type: :list},
                values: [
                  %{
-                   values: [
-                     %{type: %{kind: :Literal, type: :anything}, body: "head", kind: :Variable},
-                     %{type: %{kind: :Literal, type: :anything}, body: "tail", kind: :Variable}
-                   ],
                    body: "|",
-                   kind: :Pipe
+                   kind: :Pipe,
+                   left: %{
+                     type: %{type: :anything, kind: :Literal},
+                     body: "head",
+                     kind: :Variable
+                   },
+                   right: [
+                     %{type: %{type: :anything, kind: :Literal}, body: "tail", kind: :Variable}
+                   ]
                  }
-               ],
-               kind: :Value
+               ]
              } == Parser.parse(ast, [])
     end
   end

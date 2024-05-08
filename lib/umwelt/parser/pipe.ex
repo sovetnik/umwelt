@@ -17,10 +17,35 @@ defmodule Umwelt.Parser.Pipe do
     |> Parser.parse(aliases)
   end
 
-  def parse({term, _, children}, aliases),
+  def parse({term, _, children}, aliases)
+      when is_left_operator(term),
+      do: %{
+        body: to_string(term),
+        kind: :Pipe,
+        values: Parser.parse_list(children, aliases)
+      }
+
+  def parse({term, _, [left | right]}, aliases)
+      when is_right_operator(term),
+      do: %{
+        body: to_string(term),
+        kind: :Pipe,
+        left: Parser.maybe_list_parse(left, aliases),
+        right: Parser.maybe_list_parse(right, aliases)
+      }
+
+  def parse({term, _, children}, aliases)
+      when is_right_operator(term),
+      do: %{
+        body: to_string(term),
+        kind: :Pipe,
+        values: Parser.parse_list(children, aliases)
+      }
+
+  def parse({term, _, _}, _) when is_right_operator(term),
     do: %{
-      body: to_string(term),
-      kind: :Pipe,
-      values: Parser.parse_list(children, aliases)
+      body: "complex_arg",
+      kind: :Variable,
+      type: %{kind: :Literal, type: :anything}
     }
 end

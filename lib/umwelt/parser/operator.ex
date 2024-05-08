@@ -29,10 +29,11 @@ defmodule Umwelt.Parser.Operator do
            when term in [:and, :or, :not]
 
   defguard is_unary(term)
-           when term in [:!, :^, :not, :&]
+           when term in [:!, :^, :not, :&, :/]
 
   defguard is_operator(term)
-           when is_special_operator(term) or
+           when is_unary(term) or
+                  is_special_operator(term) or
                   is_comparison_operator(term) or
                   is_other_operator(term) or
                   is_relaxed_bool_operator(term) or

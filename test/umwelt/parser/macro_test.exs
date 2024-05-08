@@ -97,10 +97,8 @@ defmodule Umwelt.Parser.MacroTest do
       assert %{
                body: "|",
                kind: :Pipe,
-               values: [
-                 %{type: %{kind: :Literal, type: :anything}, body: "head", kind: :Variable},
-                 %{type: %{kind: :Literal, type: :anything}, body: "tail", kind: :Variable}
-               ]
+               left: %{type: %{type: :anything, kind: :Literal}, body: "head", kind: :Variable},
+               right: [%{type: %{type: :anything, kind: :Literal}, body: "tail", kind: :Variable}]
              } == Parser.parse(ast, [])
     end
 

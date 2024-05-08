@@ -20,10 +20,12 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
     assert [
              %{
-               attrs: [],
                body: "StringHelpers",
-               calls: [],
                context: [:StringHelpers],
+               kind: :Concept,
+               attrs: [],
+               calls: [],
+               guards: [],
                functions: [
                  %{
                    body: "when",
@@ -50,8 +52,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    }
                  }
                ],
-               guards: [],
-               kind: :Concept,
                types: [
                  %{
                    type: %{context: [:String], arguments: [], body: "t", kind: :Call},
@@ -877,6 +877,61 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    }
                  ],
                  functions: []
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+
+    test "module with defstruct and fun as default value" do
+      {:ok, ast} =
+        """
+          defmodule Estructura.Lazy do
+            defstruct getter: &Estructura.Lazy.id/1, expires_in: :never
+          end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %{
+                 attrs: [],
+                 body: "Lazy",
+                 context: [:Estructura, :Lazy],
+                 kind: :Concept,
+                 calls: [],
+                 functions: [],
+                 guards: [],
+                 types: [],
+                 fields: [
+                   %{
+                     body: "getter",
+                     kind: :Field,
+                     type: %{kind: :Literal, type: :anything},
+                     value: %{
+                       body: "&",
+                       kind: :Operator,
+                       expr: %{
+                         left: %{
+                           context: [:Estructura, :Lazy],
+                           arguments: [],
+                           body: "id",
+                           kind: :Call
+                         },
+                         right: %{
+                           type: %{type: :integer, kind: :Literal},
+                           body: "1",
+                           kind: :Value
+                         },
+                         body: "/",
+                         kind: :Operator
+                       }
+                     }
+                   },
+                   %{
+                     body: "expires_in",
+                     kind: :Field,
+                     type: %{kind: :Literal, type: :anything},
+                     value: %{kind: :Value, type: %{kind: :Literal, type: :atom}, body: "never"}
+                   }
+                 ]
                }
              ] == Defmodule.parse(ast, [])
     end

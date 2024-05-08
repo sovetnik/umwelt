@@ -2,9 +2,9 @@ defmodule Umwelt.Parser.Defmodule do
   @moduledoc "Parses Module AST"
 
   require Logger
-  @log_message "Unknown AST skipped in Defmodule.parse"
+  @log_message "Unknown AST skipped in Defmodule."
 
-  @skip_terms ~w{ |> = alias defdelegate defp defimpl defmacro defmacrop if case }a
+  @skip_terms ~w{ |> = alias defdelegate defimpl defmacro defmacrop if case }a
 
   import Umwelt.Parser.Macro, only: [is_macro: 1]
 
@@ -48,7 +48,7 @@ defmodule Umwelt.Parser.Defmodule do
       do: [Parser.parse(ast, context)]
 
   def parse_block(ast, _) do
-    Logger.warning("#{@log_message}_block/2\n #{inspect(ast)}")
+    Logger.warning("#{@log_message}parse_block/2\n #{inspect(ast)}")
     []
   end
 
@@ -62,7 +62,7 @@ defmodule Umwelt.Parser.Defmodule do
        do: Parser.parse(ast, aliases)
 
   defp parse_block_child({term, _, _} = ast, _, aliases)
-       when term in ~w|def import require use|a,
+       when term in ~w|def defp import require use|a,
        do: Parser.parse(ast, aliases)
 
   defp parse_block_child({term, _, _} = ast, context, _aliases)
@@ -76,7 +76,7 @@ defmodule Umwelt.Parser.Defmodule do
   defp parse_block_child({kind, _, _}, _, _) when kind in @skip_terms, do: []
 
   defp parse_block_child(ast, _, _) do
-    Logger.warning("#{@log_message}_block_child/3\n #{inspect(ast)}")
+    Logger.warning("#{@log_message}parse_block_child/3\n #{inspect(ast)}")
     nil
   end
 
@@ -119,9 +119,6 @@ defmodule Umwelt.Parser.Defmodule do
         Map.put(module, :calls, [value | calls])
 
       # doc and impl related to function and parsed in functions
-      %{type: %{kind: :Call}}, module ->
-        module
-
       %{typedoc: _}, module ->
         module
 
@@ -134,15 +131,22 @@ defmodule Umwelt.Parser.Defmodule do
       %{spec: _}, module ->
         module
 
+      %{typep: _}, module ->
+        module
+
+      %{type: %{kind: kind}}, module
+      when kind in [:Call, :Variable] ->
+        module
+
       %{kind: kind}, module
-      when kind in [:Function, :Operator] ->
+      when kind in [:Call, :Function, :Operator, :PrivateFunction] ->
         module
 
       children, module when is_list(children) ->
         module
 
       other, module ->
-        Logger.warning("#{@log_message}_combine_module/1\n #{inspect(other, pretty: true)}")
+        Logger.warning("#{@log_message}combine_module/2\n #{inspect(other, pretty: true)}")
         module
     end)
   end
@@ -164,6 +168,9 @@ defmodule Umwelt.Parser.Defmodule do
 
       %{kind: :Function} = function, [head | rest] ->
         [%{}, Map.merge(head, function) | rest]
+
+      %{kind: :PrivateFunction}, [_head | rest] ->
+        [%{} | rest]
 
       %{kind: :Operator, body: "when"} = function, [head | rest] ->
         [%{}, Map.merge(head, function) | rest]

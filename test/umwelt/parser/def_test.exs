@@ -140,13 +140,17 @@ defmodule Umwelt.Parser.DefTest do
                  type: %{kind: :Structure, type: :list},
                  values: [
                    %{
-                     values: [
+                     left: %{
+                       type: %{type: :anything, kind: :Literal},
+                       body: "first",
+                       kind: :Variable
+                     },
+                     right: [
                        %{
-                         type: %{kind: :Literal, type: :anything},
-                         body: "first",
+                         type: %{type: :anything, kind: :Literal},
+                         body: "rest",
                          kind: :Variable
-                       },
-                       %{type: %{kind: :Literal, type: :anything}, body: "rest", kind: :Variable}
+                       }
                      ],
                      body: "|",
                      kind: :Pipe

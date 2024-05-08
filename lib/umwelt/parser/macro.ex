@@ -44,6 +44,9 @@ defmodule Umwelt.Parser.Macro do
   def parse({:def, _, _} = ast, aliases) when is_macro(ast),
     do: Parser.Def.parse(ast, aliases)
 
+  def parse({:defp, _, _} = ast, aliases) when is_macro(ast),
+    do: Parser.Defp.parse(ast, aliases)
+
   def parse({:{}, _, _} = ast, aliases) when is_macro(ast),
     do: Parser.Tuple.parse(ast, aliases)
 
