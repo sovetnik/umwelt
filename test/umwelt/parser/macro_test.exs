@@ -90,6 +90,14 @@ defmodule Umwelt.Parser.MacroTest do
     end
   end
 
+  describe "sigil macro examples" do
+    test "sigil W" do
+      {:ok, ast} = Code.string_to_quoted("~w|foo bar|a")
+
+      assert %{body: "foo bar", kind: :Sigil, note: "sigil_w|a"} == Parser.parse(ast, [])
+    end
+  end
+
   describe "other macro examples" do
     test "pipe list head | tail" do
       {:ok, ast} = Code.string_to_quoted("head | tail")
@@ -103,16 +111,16 @@ defmodule Umwelt.Parser.MacroTest do
     end
 
     test "defmodule macro" do
-      code = """
-        defmodule Foo.Bar do
-          @moduledoc "Foobar description"
-          def foo(bar) do
-            :baz
+      {:ok, ast} =
+        """
+          defmodule Foo.Bar do
+            @moduledoc "Foobar description"
+            def foo(bar) do
+              :baz
+            end
           end
-        end
-      """
-
-      {:ok, ast} = Code.string_to_quoted(code)
+        """
+        |> Code.string_to_quoted()
 
       assert [
                %{

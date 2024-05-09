@@ -15,32 +15,32 @@ defmodule Umwelt.Parser.OperatorTest do
     ]
 
   describe "guards" do
-    test "guard is_special_operator(" do
+    test "guard is_special_operator" do
       [:^, :., :=, :&, :"::"]
       |> Enum.map(&assert is_special_operator(&1))
     end
 
-    test "guard is_comparison_operator(" do
+    test "guard is_comparison_operator" do
       [:==, :!=, :===, :!==, :<, :<=, :>, :>=]
       |> Enum.map(&assert is_comparison_operator(&1))
     end
 
-    test "guard is_other_operator(" do
+    test "guard is_other_operator" do
       [:\\, :in, :when]
       |> Enum.map(&assert is_other_operator(&1))
     end
 
-    test "guard is_relaxed_bool_operator(" do
+    test "guard is_relaxed_bool_operator" do
       [:&&, :||, :!]
       |> Enum.map(&assert is_relaxed_bool_operator(&1))
     end
 
-    test "guard is_strict_bool_operator(" do
+    test "guard is_strict_bool_operator" do
       [:and, :or, :not]
       |> Enum.map(&assert is_strict_bool_operator(&1))
     end
 
-    test "guard is_unary(" do
+    test "guard is_unary" do
       [:!, :^, :not, :&]
       |> Enum.map(&assert is_unary(&1))
     end
