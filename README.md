@@ -1,4 +1,4 @@
-# Umwelt ![ExUnit, Credo & Dialyzer](https://github.com/sovetnik/umwelt/actions/workflows/elixir.yml/badge.svg?event=push)
+# Umwelt ![Umwelt CI](https://github.com/sovetnik/umwelt/actions/workflows/elixir.yml/badge.svg?event=push) [![wakatime](https://wakatime.com/badge/user/7542de1a-027f-4ed7-bc4b-c31d4cf9aa2a/project/018c9f92-bb93-4303-816f-bc0799a61194.svg)](https://wakatime.com/badge/user/7542de1a-027f-4ed7-bc4b-c31d4cf9aa2a/project/018c9f92-bb93-4303-816f-bc0799a61194)
 Client for [umwelt.dev](https://umwelt.dev)
 
 ## Implemented actions:
