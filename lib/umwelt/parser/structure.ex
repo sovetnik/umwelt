@@ -5,25 +5,38 @@ defmodule Umwelt.Parser.Structure do
 
   defguard is_structure(term) when term in [:%, :%{}, :<<>>]
 
-  def parse({:%, _, [{:__aliases__, _, _} = ast, {:%{}, _, children}]}, aliases) do
-    %{
+  def parse({:%, _, [{:__aliases__, _, _} = ast, {:%{}, _, children}]}, aliases),
+    do: %{
       kind: :Value,
       type: Parser.parse(ast, aliases),
-      keyword: Parser.parse(children, aliases)
+      keyword: Parser.parse_list(children, aliases)
     }
-  end
+
+  def parse({:%, _, [{term, _, nil}, {:%{}, _, children}]}, aliases),
+    do: %{
+      kind: :Variable,
+      body: to_string(term),
+      type: Parser.Literal.type_of(:map),
+      keyword: Parser.parse_list(children, aliases)
+    }
 
   def parse({:%{}, _, children}, aliases),
     do: %{
       kind: :Value,
-      type: [:Map],
-      keyword: Parser.parse(children, aliases)
+      type: Parser.Literal.type_of(:map),
+      keyword: Parser.parse_list(children, aliases)
     }
 
-  def parse({:<<>>, _, children}, aliases),
-    do: %{
+  def parse({:<<>>, _, children}, aliases) do
+    literal_bits =
+      children
+      |> Enum.reject(&match?({_, _, _}, &1))
+      |> Parser.maybe_list_parse(aliases)
+
+    %{
       kind: :Value,
-      type: [:Bitstring],
-      bits: Parser.parse(children, aliases)
+      type: Parser.Literal.type_of(:bitstring),
+      bits: literal_bits
     }
+  end
 end

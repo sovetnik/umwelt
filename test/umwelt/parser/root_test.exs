@@ -30,27 +30,33 @@ defmodule Umwelt.Parser.RootTest do
                  body: "Foo",
                  context: [:Foo],
                  attrs: [],
+                 calls: [],
                  guards: [],
+                 types: [],
                  functions: [],
                  kind: :Root
                },
                [
                  %{
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    note: "Foobar description",
                    context: [:Foo, :Bar],
                    attrs: [
                      %{
-                       value: %{type: [:Atom], body: "bar", kind: :Value},
+                       value: %{type: %{kind: :Literal, type: :atom}, body: "bar", kind: :Value},
                        body: "foo",
                        kind: :Attr
                      }
                    ],
+                   calls: [],
                    guards: [],
+                   types: [],
                    functions: [
                      %{
-                       arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
+                       arguments: [
+                         %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
+                       ],
                        body: "foo",
                        kind: :Function,
                        note: "bar -> baz"
@@ -60,15 +66,27 @@ defmodule Umwelt.Parser.RootTest do
                  [
                    %{
                      body: "Baz",
-                     kind: :Space,
+                     kind: :Concept,
                      note: "Baz description",
                      context: [:Foo, :Bar, :Baz],
                      attrs: [],
+                     calls: [],
                      guards: [],
+                     types: [],
                      functions: [
                        %{
-                         arguments: [%{type: [:Anything], body: "baz", kind: :Variable}],
-                         impl: %{type: [:Boolean], body: "true", kind: :Value},
+                         arguments: [
+                           %{
+                             type: %{kind: :Literal, type: :anything},
+                             body: "baz",
+                             kind: :Variable
+                           }
+                         ],
+                         impl: %{
+                           type: %{kind: :Literal, type: :boolean},
+                           body: "true",
+                           kind: :Value
+                         },
                          body: "bar",
                          kind: :Function
                        }
@@ -116,19 +134,25 @@ defmodule Umwelt.Parser.RootTest do
                %{
                  functions: [
                    %{
-                     arguments: [%{type: [:Anything], body: "once", kind: :Variable}],
+                     arguments: [
+                       %{type: %{kind: :Literal, type: :anything}, body: "once", kind: :Variable}
+                     ],
                      body: "root_one",
                      kind: :Function
                    },
                    %{
-                     arguments: [%{type: [:Anything], body: "twice", kind: :Variable}],
+                     arguments: [
+                       %{type: %{kind: :Literal, type: :anything}, body: "twice", kind: :Variable}
+                     ],
                      body: "root_two",
                      kind: :Function
                    }
                  ],
                  context: [:Root],
                  attrs: [],
+                 calls: [],
                  guards: [],
+                 types: [],
                  body: "Root",
                  kind: :Root,
                  note: "Root description"
@@ -137,32 +161,44 @@ defmodule Umwelt.Parser.RootTest do
                  %{
                    functions: [
                      %{
-                       arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
+                       arguments: [
+                         %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
+                       ],
                        body: "foo",
                        kind: :Function
                      }
                    ],
                    context: [:Root, :Foo],
                    attrs: [],
+                   calls: [],
                    guards: [],
+                   types: [],
                    body: "Foo",
-                   kind: :Space,
+                   kind: :Concept,
                    note: "Foo description"
                  },
                  [
                    %{
                      functions: [
                        %{
-                         arguments: [%{type: [:Anything], body: "baz", kind: :Variable}],
+                         arguments: [
+                           %{
+                             type: %{kind: :Literal, type: :anything},
+                             body: "baz",
+                             kind: :Variable
+                           }
+                         ],
                          body: "bar",
                          kind: :Function
                        }
                      ],
                      context: [:Root, :Foo, :Bar],
                      attrs: [],
+                     calls: [],
                      guards: [],
+                     types: [],
                      body: "Bar",
-                     kind: :Space,
+                     kind: :Concept,
                      note: "Bar description"
                    }
                  ],
@@ -170,16 +206,24 @@ defmodule Umwelt.Parser.RootTest do
                    %{
                      functions: [
                        %{
-                         arguments: [%{type: [:Anything], body: "foo", kind: :Variable}],
+                         arguments: [
+                           %{
+                             type: %{kind: :Literal, type: :anything},
+                             body: "foo",
+                             kind: :Variable
+                           }
+                         ],
                          body: "baz",
                          kind: :Function
                        }
                      ],
                      context: [:Root, :Foo, :Baz],
                      attrs: [],
+                     calls: [],
                      guards: [],
+                     types: [],
                      body: "Baz",
-                     kind: :Space,
+                     kind: :Concept,
                      note: "Baz description"
                    }
                  ]
@@ -205,25 +249,31 @@ defmodule Umwelt.Parser.RootTest do
                  kind: :Root,
                  context: [:Foo],
                  attrs: [],
+                 calls: [],
                  guards: [],
+                 types: [],
                  functions: []
                },
                [
                  %{
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    context: [:Foo, :Bar],
                    attrs: [],
+                   calls: [],
                    guards: [],
+                   types: [],
                    functions: []
                  },
                  [
                    %{
                      body: "Baz",
-                     kind: :Space,
+                     kind: :Concept,
                      context: [:Foo, :Bar, :Baz],
                      attrs: [],
+                     calls: [],
                      guards: [],
+                     types: [],
                      functions: []
                    }
                  ]
@@ -247,25 +297,31 @@ defmodule Umwelt.Parser.RootTest do
                  body: "Foo",
                  kind: :Root,
                  attrs: [],
+                 calls: [],
                  guards: [],
+                 types: [],
                  functions: []
                },
                [
                  %{
                    context: [:Foo, :Bar],
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    attrs: [],
+                   calls: [],
                    guards: [],
+                   types: [],
                    functions: []
                  },
                  [
                    %{
                      context: [:Foo, :Bar, :Baz],
                      body: "Baz",
-                     kind: :Space,
+                     kind: :Concept,
                      attrs: [],
+                     calls: [],
                      guards: [],
+                     types: [],
                      functions: []
                    }
                  ]
@@ -287,25 +343,31 @@ defmodule Umwelt.Parser.RootTest do
                  body: "Foo",
                  kind: :Root,
                  attrs: [],
+                 calls: [],
                  guards: [],
+                 types: [],
                  functions: []
                },
                [
                  %{
                    context: [:Foo, :Bar],
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    attrs: [],
+                   calls: [],
                    guards: [],
+                   types: [],
                    functions: []
                  },
                  [
                    %{
                      context: [:Foo, :Bar, :Baz],
                      body: "Baz",
-                     kind: :Space,
+                     kind: :Concept,
                      attrs: [],
+                     calls: [],
                      guards: [],
+                     types: [],
                      functions: []
                    }
                  ]
@@ -336,7 +398,9 @@ defmodule Umwelt.Parser.RootTest do
                  body: "Foo",
                  context: [:Foo],
                  attrs: [],
+                 calls: [],
                  guards: [],
+                 types: [],
                  functions: [],
                  kind: :Root
                },
@@ -344,32 +408,38 @@ defmodule Umwelt.Parser.RootTest do
                  %{
                    body: "Bar",
                    note: "Foobar description",
-                   kind: :Space,
+                   kind: :Concept,
                    context: [:Foo, :Bar],
                    attrs: [],
+                   calls: [],
                    guards: [],
+                   types: [],
                    fields: [
                      %{
                        kind: :Field,
-                       type: [:Anything],
+                       type: %{kind: :Literal, type: :anything},
                        body: "foo",
-                       value: %{type: [:Atom], body: "nil", kind: :Value}
+                       value: %{type: %{kind: :Literal, type: :atom}, body: "nil", kind: :Value}
                      },
                      %{
                        kind: :Field,
-                       type: [:Anything],
+                       type: %{kind: :Literal, type: :anything},
                        body: "tree",
-                       value: %{type: [:Map], kind: :Value, keyword: []}
+                       value: %{type: %{kind: :Structure, type: :map}, kind: :Value, keyword: []}
                      }
                    ],
                    functions: [
                      %{
-                       arguments: [%{body: "bar", kind: :Variable, type: [:Anything]}],
+                       arguments: [
+                         %{body: "bar", kind: :Variable, type: %{kind: :Literal, type: :anything}}
+                       ],
                        body: "foo",
                        kind: :Function
                      },
                      %{
-                       arguments: [%{type: [:Anything], body: "baz", kind: :Variable}],
+                       arguments: [
+                         %{type: %{kind: :Literal, type: :anything}, body: "baz", kind: :Variable}
+                       ],
                        body: "bar",
                        kind: :Function
                      }
@@ -396,20 +466,26 @@ defmodule Umwelt.Parser.RootTest do
                  body: "Foo",
                  context: [:Foo],
                  attrs: [],
+                 calls: [],
                  guards: [],
+                 types: [],
                  functions: [],
                  kind: :Root
                },
                [
                  %{
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    context: [:Foo, :Bar],
                    attrs: [],
+                   calls: [],
                    guards: [],
+                   types: [],
                    functions: [
                      %{
-                       arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
+                       arguments: [
+                         %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
+                       ],
                        body: "foo",
                        kind: :Function
                      }
@@ -435,17 +511,21 @@ defmodule Umwelt.Parser.RootTest do
                  kind: :Root,
                  context: [:Foo],
                  attrs: [],
+                 calls: [],
                  guards: [],
+                 types: [],
                  functions: []
                },
                [
                  %{
                    body: "Bar",
-                   kind: :Space,
+                   kind: :Concept,
                    context: [:Foo, :Bar],
                    note: "Foobar description",
                    attrs: [],
+                   calls: [],
                    guards: [],
+                   types: [],
                    functions: []
                  }
                ]

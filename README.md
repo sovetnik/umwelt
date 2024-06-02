@@ -1,6 +1,11 @@
-# Umwelt
+# Umwelt ![Umwelt CI](https://github.com/sovetnik/umwelt/actions/workflows/elixir.yml/badge.svg?event=push) [![wakatime](https://wakatime.com/badge/user/7542de1a-027f-4ed7-bc4b-c31d4cf9aa2a/project/018c9f92-bb93-4303-816f-bc0799a61194.svg)](https://wakatime.com/badge/user/7542de1a-027f-4ed7-bc4b-c31d4cf9aa2a/project/018c9f92-bb93-4303-816f-bc0799a61194)
+Client for [umwelt.dev](https://umwelt.dev)
 
-Client for umwelt.dev
+## Implemented actions:
+
+### Dump
+
+Extracts Umwelt from Elixir project and dumps it into `project_name.bin`
 
 ## Installation
 
@@ -17,5 +22,14 @@ end
 
 ## Usage
 
-Right now it is a proof of concept, and in this version parser can parse itself,
-via `mix dump`.
+Right now it is a proof of concept, and in this version parser can parse some business-logic related code, via `mix dump`.
+
+
+## Planned
+Here is the list of planned features:
+
+### Client functions
+Set of push/pull/sync mix tasks to sync local code with remote representation on [umwelt.dev](https://umwelt.dev)
+
+### Unparser
+Tools for update local code with changes made on web side.

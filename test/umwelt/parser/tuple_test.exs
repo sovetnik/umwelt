@@ -8,7 +8,7 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              kind: :Value,
-             type: [:Tuple],
+             type: %{kind: :Structure, type: :tuple},
              elements: []
            } == Tuple.parse(ast, [])
   end
@@ -18,8 +18,8 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              kind: :Value,
-             type: [:Tuple],
-             elements: [%{body: "foo", kind: :Value, type: [:Atom]}]
+             type: %{kind: :Structure, type: :tuple},
+             elements: [%{body: "foo", kind: :Value, type: %{kind: :Literal, type: :atom}}]
            } ==
              Tuple.parse(ast, [])
   end
@@ -29,10 +29,10 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              kind: :Value,
-             type: [:Tuple],
+             type: %{kind: :Structure, type: :tuple},
              elements: [
-               %{body: "ok", kind: :Value, type: [:Atom]},
-               %{body: "result", kind: :Variable, type: [:Anything]}
+               %{body: "ok", kind: :Value, type: %{kind: :Literal, type: :atom}},
+               %{body: "result", kind: :Variable, type: %{kind: :Literal, type: :anything}}
              ]
            } == Tuple.parse(ast, [])
   end
@@ -42,10 +42,10 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              kind: :Value,
-             type: [:Tuple],
+             type: %{kind: :Structure, type: :tuple},
              elements: [
-               %{body: "ok", kind: :Value, type: [:Atom]},
-               %{body: "binary", kind: :Value, type: [:Binary]}
+               %{body: "ok", kind: :Value, type: %{kind: :Literal, type: :atom}},
+               %{body: "binary", kind: :Value, type: %{kind: :Literal, type: :binary}}
              ]
            } == Tuple.parse(ast, [])
   end
@@ -55,10 +55,10 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              kind: :Value,
-             type: [:Tuple],
+             type: %{kind: :Structure, type: :tuple},
              elements: [
-               %{body: "ok", kind: :Value, type: [:Atom]},
-               %{body: "13", kind: :Value, type: [:Integer]}
+               %{body: "ok", kind: :Value, type: %{kind: :Literal, type: :atom}},
+               %{body: "13", kind: :Value, type: %{kind: :Literal, type: :integer}}
              ]
            } == Tuple.parse(ast, [])
   end
@@ -68,13 +68,17 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              kind: :Value,
-             type: [:Tuple],
+             type: %{kind: :Structure, type: :tuple},
              elements: [
-               %{body: "ok", kind: :Value, type: [:Atom]},
+               %{body: "ok", kind: :Value, type: %{kind: :Literal, type: :atom}},
                %{
                  body: "result",
                  kind: :Match,
-                 term: %{kind: :Value, type: [:Result], keyword: []}
+                 term: %{
+                   keyword: [],
+                   kind: :Value,
+                   type: %{name: :Result, path: [:Result], kind: :Alias}
+                 }
                }
              ]
            } == Tuple.parse(ast, [])
@@ -85,11 +89,11 @@ defmodule Umwelt.Parser.TupleTest do
 
     assert %{
              kind: :Value,
-             type: [:Tuple],
+             type: %{kind: :Structure, type: :tuple},
              elements: [
-               %{body: "error", kind: :Value, type: [:Atom]},
-               %{body: "msg", kind: :Variable, type: [:Anything]},
-               %{body: "details", kind: :Variable, type: [:Anything]}
+               %{body: "error", kind: :Value, type: %{kind: :Literal, type: :atom}},
+               %{body: "msg", kind: :Variable, type: %{kind: :Literal, type: :anything}},
+               %{body: "details", kind: :Variable, type: %{kind: :Literal, type: :anything}}
              ]
            } == Tuple.parse(ast, [])
   end

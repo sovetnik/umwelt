@@ -25,6 +25,26 @@ defmodule Umwelt.Parser.AttrsTest do
              Attrs.parse(ast)
   end
 
+  test "parse function spec" do
+    {:ok, ast} =
+      """
+      @spec foobar(fizz :: atom, buzz :: any) :: boolean
+      """
+      |> Code.string_to_quoted()
+
+    assert %{
+             spec: %{
+               body: "foobar",
+               kind: :Call,
+               type: %{kind: :Literal, type: :boolean},
+               arguments: [
+                 %{type: %{kind: :Literal, type: :atom}, body: "fizz", kind: :Variable},
+                 %{type: %{kind: :Literal, type: :anything}, body: "buzz", kind: :Variable}
+               ]
+             }
+           } == Attrs.parse(ast)
+  end
+
   test "parse attr with list" do
     {:ok, ast} =
       """
@@ -35,10 +55,28 @@ defmodule Umwelt.Parser.AttrsTest do
     assert %{
              body: "attribute",
              kind: :Attr,
-             value: [
-               %{type: [:Atom], body: "foo", kind: :Value},
-               %{type: [:Atom], body: "bar", kind: :Value}
-             ]
+             value: %{
+               type: %{kind: :Structure, type: :list},
+               values: [
+                 %{type: %{kind: :Literal, type: :atom}, body: "foo", kind: :Value},
+                 %{type: %{kind: :Literal, type: :atom}, body: "bar", kind: :Value}
+               ],
+               kind: :Value
+             }
+           } == Attrs.parse(ast)
+  end
+
+  test "parse attr with nil" do
+    {:ok, ast} =
+      """
+      @options_schema nil
+      """
+      |> Code.string_to_quoted()
+
+    assert %{
+             body: "options_schema",
+             kind: :Attr,
+             value: %{kind: :Value, type: %{kind: :Literal, type: :atom}, body: "nil"}
            } == Attrs.parse(ast)
   end
 
@@ -56,15 +94,15 @@ defmodule Umwelt.Parser.AttrsTest do
                keyword: [
                  %{
                    kind: :Value,
-                   type: [:Tuple],
+                   type: %{kind: :Structure, type: :tuple},
                    elements: [
-                     %{type: [:Atom], body: "foo", kind: :Value},
-                     %{type: [:Atom], body: "bar", kind: :Value}
+                     %{type: %{kind: :Literal, type: :atom}, body: "foo", kind: :Value},
+                     %{type: %{kind: :Literal, type: :atom}, body: "bar", kind: :Value}
                    ]
                  }
                ],
                kind: :Value,
-               type: [:Map]
+               type: %{kind: :Structure, type: :map}
              }
            } == Attrs.parse(ast)
   end

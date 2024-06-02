@@ -1,6 +1,8 @@
 defmodule Umwelt.Parser.Def do
   @moduledoc "Parses Function AST"
 
+  require Logger
+  @log_message "Unknown AST skipped in Def.parse"
   alias Umwelt.Parser
 
   import Umwelt.Parser.Macro, only: [is_atom_macro: 1]
@@ -20,6 +22,11 @@ defmodule Umwelt.Parser.Def do
       when is_atom_macro(function),
       do: parse_call(function, aliases)
 
+  def parse(ast, _aliases) do
+    Logger.warning("#{@log_message}/2\n #{inspect(ast)}")
+    nil
+  end
+
   # simple call node
   defp parse_call({term, _, children} = ast, aliases)
        when is_atom_macro(ast),
@@ -29,15 +36,21 @@ defmodule Umwelt.Parser.Def do
          arguments: Enum.map(children, &parse_arg(&1, aliases))
        }
 
-  defp parse_arg([], _), do: %{body: "_", type: [:List], kind: :Value}
-
   defp parse_arg([{:|, _, [head, tail]}], aliases),
     do: %{
       body: "_",
-      type: [:List],
+      type: Parser.Literal.type_of(:list),
       kind: :Value,
       head: Parser.parse(head, aliases),
       tail: Parser.parse(tail, aliases)
+    }
+
+  defp parse_arg(list_arg, aliases) when is_list(list_arg),
+    do: %{
+      body: "_",
+      type: Parser.Literal.type_of(:list),
+      kind: :Value,
+      values: Parser.parse_list(list_arg, aliases)
     }
 
   defp parse_arg({:=, _, [left, {name, _, nil}]}, aliases) do

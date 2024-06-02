@@ -29,8 +29,8 @@ defmodule Umwelt.Parser.DefTest do
 
     assert %{
              arguments: [
-               %{body: "a", kind: :Variable, type: [:Anything]},
-               %{body: "b", kind: :Variable, type: [:Anything]}
+               %{body: "a", kind: :Variable, type: %{kind: :Literal, type: :anything}},
+               %{body: "b", kind: :Variable, type: %{kind: :Literal, type: :anything}}
              ],
              body: "div",
              kind: :Function
@@ -45,7 +45,7 @@ defmodule Umwelt.Parser.DefTest do
                %{
                  body: "bar",
                  kind: :Variable,
-                 type: [:Bar, :Baz],
+                 type: %{name: :Baz, path: [:Bar, :Baz], kind: :Alias},
                  keyword: []
                }
              ],
@@ -65,10 +65,14 @@ defmodule Umwelt.Parser.DefTest do
                  body: "bar",
                  keyword: [],
                  kind: :Variable,
-                 type: [:Foo, :Bar, :Baz]
+                 type: %{
+                   name: :Baz,
+                   path: [:Foo, :Bar, :Baz],
+                   kind: :Alias
+                 }
                }
              ]
-           } == Def.parse(ast, [[:Foo, :Bar]])
+           } == Def.parse(ast, [%{name: :Bar, path: [:Foo, :Bar], kind: :Alias}])
   end
 
   test "match in argument" do
@@ -86,18 +90,18 @@ defmodule Umwelt.Parser.DefTest do
                %{
                  body: "result",
                  kind: :Variable,
-                 type: [:Tuple],
+                 type: %{kind: :Structure, type: :tuple},
                  elements: [
-                   %{type: [:Atom], body: "ok", kind: :Value},
-                   %{type: [:Anything], body: "term", kind: :Variable}
+                   %{type: %{kind: :Literal, type: :atom}, body: "ok", kind: :Value},
+                   %{type: %{kind: :Literal, type: :anything}, body: "term", kind: :Variable}
                  ]
                },
-               %{body: "count", kind: :Variable, type: [:Anything]}
+               %{body: "count", kind: :Variable, type: %{kind: :Literal, type: :anything}}
              ]
            } == Def.parse(ast, [])
   end
 
-  test "list match [head | tail] in argument" do
+  test "list match [head | tail] value in argument" do
     {:ok, ast} =
       """
         def reverse([head | tail]), 
@@ -110,9 +114,48 @@ defmodule Umwelt.Parser.DefTest do
                %{
                  body: "_",
                  kind: :Value,
-                 type: [:List],
-                 head: %{type: [:Anything], body: "head", kind: :Variable},
-                 tail: %{type: [:Anything], body: "tail", kind: :Variable}
+                 type: %{kind: :Structure, type: :list},
+                 head: %{type: %{kind: :Literal, type: :anything}, body: "head", kind: :Variable},
+                 tail: %{type: %{kind: :Literal, type: :anything}, body: "tail", kind: :Variable}
+               }
+             ],
+             body: "reverse",
+             kind: :Function
+           } == Def.parse(ast, [])
+  end
+
+  test "list match [head | tail] variable in argument" do
+    {:ok, ast} =
+      """
+        def reverse([first | rest] = list), 
+          do: reverse(tail, head)
+      """
+      |> Code.string_to_quoted()
+
+    assert %{
+             arguments: [
+               %{
+                 body: "list",
+                 kind: :Variable,
+                 type: %{kind: :Structure, type: :list},
+                 values: [
+                   %{
+                     left: %{
+                       type: %{type: :anything, kind: :Literal},
+                       body: "first",
+                       kind: :Variable
+                     },
+                     right: [
+                       %{
+                         type: %{type: :anything, kind: :Literal},
+                         body: "rest",
+                         kind: :Variable
+                       }
+                     ],
+                     body: "|",
+                     kind: :Pipe
+                   }
+                 ]
                }
              ],
              body: "reverse",
@@ -133,21 +176,23 @@ defmodule Umwelt.Parser.DefTest do
              body: "list_from_root",
              kind: :Function,
              arguments: [
-               %{body: "path", kind: :Variable, type: [:Anything]},
+               %{body: "path", kind: :Variable, type: %{kind: :Literal, type: :anything}},
                %{
                  body: "project",
                  default: %{
-                   key: %{type: [:Atom], body: "app", kind: :Value},
+                   key: %{type: %{kind: :Literal, type: :atom}, body: "app", kind: :Value},
                    source: %{
                      context: [:Mix, :Project],
-                     arguments: [%{type: [:Atom], body: "dev", kind: :Value}],
+                     arguments: [
+                       %{type: %{kind: :Literal, type: :atom}, body: "dev", kind: :Value}
+                     ],
                      body: "config",
                      kind: :Call
                    },
                    kind: :Access
                  },
                  kind: :Variable,
-                 type: [:Anything]
+                 type: %{kind: :Literal, type: :anything}
                }
              ]
            } == Def.parse(ast, [])
@@ -170,8 +215,8 @@ defmodule Umwelt.Parser.DefTest do
                kind: :Operator,
                left: %{
                  arguments: [
-                   %{type: [:Anything], body: "ast", kind: :Variable},
-                   %{type: [:Anything], body: "_aliases", kind: :Variable}
+                   %{type: %{kind: :Literal, type: :anything}, body: "ast", kind: :Variable},
+                   %{type: %{kind: :Literal, type: :anything}, body: "_aliases", kind: :Variable}
                  ],
                  body: "parse_tuple_child",
                  kind: :Call
@@ -189,14 +234,14 @@ defmodule Umwelt.Parser.DefTest do
                        body: "is_atom",
                        kind: :Call,
                        arguments: [
-                         %{type: [:Anything], body: "ast", kind: :Variable}
+                         %{type: %{kind: :Literal, type: :anything}, body: "ast", kind: :Variable}
                        ]
                      },
                      right: %{
                        body: "is_binary",
                        kind: :Call,
                        arguments: [
-                         %{type: [:Anything], body: "ast", kind: :Variable}
+                         %{type: %{kind: :Literal, type: :anything}, body: "ast", kind: :Variable}
                        ]
                      }
                    },
@@ -204,7 +249,7 @@ defmodule Umwelt.Parser.DefTest do
                      body: "is_integer",
                      kind: :Call,
                      arguments: [
-                       %{type: [:Anything], body: "ast", kind: :Variable}
+                       %{type: %{kind: :Literal, type: :anything}, body: "ast", kind: :Variable}
                      ]
                    }
                  },
@@ -212,7 +257,7 @@ defmodule Umwelt.Parser.DefTest do
                    body: "is_float",
                    kind: :Call,
                    arguments: [
-                     %{type: [:Anything], body: "ast", kind: :Variable}
+                     %{type: %{kind: :Literal, type: :anything}, body: "ast", kind: :Variable}
                    ]
                  }
                }
@@ -234,20 +279,24 @@ defmodule Umwelt.Parser.DefTest do
                kind: :Operator,
                left: %{
                  arguments: [
-                   %{type: [:Anything], body: "bar", kind: :Variable},
-                   %{type: [:Anything], body: "baz", kind: :Variable}
+                   %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable},
+                   %{type: %{kind: :Literal, type: :anything}, body: "baz", kind: :Variable}
                  ],
                  body: "foo",
                  kind: :Call
                },
                right: %{
                  left: %{
-                   arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
+                   arguments: [
+                     %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
+                   ],
                    body: "is_integer",
                    kind: :Call
                  },
                  right: %{
-                   arguments: [%{type: [:Anything], body: "baz", kind: :Variable}],
+                   arguments: [
+                     %{type: %{kind: :Literal, type: :anything}, body: "baz", kind: :Variable}
+                   ],
                    body: "is_float",
                    kind: :Call
                  },
@@ -272,20 +321,24 @@ defmodule Umwelt.Parser.DefTest do
                kind: :Operator,
                left: %{
                  arguments: [
-                   %{type: [:Anything], body: "bar", kind: :Variable},
-                   %{type: [:Anything], body: "baz", kind: :Variable}
+                   %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable},
+                   %{type: %{kind: :Literal, type: :anything}, body: "baz", kind: :Variable}
                  ],
                  body: "foo",
                  kind: :Call
                },
                right: %{
                  left: %{
-                   arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
+                   arguments: [
+                     %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
+                   ],
                    body: "is_integer",
                    kind: :Call
                  },
                  right: %{
-                   arguments: [%{type: [:Anything], body: "baz", kind: :Variable}],
+                   arguments: [
+                     %{type: %{kind: :Literal, type: :anything}, body: "baz", kind: :Variable}
+                   ],
                    body: "is_float",
                    kind: :Call
                  },
@@ -312,16 +365,16 @@ defmodule Umwelt.Parser.DefTest do
                  body: "increase",
                  kind: :Call,
                  arguments: [
-                   %{type: [:Anything], body: "num", kind: :Variable},
+                   %{type: %{kind: :Literal, type: :anything}, body: "num", kind: :Variable},
                    %{
                      body: "add",
                      default: %{
-                       type: [:Integer],
+                       type: %{kind: :Literal, type: :integer},
                        body: "1",
                        kind: :Value
                      },
                      kind: :Variable,
-                     type: [:Anything]
+                     type: %{kind: :Literal, type: :anything}
                    }
                  ]
                },
@@ -329,12 +382,16 @@ defmodule Umwelt.Parser.DefTest do
                  body: "or",
                  kind: :Operator,
                  left: %{
-                   arguments: [%{type: [:Anything], body: "num", kind: :Variable}],
+                   arguments: [
+                     %{type: %{kind: :Literal, type: :anything}, body: "num", kind: :Variable}
+                   ],
                    body: "is_integer",
                    kind: :Call
                  },
                  right: %{
-                   arguments: [%{type: [:Anything], body: "num", kind: :Variable}],
+                   arguments: [
+                     %{type: %{kind: :Literal, type: :anything}, body: "num", kind: :Variable}
+                   ],
                    body: "is_float",
                    kind: :Call
                  }

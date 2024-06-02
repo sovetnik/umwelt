@@ -43,7 +43,7 @@ defmodule Umwelt.Parser.MacroTest do
       assert %{
                body: "foo",
                kind: :Variable,
-               type: [:Anything]
+               type: %{kind: :Literal, type: :anything}
              } == Macro.parse(ast, [])
     end
 
@@ -56,7 +56,7 @@ defmodule Umwelt.Parser.MacroTest do
                term: %{
                  kind: :Value,
                  keyword: [],
-                 type: [:Bar]
+                 type: %{name: :Bar, path: [:Bar], kind: :Alias}
                }
              } == Macro.parse(ast, [])
     end
@@ -69,7 +69,7 @@ defmodule Umwelt.Parser.MacroTest do
                kind: :Match,
                term: %{
                  kind: :Value,
-                 type: [:Bar, :Baz],
+                 type: %{name: :Baz, path: [:Bar, :Baz], kind: :Alias},
                  keyword: []
                }
              } == Macro.parse(ast, [])
@@ -83,10 +83,18 @@ defmodule Umwelt.Parser.MacroTest do
                kind: :Match,
                term: %{
                  kind: :Value,
-                 type: [:Foo, :Bar, :Baz],
+                 type: %{name: :Baz, path: [:Foo, :Bar, :Baz], kind: :Alias},
                  keyword: []
                }
-             } == Macro.parse(ast, [[:Foo, :Bar]])
+             } == Macro.parse(ast, [%{name: :Bar, path: [:Foo, :Bar], kind: :Alias}])
+    end
+  end
+
+  describe "sigil macro examples" do
+    test "sigil W" do
+      {:ok, ast} = Code.string_to_quoted("~w|foo bar|a")
+
+      assert %{body: "foo bar", kind: :Sigil, note: "sigil_w|a"} == Parser.parse(ast, [])
     end
   end
 
@@ -97,39 +105,41 @@ defmodule Umwelt.Parser.MacroTest do
       assert %{
                body: "|",
                kind: :Pipe,
-               values: [
-                 %{type: [:Anything], body: "head", kind: :Variable},
-                 %{type: [:Anything], body: "tail", kind: :Variable}
-               ]
+               left: %{type: %{type: :anything, kind: :Literal}, body: "head", kind: :Variable},
+               right: [%{type: %{type: :anything, kind: :Literal}, body: "tail", kind: :Variable}]
              } == Parser.parse(ast, [])
     end
 
     test "defmodule macro" do
-      code = """
-        defmodule Foo.Bar do
-          @moduledoc "Foobar description"
-          def foo(bar) do
-            :baz
+      {:ok, ast} =
+        """
+          defmodule Foo.Bar do
+            @moduledoc "Foobar description"
+            def foo(bar) do
+              :baz
+            end
           end
-        end
-      """
-
-      {:ok, ast} = Code.string_to_quoted(code)
+        """
+        |> Code.string_to_quoted()
 
       assert [
                %{
                  body: "Bar",
                  context: [:Foo, :Bar],
                  attrs: [],
+                 calls: [],
                  guards: [],
+                 types: [],
                  functions: [
                    %{
-                     arguments: [%{type: [:Anything], body: "bar", kind: :Variable}],
+                     arguments: [
+                       %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
+                     ],
                      body: "foo",
                      kind: :Function
                    }
                  ],
-                 kind: :Space,
+                 kind: :Concept,
                  note: "Foobar description"
                }
              ] == Macro.parse(ast, [])
@@ -159,7 +169,7 @@ defmodule Umwelt.Parser.MacroTest do
                kind: :Match,
                term: %{
                  kind: :Value,
-                 type: [:Foo],
+                 type: %{name: :Foo, path: [:Foo], kind: :Alias},
                  keyword: []
                }
              } == Macro.parse(ast, [])
@@ -168,7 +178,11 @@ defmodule Umwelt.Parser.MacroTest do
     test "struct macro" do
       {:ok, ast} = Code.string_to_quoted("%Foo{}")
 
-      assert %{kind: :Value, type: [:Foo], keyword: []} == Macro.parse(ast, [])
+      assert %{
+               keyword: [],
+               kind: :Value,
+               type: %{name: :Foo, path: [:Foo], kind: :Alias}
+             } == Macro.parse(ast, [])
     end
 
     test "tuple macro" do
@@ -176,13 +190,25 @@ defmodule Umwelt.Parser.MacroTest do
 
       assert %{
                kind: :Value,
-               type: [:Tuple],
+               type: %{kind: :Structure, type: :tuple},
                elements: [
-                 %{body: "ok", kind: :Value, type: [:Atom]},
-                 %{body: "one", kind: :Variable, type: [:Anything]},
-                 [%{body: "two", kind: :Value, type: [:Atom]}]
+                 %{body: "ok", kind: :Value, type: %{kind: :Literal, type: :atom}},
+                 %{body: "one", kind: :Variable, type: %{kind: :Literal, type: :anything}},
+                 %{
+                   type: %{kind: :Structure, type: :list},
+                   values: [%{type: %{kind: :Literal, type: :atom}, body: "two", kind: :Value}],
+                   kind: :Value
+                 }
                ]
              } == Macro.parse(ast, [[:Foo, :Bar]])
+    end
+  end
+
+  describe "skipped macros" do
+    test "unquote" do
+      {:ok, ast} = Code.string_to_quoted("unquote(name)(opts)")
+
+      assert %{unquoted: []} == Macro.parse(ast, [])
     end
   end
 end

@@ -5,6 +5,7 @@ defmodule Umwelt.Parser.Macro do
 
   import Umwelt.Parser.Operator, only: [is_operator: 1]
   import Umwelt.Parser.Pipe, only: [is_pipe_operator: 1]
+  import Umwelt.Parser.Sigil, only: [is_sigil: 1]
   import Umwelt.Parser.Structure, only: [is_structure: 1]
 
   defguard is_atom_macro(term)
@@ -26,8 +27,8 @@ defmodule Umwelt.Parser.Macro do
   def parse({_, _, nil} = ast, _aliases),
     do: Parser.Literal.parse(ast)
 
-  def parse({:@, _, _} = ast, _aliases),
-    do: Parser.Attrs.parse(ast)
+  def parse({:@, _, [{_, _, nil}]} = ast, _aliases),
+    do: Parser.Literal.parse(ast)
 
   def parse({:__aliases__, _, _} = ast, aliases),
     do: Parser.Aliases.parse(ast, aliases)
@@ -41,29 +42,46 @@ defmodule Umwelt.Parser.Macro do
   def parse({:defguard, _, [{:when, _, _} = when_ast]}, context),
     do: %{defguard: parse(when_ast, context)}
 
-  def parse({:def, _, _} = ast, aliases) when is_macro(ast),
-    do: Parser.Def.parse(ast, aliases)
+  def parse({:def, _, _} = ast, aliases)
+      when is_macro(ast),
+      do: Parser.Def.parse(ast, aliases)
 
-  def parse({:{}, _, _} = ast, aliases) when is_macro(ast),
-    do: Parser.Tuple.parse(ast, aliases)
+  def parse({:defp, _, _} = ast, aliases)
+      when is_macro(ast),
+      do: Parser.Defp.parse(ast, aliases)
 
-  def parse({term, _, _} = ast, aliases) when is_macro(ast) and is_structure(term),
-    do: Parser.Structure.parse(ast, aliases)
+  def parse({:{}, _, _} = ast, aliases)
+      when is_macro(ast),
+      do: Parser.Tuple.parse(ast, aliases)
 
-  def parse({term, _, _} = ast, aliases) when is_operator(term),
-    do: Parser.Operator.parse(ast, aliases)
+  def parse({term, _, _} = ast, aliases)
+      when is_macro(ast) and is_structure(term),
+      do: Parser.Structure.parse(ast, aliases)
 
-  def parse({{term, _, _}, _, _} = ast, aliases) when is_operator(term),
-    do: Parser.Operator.parse(ast, aliases)
+  def parse({term, _, _} = ast, aliases)
+      when is_operator(term),
+      do: Parser.Operator.parse(ast, aliases)
 
-  def parse({term, _, _} = ast, aliases) when is_pipe_operator(term),
-    do: Parser.Pipe.parse(ast, aliases)
+  def parse({{term, _, _}, _, _} = ast, aliases)
+      when is_operator(term),
+      do: Parser.Operator.parse(ast, aliases)
+
+  def parse({term, _, _} = ast, aliases)
+      when is_pipe_operator(term),
+      do: Parser.Pipe.parse(ast, aliases)
+
+  def parse({term, _, _} = ast, aliases)
+      when is_sigil(term),
+      do: Parser.Sigil.parse(ast, aliases)
+
+  # skip unquote
+  def parse({{:unquote, _, _}, _, _}, _), do: %{unquoted: []}
 
   # simple call node
   def parse({term, _, children} = ast, aliases) when is_atom_macro(ast),
     do: %{
       kind: :Call,
       body: to_string(term),
-      arguments: Parser.parse(children, aliases)
+      arguments: Parser.parse_list(children, aliases)
     }
 end

@@ -15,27 +15,27 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        elixir: [1.15.7, 1.16.2]
-        otp: [25.3.2.7, 26.2.2]
+        elixir: [1.15.8, 1.16.3]
+        otp: [25.3.2.12, 26.2.5]
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
 
       - name: Setup
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@v1.17.5
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4.0.1
         id: mix-cache
         with:
           path: |
@@ -60,27 +60,27 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        elixir: [1.15.7, 1.16.2]
-        otp: [25.3.2.7, 26.2.2]
+        elixir: [1.15.8, 1.16.3]
+        otp: [25.3.2.12, 26.2.5]
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
 
       - name: Setup
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@v1.17.5
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4.0.1
         id: mix-cache
         with:
           path: |
@@ -125,27 +125,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        elixir: [1.15.7, 1.16.2]
-        otp: [25.3.2.7, 26.2.2]
+        elixir: [1.15.8, 1.16.3]
+        otp: [25.3.2.12, 26.2.5]
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
 
       - name: Setup
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@v1.17.5
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
       - name: Retrieve Cached Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4.0.1
         id: mix-cache
         with:
           path: |
