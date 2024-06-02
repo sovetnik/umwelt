@@ -6,36 +6,33 @@ defmodule Umwelt.Parser.Attrs do
 
   alias Umwelt.Parser
 
-  def parse({:@, _, children}, context \\ []) do
-    case children do
-      [{:moduledoc, _, children} | _] ->
-        %{moduledoc: children}
+  def parse({:@, _, [children]}, context \\ []),
+    do: parse_children(children, context)
 
-      [{:impl, _, children} | _] ->
-        %{impl: Parser.maybe_list_parse(children, [])}
+  defp parse_children({term, _, _}, _context) when term in ~w|behaviour opaque typep|a,
+    do: nil
 
-      [{:doc, _, children} | _] ->
-        %{doc: children}
+  defp parse_children({term, _, value}, _context) when term in ~w|doc moduledoc|a,
+    do: [{term, value}] |> Enum.into(%{})
 
-      [{:spec, _, children} | _] ->
-        %{spec: Parser.Typespec.parse(children, [], context)}
+  defp parse_children({term, _, value}, context) when term in ~w|spec type|a,
+    do: [{term, Parser.Typespec.parse(value, [], context)}] |> Enum.into(%{})
 
-      [{:type, _, children} | _] ->
-        %{type: Parser.Typespec.parse(children, [], context)}
+  defp parse_children({:typedoc, _, value}, _context),
+    do: %{typedoc: Parser.maybe_list_parse(value, [])}
 
-      [{:typedoc, _, children} | _] ->
-        %{typedoc: Parser.maybe_list_parse(children, [])}
+  defp parse_children({:impl, _, value}, _context),
+    do: %{impl: Parser.maybe_list_parse(value, [])}
 
-      [{constant, _, [child]} | _] ->
-        %{
-          body: to_string(constant),
-          kind: :Attr,
-          value: Parser.parse(child, [])
-        }
+  defp parse_children({constant, _, [child]}, _context),
+    do: %{
+      body: to_string(constant),
+      kind: :Attr,
+      value: Parser.parse(child, [])
+    }
 
-      ast ->
-        Logger.warning("#{@log_message}_block/2\n #{inspect(ast)}")
-        %{unknown: "unknown attr"}
-    end
+  defp parse_children(ast, _context) do
+    Logger.warning("#{@log_message}_block/2\n #{inspect(ast)}")
+    %{unknown: "unknown attr"}
   end
 end
