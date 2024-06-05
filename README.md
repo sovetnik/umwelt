@@ -5,7 +5,7 @@ Client for [umwelt.dev](https://umwelt.dev)
 
 ### Dump
 
-Extracts Umwelt from Elixir project and dumps it into `project_name.bin`
+Extracts Umwelt from Elixir project and dumps it into `root_name.bin`
 
 ## Installation
 
@@ -15,7 +15,7 @@ by adding `umwelt` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:umwelt, "~> 0.1.0"}
+    {:umwelt, "~> 0.1"}
   ]
 end
 ```
@@ -23,6 +23,16 @@ end
 ## Usage
 
 Right now it is a proof of concept, and in this version parser can parse some business-logic related code, via `mix dump`.
+
+In common case, when you want to parse your project and it's name from `Mix.Project.config()[:app]` matches root folder name `lib/root_name`, use:
+```bash
+  mix dump
+```
+
+When you wanna parse another folder in lib, `lib/another_root_name`, use:
+```bash
+  mix dump another_root_name
+```
 
 
 ## Planned
