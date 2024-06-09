@@ -132,7 +132,7 @@ defmodule Umwelt.Parser.Operator do
       expr: Parser.parse(expr, aliases)
     }
 
-  def parse({term, _, [left, right]}, aliases),
+  def parse({term, _, [left, right]}, aliases) when is_atom(term),
     do: %{
       body: to_string(term),
       kind: :Operator,
