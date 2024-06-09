@@ -9,6 +9,15 @@ defmodule Umwelt.Parser.Defstruct do
   defp parse_children(fields, aliases),
     do: Enum.map(fields, &parse_field(&1, aliases))
 
+  def parse_field(field, aliases) when is_atom(field) do
+    %{
+      body: to_string(field),
+      kind: :Field,
+      type: %{kind: :Literal, type: :anything},
+      value: Parser.parse(nil, aliases)
+    }
+  end
+
   def parse_field({field, value}, aliases) do
     %{
       body: to_string(field),

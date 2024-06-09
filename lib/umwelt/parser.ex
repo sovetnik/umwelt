@@ -29,6 +29,8 @@ defmodule Umwelt.Parser do
   def parse({:ok, ast}),
     do: ast |> parse([]) |> index()
 
+  def parse({:error, _}), do: %{[] => %{}}
+
   def parse_root({:ok, ast}),
     do: ast |> Parser.Root.parse() |> index()
 
@@ -80,8 +82,8 @@ defmodule Umwelt.Parser do
     project
     |> Files.root_module()
     |> File.read()
-    |> Parser.read_ast()
-    |> Parser.parse_root()
+    |> read_ast()
+    |> parse_root()
   end
 
   defp parse_other_sources(project) do
