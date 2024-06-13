@@ -49,7 +49,7 @@ defmodule Umwelt.Parser.Operator do
       when is_atom(term),
       do: %{
         body: to_string(term),
-        context: module,
+        context: Enum.map(module, &to_string/1),
         kind: :Call,
         arguments: Parser.parse_list(arguments, aliases)
       }

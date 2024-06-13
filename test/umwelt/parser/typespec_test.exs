@@ -33,7 +33,7 @@ defmodule Umwelt.Parser.TypespecTest do
 
       assert %{
                kind: :Spec,
-               spec: %{context: [:String], arguments: [], body: "t", kind: :Call},
+               spec: %{context: ["String"], arguments: [], body: "t", kind: :Call},
                type: %{
                  arguments: [
                    %{body: "num", kind: :Variable, type: %{kind: :Literal, type: :integer}}
@@ -95,7 +95,7 @@ defmodule Umwelt.Parser.TypespecTest do
 
       assert %{
                kind: :Type,
-               spec: %{body: "t", kind: :Call, arguments: [], context: [:String]},
+               spec: %{body: "t", kind: :Call, arguments: [], context: ["String"]},
                type: %{body: "word", kind: :Call, arguments: []}
              } == Typespec.parse(ast, [])
     end

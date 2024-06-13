@@ -34,7 +34,7 @@ defmodule Umwelt.Parser.Root do
     %{
       body: to_string(this_module),
       kind: kind,
-      context: context,
+      context: Enum.map(context, &to_string/1),
       attrs: [],
       calls: [],
       functions: [],
