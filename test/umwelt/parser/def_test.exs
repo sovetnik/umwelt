@@ -182,7 +182,7 @@ defmodule Umwelt.Parser.DefTest do
                  default: %{
                    key: %{type: %{kind: :Literal, type: :atom}, body: "app", kind: :Value},
                    source: %{
-                     context: [:Mix, :Project],
+                     context: ["Mix", "Project"],
                      arguments: [
                        %{type: %{kind: :Literal, type: :atom}, body: "dev", kind: :Value}
                      ],
