@@ -21,7 +21,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
     assert [
              %{
                body: "StringHelpers",
-               context: [:StringHelpers],
+               context: ["StringHelpers"],
                kind: :Concept,
                attrs: [],
                calls: [],
@@ -54,7 +54,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                ],
                types: [
                  %{
-                   type: %{context: [:String], arguments: [], body: "t", kind: :Call},
+                   type: %{context: ["String"], arguments: [], body: "t", kind: :Call},
                    arguments: [],
                    body: "word",
                    kind: :Call,
@@ -143,7 +143,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      kind: :Function
                    }
                  ],
-                 context: [:Umwelt, :Parser, :Typespec],
+                 context: ["Umwelt", "Parser", "Typespec"],
                  body: "Typespec",
                  kind: :Concept,
                  guards: [],
@@ -181,7 +181,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  attrs: [],
                  body: "StringHelpers",
                  calls: [],
-                 context: [:StringHelpers],
+                 context: ["StringHelpers"],
                  functions: [],
                  guards: [],
                  kind: :Concept,
@@ -191,7 +191,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      body: "word",
                      kind: :Call,
                      note: "Description of type",
-                     type: %{arguments: [], body: "t", context: [:String], kind: :Call}
+                     type: %{arguments: [], body: "t", context: ["String"], kind: :Call}
                    }
                  ],
                  note: "Helpers for string"
@@ -251,7 +251,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      note: "days between past date and today"
                    }
                  ],
-                 context: [:Calendar],
+                 context: ["Calendar"],
                  body: "Calendar",
                  kind: :Concept,
                  guards: [],
@@ -280,7 +280,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Math",
-                 context: [:Math],
+                 context: ["Math"],
                  attrs: [],
                  calls: [
                    %{
@@ -355,7 +355,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Math",
-                 context: [:Math],
+                 context: ["Math"],
                  attrs: [],
                  calls: [],
                  functions: [%{arguments: [], body: "some_function", kind: :Function}],
@@ -410,7 +410,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      kind: :Call
                    }
                  ],
-                 context: [:Cryptoid, :Mailer],
+                 context: ["Cryptoid", "Mailer"],
                  functions: [],
                  guards: [],
                  types: [],
@@ -464,7 +464,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      kind: :Call
                    }
                  ],
-                 context: [:Example],
+                 context: ["Example"],
                  functions: [],
                  guards: [],
                  types: [],
@@ -516,7 +516,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      ],
                      body: "__using__",
                      kind: :Call,
-                     context: [:Feature]
+                     context: ["Feature"]
                    },
                    %{
                      arguments: [%{name: :Feature, path: [:Feature], kind: :Alias}],
@@ -524,7 +524,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      kind: :Call
                    }
                  ],
-                 context: [:Example],
+                 context: ["Example"],
                  functions: [],
                  guards: [],
                  types: [],
@@ -551,7 +551,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  body: "Bar",
                  kind: :Concept,
-                 context: [:Foo, :Bar],
+                 context: ["Foo", "Bar"],
                  attrs: [],
                  calls: [],
                  functions: [
@@ -595,7 +595,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  body: "Bar",
                  kind: :Concept,
-                 context: [:Foo, :Bar],
+                 context: ["Foo", "Bar"],
                  attrs: [],
                  calls: [],
                  functions: [
@@ -637,7 +637,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  body: "Bar",
                  kind: :Concept,
-                 context: [:Foo, :Bar],
+                 context: ["Foo", "Bar"],
                  attrs: [],
                  calls: [],
                  functions: [],
@@ -692,7 +692,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  body: "Bar",
                  kind: :Concept,
-                 context: [:Foo, :Bar],
+                 context: ["Foo", "Bar"],
                  functions: [
                    %{
                      body: "when",
@@ -772,7 +772,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Enumeric",
-                 context: [:Enumeric],
+                 context: ["Enumeric"],
                  attrs: [],
                  calls: [],
                  guards: [],
@@ -857,7 +857,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  body: "Bar",
                  kind: :Concept,
-                 context: [:Foo, :Bar],
+                 context: ["Foo", "Bar"],
                  attrs: [],
                  calls: [],
                  guards: [],
@@ -894,7 +894,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  attrs: [],
                  body: "Lazy",
-                 context: [:Estructura, :Lazy],
+                 context: ["Estructura", "Lazy"],
                  kind: :Concept,
                  calls: [],
                  functions: [],
@@ -910,7 +910,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        kind: :Operator,
                        expr: %{
                          left: %{
-                           context: [:Estructura, :Lazy],
+                           context: ["Estructura", "Lazy"],
                            arguments: [],
                            body: "id",
                            kind: :Call
@@ -957,7 +957,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  body: "Bar",
                  note: "Foobar description",
                  kind: :Concept,
-                 context: [:Foo, :Bar],
+                 context: ["Foo", "Bar"],
                  attrs: [],
                  calls: [],
                  guards: [],
@@ -1012,7 +1012,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  body: "Bar",
                  kind: :Concept,
-                 context: [:Foo, :Bar],
+                 context: ["Foo", "Bar"],
                  attrs: [],
                  calls: [],
                  guards: [],
@@ -1042,7 +1042,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
       assert [
                %{
-                 context: [:Foo, :Bar],
+                 context: ["Foo", "Bar"],
                  body: "Bar",
                  kind: :Concept,
                  attrs: [
@@ -1078,7 +1078,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
       assert [
                %{
-                 context: [:Foo, :Bar],
+                 context: ["Foo", "Bar"],
                  body: "Bar",
                  kind: :Concept,
                  note: "Foobar description",
@@ -1116,7 +1116,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  attrs: [],
                  body: "Formulae",
                  calls: [],
-                 context: [:Formulae],
+                 context: ["Formulae"],
                  functions: [],
                  guards: [],
                  kind: :Concept,
@@ -1136,7 +1136,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
       assert [
                %{
-                 context: [:Foo, :Bar],
+                 context: ["Foo", "Bar"],
                  body: "Bar",
                  kind: :Concept,
                  attrs: [],
@@ -1173,7 +1173,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       assert [
                %{
                  body: "Bar",
-                 context: [:Foo, :Bar],
+                 context: ["Foo", "Bar"],
                  attrs: [],
                  calls: [],
                  guards: [],
@@ -1198,7 +1198,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                [
                  %{
                    body: "Baz",
-                   context: [:Foo, :Bar, :Baz],
+                   context: ["Foo", "Bar", "Baz"],
                    attrs: [],
                    calls: [],
                    guards: [],
@@ -1275,7 +1275,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      kind: :Function
                    }
                  ],
-                 context: [:Root],
+                 context: ["Root"],
                  attrs: [],
                  calls: [],
                  guards: [],
@@ -1295,7 +1295,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        kind: :Function
                      }
                    ],
-                   context: [:Root, :Foo],
+                   context: ["Root", "Foo"],
                    attrs: [],
                    calls: [],
                    guards: [],
@@ -1319,7 +1319,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                          kind: :Function
                        }
                      ],
-                     context: [:Root, :Foo, :Bar],
+                     context: ["Root", "Foo", "Bar"],
                      attrs: [],
                      calls: [],
                      guards: [],
@@ -1344,7 +1344,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                          kind: :Function
                        }
                      ],
-                     context: [:Root, :Foo, :Baz],
+                     context: ["Root", "Foo", "Baz"],
                      attrs: [],
                      calls: [],
                      guards: [],
@@ -1374,7 +1374,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                %{
                  body: "Foo",
                  kind: :Concept,
-                 context: [:Foo],
+                 context: ["Foo"],
                  attrs: [],
                  calls: [],
                  guards: [],
@@ -1385,7 +1385,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  %{
                    body: "Bar",
                    kind: :Concept,
-                   context: [:Foo, :Bar],
+                   context: ["Foo", "Bar"],
                    attrs: [],
                    calls: [],
                    guards: [],
@@ -1400,7 +1400,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      calls: [],
                      guards: [],
                      types: [],
-                     context: [:Foo, :Bar, :Baz],
+                     context: ["Foo", "Bar", "Baz"],
                      functions: []
                    }
                  ]
@@ -1420,7 +1420,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
       assert [
                %{
-                 context: [:Foo, :Bar],
+                 context: ["Foo", "Bar"],
                  body: "Bar",
                  kind: :Concept,
                  attrs: [],
@@ -1431,7 +1431,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                },
                [
                  %{
-                   context: [:Foo, :Bar, :Baz],
+                   context: ["Foo", "Bar", "Baz"],
                    body: "Baz",
                    kind: :Concept,
                    attrs: [],

@@ -17,8 +17,12 @@ defmodule Umwelt.Parser.Defmodule do
          [{:__aliases__, _, module}, [do: block_children]],
          context
        ) do
+    path =
+      (context ++ module)
+      |> Enum.map(&to_string/1)
+
     block_children
-    |> parse_block(context ++ module)
+    |> parse_block(path)
     |> combine(%{
       body: to_string(List.last(module)),
       attrs: [],
@@ -26,7 +30,7 @@ defmodule Umwelt.Parser.Defmodule do
       guards: [],
       types: [],
       kind: :Concept,
-      context: context ++ module
+      context: path
     })
   end
 

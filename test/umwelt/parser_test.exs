@@ -125,9 +125,9 @@ defmodule Umwelt.ParserTest do
   describe "parsing ast" do
     test "general example", %{code: code} do
       assert %{
-               [:Root] => %{
+               ["Root"] => %{
                  body: "Root",
-                 context: [:Root],
+                 context: ["Root"],
                  attrs: [
                    %{
                      value: %{
@@ -161,9 +161,9 @@ defmodule Umwelt.ParserTest do
                  kind: :Root,
                  note: "Root description"
                },
-               [:Root, :Foo] => %{
+               ["Root", "Foo"] => %{
                  body: "Foo",
-                 context: [:Root, :Foo],
+                 context: ["Root", "Foo"],
                  attrs: [
                    %{
                      value: %{
@@ -199,9 +199,9 @@ defmodule Umwelt.ParserTest do
                  kind: :Concept,
                  note: "Foo description"
                },
-               [:Root, :Foo, :Bar] => %{
+               ["Root", "Foo", "Bar"] => %{
                  body: "Bar",
-                 context: [:Root, :Foo, :Bar],
+                 context: ["Root", "Foo", "Bar"],
                  attrs: [],
                  calls: [],
                  guards: [],
@@ -218,9 +218,9 @@ defmodule Umwelt.ParserTest do
                  kind: :Concept,
                  note: "Bar description"
                },
-               [:Root, :Foo, :Baz] => %{
+               ["Root", "Foo", "Baz"] => %{
                  body: "Baz",
-                 context: [:Root, :Foo, :Baz],
+                 context: ["Root", "Foo", "Baz"],
                  attrs: [],
                  calls: [],
                  guards: [],
