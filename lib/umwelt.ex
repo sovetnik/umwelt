@@ -1,5 +1,5 @@
 defmodule Umwelt do
   @moduledoc """
-  Documentation for `Umwelt`.
+  Root of `Umwelt`.
   """
 end
