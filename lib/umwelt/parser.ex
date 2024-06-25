@@ -5,6 +5,16 @@ defmodule Umwelt.Parser do
 
   alias Umwelt.{Files, Parser}
 
+  def parse_raw(code) do
+    case read_ast({:ok, code}) do
+      {:ok, ast} ->
+        parse_ast({:ok, ast})
+
+      {:error, message} ->
+        {:error, message}
+    end
+  end
+
   def parse_source(project) do
     Map.merge(
       parse_root_source(project),
@@ -12,27 +22,15 @@ defmodule Umwelt.Parser do
     )
   end
 
+  def read_ast({:ok, code}), do: Code.string_to_quoted(code)
   def read_ast({:error, msg}), do: {:error, msg}
-
-  def read_ast({:ok, code}),
-    do: Code.string_to_quoted(code)
-
-  def maybe_list_parse(ast, aliases) when is_list(ast),
-    do: parse_list(ast, aliases)
-
-  def maybe_list_parse(ast, aliases),
-    do: parse(ast, aliases)
-
-  def parse_list(ast, aliases) when is_list(ast),
-    do: Enum.map(ast, &parse(&1, aliases))
-
-  def parse({:ok, ast}),
-    do: ast |> parse([]) |> index()
-
-  def parse({:error, _}), do: %{[] => %{}}
+  def read_ast(code) when is_binary(code), do: read_ast({:ok, code})
 
   def parse_root({:ok, ast}),
     do: ast |> Parser.Root.parse() |> index()
+
+  def parse_ast({:ok, ast}), do: ast |> parse([]) |> index()
+  def parse_ast({:error, _}), do: %{[] => %{}}
 
   def parse(ast, aliases) when is_macro(ast),
     do: Parser.Macro.parse(ast, aliases)
@@ -49,6 +47,15 @@ defmodule Umwelt.Parser do
 
   def parse(ast, _aliases),
     do: Parser.Literal.parse(ast)
+
+  def maybe_list_parse(ast, aliases) when is_list(ast),
+    do: parse_list(ast, aliases)
+
+  def maybe_list_parse(ast, aliases),
+    do: parse(ast, aliases)
+
+  def parse_list(ast, aliases) when is_list(ast),
+    do: Enum.map(ast, &parse(&1, aliases))
 
   defp index(parsed) do
     parsed
@@ -89,7 +96,7 @@ defmodule Umwelt.Parser do
   defp parse_other_sources(project) do
     project
     |> Files.list_root_dir()
-    |> Enum.map(&(&1 |> File.read() |> Parser.read_ast() |> Parser.parse()))
+    |> Enum.map(&(&1 |> File.read() |> read_ast() |> parse_ast()))
     |> Enum.reduce(&Map.merge/2)
   end
 end

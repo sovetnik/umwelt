@@ -40,6 +40,193 @@ defmodule Umwelt.ParserTest do
     {:ok, code: code}
   end
 
+  describe "parse_raw" do
+    test "just a function" do
+      code = """
+        defmodule Foobar do
+          def foo(bar, baz)
+        end
+      """
+
+      assert %{
+               ["Foobar"] => %{
+                 functions: [
+                   %{
+                     arguments: [
+                       %{type: %{type: :anything, kind: :Literal}, body: "bar", kind: :Variable},
+                       %{type: %{type: :anything, kind: :Literal}, body: "baz", kind: :Variable}
+                     ],
+                     body: "foo",
+                     kind: :Function
+                   }
+                 ],
+                 context: ["Foobar"],
+                 body: "Foobar",
+                 kind: :Concept,
+                 guards: [],
+                 types: [],
+                 attrs: [],
+                 calls: []
+               }
+             } == Parser.parse_raw(code)
+    end
+
+    test "attr and function" do
+      code = """
+        defmodule Context do
+          @fizz :buzz
+          def foo(bar, baz)
+        end
+      """
+
+      assert %{
+               ["Context"] => %{
+                 functions: [
+                   %{
+                     arguments: [
+                       %{type: %{type: :anything, kind: :Literal}, body: "bar", kind: :Variable},
+                       %{type: %{type: :anything, kind: :Literal}, body: "baz", kind: :Variable}
+                     ],
+                     body: "foo",
+                     kind: :Function
+                   }
+                 ],
+                 context: ["Context"],
+                 body: "Context",
+                 kind: :Concept,
+                 guards: [],
+                 types: [],
+                 attrs: [
+                   %{
+                     value: %{type: %{type: :atom, kind: :Literal}, body: "buzz", kind: :Value},
+                     body: "fizz",
+                     kind: :Attr
+                   }
+                 ],
+                 calls: []
+               }
+             } == Parser.parse_raw(code)
+    end
+
+    test "several modules", %{code: code} do
+      assert %{
+               ["Root"] => %{
+                 functions: [
+                   %{
+                     arguments: [
+                       %{type: %{type: :anything, kind: :Literal}, body: "once", kind: :Variable}
+                     ],
+                     body: "root_one",
+                     kind: :Function
+                   },
+                   %{
+                     arguments: [
+                       %{type: %{type: :anything, kind: :Literal}, body: "twice", kind: :Variable}
+                     ],
+                     body: "root_two",
+                     kind: :Function
+                   }
+                 ],
+                 context: ["Root"],
+                 body: "Root",
+                 kind: :Concept,
+                 guards: [],
+                 types: [],
+                 attrs: [
+                   %{
+                     value: %{
+                       type: %{type: :atom, kind: :Literal},
+                       body: "root_attribute",
+                       kind: :Value
+                     },
+                     body: "root_attr",
+                     kind: :Attr
+                   }
+                 ],
+                 calls: [],
+                 note: "Root description"
+               },
+               ["Root", "Foo"] => %{
+                 functions: [
+                   %{
+                     arguments: [
+                       %{type: %{type: :anything, kind: :Literal}, body: "bar", kind: :Variable}
+                     ],
+                     body: "foo",
+                     kind: :Function
+                   }
+                 ],
+                 context: ["Root", "Foo"],
+                 body: "Foo",
+                 kind: :Concept,
+                 guards: [],
+                 types: [],
+                 attrs: [
+                   %{
+                     value: %{
+                       type: %{type: :atom, kind: :Literal},
+                       body: "baz_attribute",
+                       kind: :Value
+                     },
+                     body: "baz_attr",
+                     kind: :Attr
+                   },
+                   %{
+                     value: %{
+                       type: %{type: :atom, kind: :Literal},
+                       body: "bar_attribute",
+                       kind: :Value
+                     },
+                     body: "bar_attr",
+                     kind: :Attr
+                   }
+                 ],
+                 calls: [],
+                 note: "Foo description"
+               },
+               ["Root", "Foo", "Bar"] => %{
+                 functions: [
+                   %{
+                     arguments: [
+                       %{type: %{type: :anything, kind: :Literal}, body: "baz", kind: :Variable}
+                     ],
+                     body: "bar",
+                     kind: :Function
+                   }
+                 ],
+                 context: ["Root", "Foo", "Bar"],
+                 body: "Bar",
+                 kind: :Concept,
+                 guards: [],
+                 types: [],
+                 attrs: [],
+                 calls: [],
+                 note: "Bar description"
+               },
+               ["Root", "Foo", "Baz"] => %{
+                 functions: [
+                   %{
+                     arguments: [
+                       %{type: %{type: :anything, kind: :Literal}, body: "foo", kind: :Variable}
+                     ],
+                     body: "baz",
+                     kind: :Function
+                   }
+                 ],
+                 context: ["Root", "Foo", "Baz"],
+                 body: "Baz",
+                 kind: :Concept,
+                 guards: [],
+                 types: [],
+                 attrs: [],
+                 calls: [],
+                 note: "Baz description"
+               }
+             } ==
+               Parser.parse_raw(code)
+    end
+  end
+
   describe "reading ast" do
     test "read_ast when error" do
       assert {:error, "read failed"} ==
