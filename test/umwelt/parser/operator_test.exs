@@ -139,7 +139,13 @@ defmodule Umwelt.Parser.OperatorTest do
       assert %{
                body: "bar",
                kind: :Match,
-               term: [%{type: %{kind: :Literal, type: :atom}, body: "foo", kind: :Value}]
+               term: %{
+                 kind: :Value,
+                 type: %{kind: :Structure, type: :list},
+                 values: [
+                   %{type: %{kind: :Literal, type: :atom}, body: "foo", kind: :Value}
+                 ]
+               }
              } == Operator.parse(ast, [])
     end
   end

@@ -65,13 +65,6 @@ defmodule Umwelt.Parser.Operator do
         key: Parser.parse(key, aliases)
       }
 
-  def parse({:=, _, [left, {name, _, nil}]}, aliases) when is_list(left),
-    do: %{
-      body: to_string(name),
-      kind: :Match,
-      term: Parser.parse_list(left, aliases)
-    }
-
   def parse({:=, _, [left, {name, _, nil}]}, aliases),
     do: %{
       body: to_string(name),
