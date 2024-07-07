@@ -56,7 +56,7 @@ defmodule Umwelt.Parser.MacroTest do
                term: %{
                  kind: :Value,
                  keyword: [],
-                 type: %{name: :Bar, path: [:Bar], kind: :Alias}
+                 type: %{name: "Bar", path: ["Bar"], kind: :Alias}
                }
              } == Macro.parse(ast, [])
     end
@@ -69,7 +69,7 @@ defmodule Umwelt.Parser.MacroTest do
                kind: :Match,
                term: %{
                  kind: :Value,
-                 type: %{name: :Baz, path: [:Bar, :Baz], kind: :Alias},
+                 type: %{name: "Baz", path: ["Bar", "Baz"], kind: :Alias},
                  keyword: []
                }
              } == Macro.parse(ast, [])
@@ -83,10 +83,10 @@ defmodule Umwelt.Parser.MacroTest do
                kind: :Match,
                term: %{
                  kind: :Value,
-                 type: %{name: :Baz, path: [:Foo, :Bar, :Baz], kind: :Alias},
+                 type: %{name: "Baz", path: ["Foo", "Bar", "Baz"], kind: :Alias},
                  keyword: []
                }
-             } == Macro.parse(ast, [%{name: :Bar, path: [:Foo, :Bar], kind: :Alias}])
+             } == Macro.parse(ast, [%{name: "Bar", path: ["Foo", "Bar"], kind: :Alias}])
     end
   end
 
@@ -169,7 +169,7 @@ defmodule Umwelt.Parser.MacroTest do
                kind: :Match,
                term: %{
                  kind: :Value,
-                 type: %{name: :Foo, path: [:Foo], kind: :Alias},
+                 type: %{name: "Foo", path: ["Foo"], kind: :Alias},
                  keyword: []
                }
              } == Macro.parse(ast, [])
@@ -181,7 +181,7 @@ defmodule Umwelt.Parser.MacroTest do
       assert %{
                keyword: [],
                kind: :Value,
-               type: %{name: :Foo, path: [:Foo], kind: :Alias}
+               type: %{name: "Foo", path: ["Foo"], kind: :Alias}
              } == Macro.parse(ast, [])
     end
 

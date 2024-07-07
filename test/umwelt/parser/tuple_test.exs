@@ -77,7 +77,7 @@ defmodule Umwelt.Parser.TupleTest do
                  term: %{
                    keyword: [],
                    kind: :Value,
-                   type: %{name: :Result, path: [:Result], kind: :Alias}
+                   type: %{name: "Result", path: ["Result"], kind: :Alias}
                  }
                }
              ]

@@ -66,7 +66,7 @@ defmodule Umwelt.Parser.StructureTest do
                }
              ],
              kind: :Value,
-             type: %{name: :Foobar, path: [:Foobar], kind: :Alias}
+             type: %{name: "Foobar", path: ["Foobar"], kind: :Alias}
            } == Structure.parse(ast, [])
   end
 
