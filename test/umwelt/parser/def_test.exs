@@ -45,7 +45,7 @@ defmodule Umwelt.Parser.DefTest do
                %{
                  body: "bar",
                  kind: :Variable,
-                 type: %{name: :Baz, path: [:Bar, :Baz], kind: :Alias},
+                 type: %{name: "Baz", path: ["Bar", "Baz"], kind: :Alias},
                  keyword: []
                }
              ],
@@ -66,13 +66,13 @@ defmodule Umwelt.Parser.DefTest do
                  keyword: [],
                  kind: :Variable,
                  type: %{
-                   name: :Baz,
-                   path: [:Foo, :Bar, :Baz],
+                   name: "Baz",
+                   path: ["Foo", "Bar", "Baz"],
                    kind: :Alias
                  }
                }
              ]
-           } == Def.parse(ast, [%{name: :Bar, path: [:Foo, :Bar], kind: :Alias}])
+           } == Def.parse(ast, [%{name: "Bar", path: ["Foo", "Bar"], kind: :Alias}])
   end
 
   test "match in argument" do

@@ -10,7 +10,7 @@ defmodule Umwelt.Parser.AliasesTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{kind: :Alias, name: :Bar, path: [:Foo, :Bar]} == Aliases.parse(ast, [])
+    assert %{kind: :Alias, name: "Bar", path: ["Foo", "Bar"]} == Aliases.parse(ast, [])
   end
 
   test "parse single named alias" do
@@ -20,7 +20,8 @@ defmodule Umwelt.Parser.AliasesTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{kind: :Alias, name: [:Cfg], path: [:Estructura, :Config]} == Aliases.parse(ast, [])
+    assert %{kind: :Alias, name: "Cfg", path: ["Estructura", "Config"]} ==
+             Aliases.parse(ast, [])
   end
 
   test "parse multi alias" do
@@ -31,8 +32,8 @@ defmodule Umwelt.Parser.AliasesTest do
       |> Code.string_to_quoted()
 
     assert [
-             %{name: :Bar, path: [:Foo, :Bar], kind: :Alias},
-             %{name: :Baz, path: [:Foo, :Baz], kind: :Alias}
+             %{name: "Bar", path: ["Foo", "Bar"], kind: :Alias},
+             %{name: "Baz", path: ["Foo", "Baz"], kind: :Alias}
            ] == Aliases.parse(ast, [])
   end
 
@@ -40,19 +41,19 @@ defmodule Umwelt.Parser.AliasesTest do
     test "nothing to expand" do
       module = [:Foo]
       aliases = []
-      assert [:Foo] == Aliases.expand_module(module, aliases)
+      assert ["Foo"] == Aliases.expand_module(module, aliases)
     end
 
     test "aliases not match" do
       module = [:Foo, :Bar]
-      aliases = [%{kind: :Alias, name: :Baz, path: [:Bar, :Baz]}]
-      assert module == Aliases.expand_module(module, aliases)
+      aliases = [%{kind: :Alias, name: "Baz", path: ["Bar", "Baz"]}]
+      assert ["Foo", "Bar"] == Aliases.expand_module(module, aliases)
     end
 
     test "aliases match and module expanded" do
       module = [:Bar, :Baz]
-      aliases = [%{kind: :Alias, name: :Bar, path: [:Foo, :Bar]}]
-      assert [:Foo, :Bar, :Baz] == Aliases.expand_module(module, aliases)
+      aliases = [%{kind: :Alias, name: "Bar", path: ["Foo", "Bar"]}]
+      assert ["Foo", "Bar", "Baz"] == Aliases.expand_module(module, aliases)
     end
   end
 end

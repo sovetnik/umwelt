@@ -285,7 +285,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  calls: [
                    %{
                      arguments: [
-                       %{name: :List, path: [:List], kind: :Alias},
+                       %{name: "List", path: ["List"], kind: :Alias},
                        %{
                          type: %{kind: :Structure, type: :list},
                          values: [
@@ -382,7 +382,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  calls: [
                    %{
                      arguments: [
-                       %{name: :Mailer, path: [:Swoosh, :Mailer], kind: :Alias},
+                       %{name: "Mailer", path: ["Swoosh", "Mailer"], kind: :Alias},
                        %{
                          type: %{kind: :Structure, type: :list},
                          values: [
@@ -436,7 +436,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  calls: [
                    %{
                      arguments: [
-                       %{name: :Feature, path: [:Feature], kind: :Alias},
+                       %{name: "Feature", path: ["Feature"], kind: :Alias},
                        %{
                          type: %{kind: :Structure, type: :list},
                          values: [
@@ -519,7 +519,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                      context: ["Feature"]
                    },
                    %{
-                     arguments: [%{name: :Feature, path: [:Feature], kind: :Alias}],
+                     arguments: [%{name: "Feature", path: ["Feature"], kind: :Alias}],
                      body: "require",
                      kind: :Call
                    }
@@ -558,13 +558,13 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    %{
                      arguments: [
                        %{
-                         type: %{name: :Bar, path: [:Foo, :Bar], kind: :Alias},
+                         type: %{name: "Bar", path: ["Foo", "Bar"], kind: :Alias},
                          body: "bar",
                          kind: :Variable,
                          keyword: []
                        },
                        %{
-                         type: %{name: :Baz, path: [:Foo, :Baz], kind: :Alias},
+                         type: %{name: "Baz", path: ["Foo", "Baz"], kind: :Alias},
                          body: "baz",
                          kind: :Variable,
                          keyword: []
@@ -602,13 +602,13 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    %{
                      arguments: [
                        %{
-                         type: %{name: :Bar, path: [:Foo, :Bar], kind: :Alias},
+                         type: %{name: "Bar", path: ["Foo", "Bar"], kind: :Alias},
                          body: "bar",
                          kind: :Variable,
                          keyword: []
                        },
                        %{
-                         type: %{name: :Baz, path: [:Foo, :Baz], kind: :Alias},
+                         type: %{name: "Baz", path: ["Foo", "Baz"], kind: :Alias},
                          body: "baz",
                          kind: :Variable,
                          keyword: []
