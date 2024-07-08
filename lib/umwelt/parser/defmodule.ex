@@ -36,16 +36,16 @@ defmodule Umwelt.Parser.Defmodule do
 
   def parse_block({:__block__, _, block_children}, context) do
     block_children
-    |> Enum.map(&parse_block_child(&1, context, aliases(block_children)))
+    |> Enum.map(&parse_block_child(&1, context, aliases(block_children, context)))
     |> Enum.reject(&is_nil(&1))
   end
 
   def parse_block({:@, _, _} = ast, context),
     do: Parser.Attrs.parse(ast, context)
 
-  def parse_block({term, _, block_children} = ast, _context)
+  def parse_block({term, _, block_children} = ast, context)
       when term in ~w|def import require use|a,
-      do: [Parser.parse(ast, aliases(block_children))]
+      do: [Parser.parse(ast, aliases(block_children, context))]
 
   def parse_block({term, _, _} = ast, context)
       when term in [:@, :defguard, :defmodule, :defstruct],
@@ -84,10 +84,10 @@ defmodule Umwelt.Parser.Defmodule do
     nil
   end
 
-  defp aliases(children) do
+  defp aliases(children, context) do
     Enum.flat_map(children, fn
       {:alias, _, _} = ast ->
-        Parser.Aliases.parse(ast, [])
+        Parser.Aliases.parse(ast, [], context)
         |> List.wrap()
 
       _other ->

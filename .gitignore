@@ -24,3 +24,4 @@ umwelt-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+/trash/
