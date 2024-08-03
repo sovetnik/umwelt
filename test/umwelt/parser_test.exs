@@ -225,6 +225,18 @@ defmodule Umwelt.ParserTest do
              } ==
                Parser.parse_raw(code)
     end
+
+    test "parsing error", %{} do
+      assert {:error,
+              {[
+                 opening_delimiter: :do,
+                 expected_delimiter: :end,
+                 line: 1,
+                 column: 9,
+                 end_line: 1,
+                 end_column: 11
+               ], "missing terminator: end", ""}} == Parser.parse_raw("def foo do")
+    end
   end
 
   describe "reading ast" do
