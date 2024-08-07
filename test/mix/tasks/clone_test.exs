@@ -2,7 +2,6 @@ defmodule Mix.Tasks.CloneTest do
   use ExUnit.Case
   import ExUnit.CaptureLog
 
-  alias Bypass
   alias Mix.Tasks.Umwelt.Clone
 
   setup do

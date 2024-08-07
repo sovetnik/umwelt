@@ -28,7 +28,7 @@ defmodule Mix.Tasks.Umwelt.Clone do
 
   @impl Mix.Task
   def run([phase_id, token]) do
-    Umwelt.Client.Application.start(nil, nil)
+    Umwelt.Client.Application.start(:normal, [])
 
     Umwelt.Client.Supervisor
     |> Process.whereis()
@@ -51,11 +51,8 @@ defmodule Mix.Tasks.Umwelt.Clone do
   defp assign_host(params) do
     host =
       case Mix.env() do
-        :dev ->
-          System.get_env("UMWELT_HOST", "https://umwelt.dev")
-
-        :test ->
-          "http://localhost"
+        :test -> "http://localhost"
+        _ -> System.get_env("UMWELT_HOST", "https://umwelt.dev")
       end
 
     Map.put(params, :api_host, host)

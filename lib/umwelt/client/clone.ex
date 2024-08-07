@@ -1,7 +1,7 @@
 defmodule Umwelt.Client.Clone do
   @moduledoc "Clone main process"
 
-  use GenServer
+  use GenServer, restart: :transient, shutdown: 10_000
   require Logger
 
   alias Umwelt.Client
@@ -17,12 +17,10 @@ defmodule Umwelt.Client.Clone do
   def init(state), do: {:ok, state}
 
   def handle_cast({:pull, params}, _state) do
-    send(self(), :start_pulling)
-
-    {:noreply, params}
+    {:noreply, params, {:continue, :start_pulling}}
   end
 
-  def handle_info(:start_pulling, state) do
+  def handle_continue(:start_pulling, state) do
     case Client.Request.fetch_modules(state) do
       {:ok, modules} ->
         Logger.info("Fetching modules: #{inspect(Map.keys(modules))}")
@@ -32,15 +30,6 @@ defmodule Umwelt.Client.Clone do
         Logger.error("Failed to fetch modules: #{inspect(reason)}. Stopping...")
         Supervisor.stop(Client.Supervisor)
     end
-
-    send(self(), :spawn_fetchers)
-
-    {:noreply, state}
-  end
-
-  def handle_info(:spawn_fetchers, state) do
-    total = Client.Agent.total()
-    Logger.debug("Spawning fetchers: #{total}")
 
     Client.Agent.all_waiting()
     |> Enum.each(fn _ -> spawn_fetcher(state) end)

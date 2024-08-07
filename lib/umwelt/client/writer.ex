@@ -24,18 +24,15 @@ defmodule Umwelt.Client.Writer do
     case File.read(path) do
       {:ok, content} when content == code ->
         Logger.debug("Write #{path}: identical")
-        {path, :identical}
 
       {:ok, content} ->
-        :ok = File.write!("#{path}_", content)
+        :ok = File.write!(path <> "_", content)
         :ok = File.write!(path, code)
         Logger.debug("Write #{path}: created_with_backup")
-        {path, :created_with_backup}
 
       {:error, _reason} ->
         :ok = File.write!(path, code)
-        :ok = Logger.debug("Write #{path}: created")
-        {path, :created}
+        Logger.debug("Write #{path}: created")
     end
   end
 end
