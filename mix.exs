@@ -4,8 +4,8 @@ defmodule Umwelt.MixProject do
   def project do
     [
       app: :umwelt,
-      version: "0.1.8",
-      elixir: "~> 1.15",
+      version: "0.2.0",
+      elixir: "~> 1.17",
       compilers: [:leex, :yecc] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -21,13 +21,18 @@ defmodule Umwelt.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:inets, :logger, :public_key, :ssl],
+      mod: {Umwelt.Client.Application, []}
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:certifi, "~> 2.5"},
+      {:jason, "~> 1.2"},
+      {:progress_bar, "~> 3.0"},
+      {:bypass, "~> 2.1", only: :test},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.29", only: :dev, runtime: false}

@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Dump do
+defmodule Mix.Tasks.Umwelt.Dump do
   @moduledoc "This task for self-parse umwelt"
   @shortdoc "The lib parser"
 
