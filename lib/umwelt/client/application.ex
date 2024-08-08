@@ -6,6 +6,8 @@ defmodule Umwelt.Client.Application do
   def start(_type, _args) do
     children = [
       {Umwelt.Client.Agent, []},
+      {Task.Supervisor, name: Umwelt.Client.FetcherSupervisor},
+      {Task.Supervisor, name: Umwelt.Client.WriterSupervisor},
       {Umwelt.Client.Clone, []}
     ]
 

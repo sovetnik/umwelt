@@ -6,19 +6,20 @@ defmodule Umwelt.Client.Fetcher do
 
   alias Umwelt.Client
 
-  def start_link(module) do
-    Task.start_link(__MODULE__, :run, [module])
+  def start_link(params) do
+    Client.FetcherSupervisor
+    |> Task.Supervisor.start_child(__MODULE__, :run, [params])
   end
 
-  def run(module) do
-    case Client.Request.fetch_code(module) do
+  def run(params) do
+    case Client.Request.fetch_code(params) do
       {:ok, code} ->
-        Logger.debug("Success fetch #{module.name}")
-        send(Client.Clone, {:fetched, %{name: module.name, code: code}})
+        Logger.debug("Success fetch #{params.name}")
+        send(Client.Clone, {:fetched, %{name: params.name, code: code}})
 
       {:error, reason} ->
-        Logger.warning("Fail fetch #{module.name}: #{reason}")
-        send(Client.Clone, {:fetch_failed, module})
+        Logger.warning("Fail fetch #{params.name}: #{reason}")
+        send(Client.Clone, {:fetch_failed, params})
     end
   end
 end

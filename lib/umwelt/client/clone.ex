@@ -17,10 +17,10 @@ defmodule Umwelt.Client.Clone do
   def init(state), do: {:ok, state}
 
   def handle_cast({:pull, params}, _state) do
-    {:noreply, params, {:continue, :start_pulling}}
+    {:noreply, params, {:continue, :fetch_modules}}
   end
 
-  def handle_continue(:start_pulling, state) do
+  def handle_continue(:fetch_modules, state) do
     case Client.Request.fetch_modules(state) do
       {:ok, modules} ->
         Logger.info("Fetching modules: #{inspect(Map.keys(modules))}")
@@ -31,6 +31,10 @@ defmodule Umwelt.Client.Clone do
         Supervisor.stop(Client.Supervisor)
     end
 
+    {:noreply, state, {:continue, :start_pulling}}
+  end
+
+  def handle_continue(:start_pulling, state) do
     Client.Agent.all_waiting()
     |> Enum.each(fn _ -> spawn_fetcher(state) end)
 

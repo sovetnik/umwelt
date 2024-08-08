@@ -18,6 +18,7 @@ defmodule Umwelt.Client.WriterTest do
     Agent.update_status("Disco.Chaos", :fetched)
 
     on_exit(fn -> File.rm_rf!("umwelt_raw/temp") end)
+
     {:ok, module: module}
   end
 

@@ -6,15 +6,16 @@ defmodule Umwelt.Client.Writer do
 
   alias Umwelt.Client
 
-  def start_link(module) do
-    Task.start_link(__MODULE__, :run, [module])
+  def start_link(params) do
+    Client.WriterSupervisor
+    |> Task.Supervisor.start_child(__MODULE__, :run, [params])
   end
 
-  def run(module) do
-    module.code
+  def run(params) do
+    params.code
     |> Enum.each(fn {path, code} -> write_to_file(path, code) end)
 
-    send(Client.Clone, {:written, module.name})
+    send(Client.Clone, {:written, params.name})
   end
 
   defp write_to_file(path, code) do
