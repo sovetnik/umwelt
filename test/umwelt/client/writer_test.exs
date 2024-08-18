@@ -17,15 +17,15 @@ defmodule Umwelt.Client.WriterTest do
     Agent.add_modules(%{"Disco.Chaos" => 23})
     Agent.update_status("Disco.Chaos", :fetched)
 
-    on_exit(fn -> File.rm_rf!("umwelt_raw/temp") end)
+    on_exit(fn -> File.rm_rf!("temp") end)
 
     {:ok, module: module}
   end
 
   describe "run/1" do
     test "writes new files correctly", %{module: module} do
-      lib_path = "umwelt_raw/temp/lib/disco/chaos.ex"
-      test_path = "umwelt_raw/temp/test/disco/chaos_test.exs"
+      lib_path = "temp/lib/disco/chaos.ex"
+      test_path = "temp/test/disco/chaos_test.exs"
 
       log = capture_log(fn -> Writer.run(module) end)
 
@@ -38,8 +38,8 @@ defmodule Umwelt.Client.WriterTest do
     end
 
     test "writes identical files correctly", %{module: module} do
-      lib_path = "umwelt_raw/temp/lib/disco/chaos.ex"
-      test_path = "umwelt_raw/temp/test/disco/chaos_test.exs"
+      lib_path = "temp/lib/disco/chaos.ex"
+      test_path = "temp/test/disco/chaos_test.exs"
 
       File.mkdir_p!(Path.dirname(lib_path))
       File.write!(lib_path, "defmodule Disco.Chaos")
@@ -53,8 +53,8 @@ defmodule Umwelt.Client.WriterTest do
     end
 
     test "creates backup and writes new content", %{module: module} do
-      lib_path = "umwelt_raw/temp/lib/disco/chaos.ex"
-      test_path = "umwelt_raw/temp/test/disco/chaos_test.exs"
+      lib_path = "temp/lib/disco/chaos.ex"
+      test_path = "temp/test/disco/chaos_test.exs"
       lib_backup_path = "#{lib_path}_"
       test_backup_path = "#{test_path}_"
 

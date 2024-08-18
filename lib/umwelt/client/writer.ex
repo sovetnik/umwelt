@@ -19,7 +19,7 @@ defmodule Umwelt.Client.Writer do
   end
 
   defp write_to_file(path, code) do
-    path = Path.expand(path, "umwelt_raw")
+    path = Path.expand(path)
     path |> Path.dirname() |> File.mkdir_p!()
 
     case File.read(path) do

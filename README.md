@@ -33,6 +33,7 @@ When you wanna parse another folder in lib, `lib/another_root_name`, use:
 ### Clone
 
 Fetch and write all modules from specified phase.
+Make sure that your project name and umwelt name didn't match to avoid file corruption.
 
 When your project is ready, you can get its code and specs.
 Create a new elixir or phoenix app, add umwelt and pull the code.

@@ -10,7 +10,7 @@ defmodule Mix.Tasks.CloneTest do
 
     :ok = Application.ensure_started(:umwelt)
 
-    on_exit(fn -> File.rm_rf!("umwelt_raw/temp") end)
+    on_exit(fn -> File.rm_rf!("temp") end)
 
     {:ok, bypass: bypass}
   end
@@ -66,16 +66,12 @@ defmodule Mix.Tasks.CloneTest do
       assert capture_log([], fn -> assert :ok == Clone.run([23, "token"]) end) =~ "Done!"
 
       :timer.sleep(666)
-      assert "defmodule Disco" == File.read!("umwelt_raw/temp/lib/disco.ex")
-      assert "defmodule DiscoTest" == File.read!("umwelt_raw/temp/test/disco_test.ex")
-      assert "defmodule Disco.Chaos" == File.read!("umwelt_raw/temp/lib/disco/chaos.ex")
-      assert "defmodule Disco.ChaosTest" == File.read!("umwelt_raw/temp/test/disco/chaos_test.ex")
-      assert "defmodule Disco.Discord" == File.read!("umwelt_raw/temp/lib/disco/discord.ex")
-
-      assert "defmodule Disco.DiscordTest" ==
-               File.read!("umwelt_raw/temp/test/disco/discord_test.ex")
-
-      assert {:ok, _} = File.rm_rf("umwelt_raw/temp")
+      assert "defmodule Disco" == File.read!("temp/lib/disco.ex")
+      assert "defmodule DiscoTest" == File.read!("temp/test/disco_test.ex")
+      assert "defmodule Disco.Chaos" == File.read!("temp/lib/disco/chaos.ex")
+      assert "defmodule Disco.ChaosTest" == File.read!("temp/test/disco/chaos_test.ex")
+      assert "defmodule Disco.Discord" == File.read!("temp/lib/disco/discord.ex")
+      assert "defmodule Disco.DiscordTest" == File.read!("temp/test/disco/discord_test.ex")
     end
 
     test "when fetch unsuccessful", %{bypass: bypass} do
