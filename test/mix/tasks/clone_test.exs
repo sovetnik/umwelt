@@ -10,7 +10,10 @@ defmodule Mix.Tasks.CloneTest do
 
     :ok = Application.ensure_started(:umwelt)
 
-    on_exit(fn -> File.rm_rf!("temp") end)
+    on_exit(fn ->
+      :timer.sleep(99)
+      File.rm_rf!("temp")
+    end)
 
     {:ok, bypass: bypass}
   end
@@ -65,7 +68,6 @@ defmodule Mix.Tasks.CloneTest do
 
       assert capture_log([], fn -> assert :ok == Clone.run([23, "token"]) end) =~ "Done!"
 
-      :timer.sleep(666)
       assert "defmodule Disco" == File.read!("temp/lib/disco.ex")
       assert "defmodule DiscoTest" == File.read!("temp/test/disco_test.ex")
       assert "defmodule Disco.Chaos" == File.read!("temp/lib/disco/chaos.ex")

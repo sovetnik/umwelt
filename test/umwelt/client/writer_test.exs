@@ -17,7 +17,10 @@ defmodule Umwelt.Client.WriterTest do
     Agent.add_modules(%{"Disco.Chaos" => 23})
     Agent.update_status("Disco.Chaos", :fetched)
 
-    on_exit(fn -> File.rm_rf!("temp") end)
+    on_exit(fn ->
+      :timer.sleep(199)
+      File.rm_rf!("temp")
+    end)
 
     {:ok, module: module}
   end

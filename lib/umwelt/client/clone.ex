@@ -62,6 +62,7 @@ defmodule Umwelt.Client.Clone do
   def handle_info(:maybe_stop, state) do
     if Client.Agent.completed?() do
       Logger.debug("All modules processed. Stopping application.")
+      :timer.sleep(99)
       Supervisor.stop(Client.Supervisor)
     end
 
