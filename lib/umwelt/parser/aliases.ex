@@ -1,9 +1,10 @@
 defmodule Umwelt.Parser.Aliases do
   @moduledoc "Parses @attr AST"
 
+  alias Umwelt.Felixir.Alias
+
   def parse({:alias, _, [{:__aliases__, _, module}]}, aliases, context),
-    do: %{
-      kind: :Alias,
+    do: %Alias{
       name: module_name(module, context),
       path: full_path(module, aliases, context)
     }
@@ -13,8 +14,7 @@ defmodule Umwelt.Parser.Aliases do
         aliases,
         context
       ),
-      do: %{
-        kind: :Alias,
+      do: %Alias{
         name: module_name(alias_name, context),
         path: full_path(module, aliases, context)
       }
@@ -24,8 +24,7 @@ defmodule Umwelt.Parser.Aliases do
 
     children
     |> Enum.map(fn {:__aliases__, _, right} ->
-      %{
-        kind: :Alias,
+      %Alias{
         name: module_name(right, context),
         path: stringify_path(left_alias ++ right)
       }
@@ -33,8 +32,7 @@ defmodule Umwelt.Parser.Aliases do
   end
 
   def parse({:__aliases__, _, module}, aliases, context),
-    do: %{
-      kind: :Alias,
+    do: %Alias{
       name: module_name(module, context),
       path: full_path(module, aliases, context)
     }
@@ -47,11 +45,8 @@ defmodule Umwelt.Parser.Aliases do
     [head | rest] = module |> stringify_path()
 
     case Enum.filter(aliases, &match?(%{name: ^head}, &1)) do
-      [] ->
-        module
-
-      [%{path: path}] ->
-        path ++ rest
+      [] -> module
+      [%{path: path}] -> path ++ rest
     end
     |> stringify_path()
   end

@@ -1,6 +1,19 @@
 defmodule Umwelt.ParserTest do
   use ExUnit.Case, async: true
 
+  alias Umwelt.Felixir.{
+    Attribute,
+    Call,
+    Concept,
+    Function,
+    Literal,
+    Operator,
+    Root,
+    Structure,
+    Value,
+    Variable
+  }
+
   alias Umwelt.Parser
 
   setup do
@@ -49,24 +62,21 @@ defmodule Umwelt.ParserTest do
       """
 
       assert %{
-               ["Foobar"] => %{
+               ["Foobar"] => %Concept{
                  functions: [
-                   %{
-                     arguments: [
-                       %{type: %{type: :anything, kind: :Literal}, body: "bar", kind: :Variable},
-                       %{type: %{type: :anything, kind: :Literal}, body: "baz", kind: :Variable}
-                     ],
-                     body: "foo",
-                     kind: :Function
+                   %Function{
+                     body: %Call{
+                       name: "foo",
+                       arguments: [
+                         %Variable{body: "bar", type: %Literal{type: :anything}},
+                         %Variable{body: "baz", type: %Literal{type: :anything}}
+                       ],
+                       type: %Literal{type: :anything}
+                     }
                    }
                  ],
                  context: ["Foobar"],
-                 body: "Foobar",
-                 kind: :Concept,
-                 guards: [],
-                 types: [],
-                 attrs: [],
-                 calls: []
+                 name: "Foobar"
                }
              } == Parser.parse_raw(code)
     end
@@ -80,150 +90,123 @@ defmodule Umwelt.ParserTest do
       """
 
       assert %{
-               ["Context"] => %{
+               ["Context"] => %Concept{
                  functions: [
-                   %{
-                     arguments: [
-                       %{type: %{type: :anything, kind: :Literal}, body: "bar", kind: :Variable},
-                       %{type: %{type: :anything, kind: :Literal}, body: "baz", kind: :Variable}
-                     ],
-                     body: "foo",
-                     kind: :Function
+                   %Function{
+                     body: %Call{
+                       name: "foo",
+                       arguments: [
+                         %Variable{body: "bar", type: %Literal{type: :anything}},
+                         %Variable{body: "baz", type: %Literal{type: :anything}}
+                       ],
+                       type: %Literal{type: :anything}
+                     }
                    }
                  ],
                  context: ["Context"],
-                 body: "Context",
-                 kind: :Concept,
-                 guards: [],
-                 types: [],
+                 name: "Context",
                  attrs: [
-                   %{
-                     value: %{type: %{type: :atom, kind: :Literal}, body: "buzz", kind: :Value},
-                     body: "fizz",
-                     kind: :Attr
+                   %Attribute{
+                     name: "fizz",
+                     value: %Value{type: %Literal{type: :atom}, body: "buzz"}
                    }
-                 ],
-                 calls: []
+                 ]
                }
              } == Parser.parse_raw(code)
     end
 
     test "several modules", %{code: code} do
       assert %{
-               ["Root"] => %{
-                 functions: [
-                   %{
-                     arguments: [
-                       %{type: %{type: :anything, kind: :Literal}, body: "once", kind: :Variable}
-                     ],
-                     body: "root_one",
-                     kind: :Function
-                   },
-                   %{
-                     arguments: [
-                       %{type: %{type: :anything, kind: :Literal}, body: "twice", kind: :Variable}
-                     ],
-                     body: "root_two",
-                     kind: :Function
+               ["Root"] => %Concept{
+                 attrs: [
+                   %Attribute{
+                     name: "root_attr",
+                     value: %Value{body: "root_attribute", type: %Literal{type: :atom}}
                    }
                  ],
                  context: ["Root"],
-                 body: "Root",
-                 kind: :Concept,
-                 guards: [],
-                 types: [],
-                 attrs: [
-                   %{
-                     value: %{
-                       type: %{type: :atom, kind: :Literal},
-                       body: "root_attribute",
-                       kind: :Value
+                 functions: [
+                   %Function{
+                     body: %Call{
+                       name: "root_one",
+                       arguments: [%Variable{body: "once", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
                      },
-                     body: "root_attr",
-                     kind: :Attr
+                     impl: nil,
+                     private: false
+                   },
+                   %Function{
+                     body: %Call{
+                       name: "root_two",
+                       arguments: [%Variable{body: "twice", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
+                     },
+                     impl: nil,
+                     private: false
                    }
                  ],
-                 calls: [],
+                 name: "Root",
                  note: "Root description"
                },
-               ["Root", "Foo"] => %{
-                 functions: [
-                   %{
-                     arguments: [
-                       %{type: %{type: :anything, kind: :Literal}, body: "bar", kind: :Variable}
-                     ],
-                     body: "foo",
-                     kind: :Function
+               ["Root", "Foo"] => %Concept{
+                 attrs: [
+                   %Attribute{
+                     name: "baz_attr",
+                     value: %Value{body: "baz_attribute", type: %Literal{type: :atom}}
+                   },
+                   %Attribute{
+                     name: "bar_attr",
+                     value: %Value{body: "bar_attribute", type: %Literal{type: :atom}}
                    }
                  ],
                  context: ["Root", "Foo"],
-                 body: "Foo",
-                 kind: :Concept,
-                 guards: [],
-                 types: [],
-                 attrs: [
-                   %{
-                     value: %{
-                       type: %{type: :atom, kind: :Literal},
-                       body: "baz_attribute",
-                       kind: :Value
+                 functions: [
+                   %Function{
+                     body: %Call{
+                       name: "foo",
+                       arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
                      },
-                     body: "baz_attr",
-                     kind: :Attr
-                   },
-                   %{
-                     value: %{
-                       type: %{type: :atom, kind: :Literal},
-                       body: "bar_attribute",
-                       kind: :Value
-                     },
-                     body: "bar_attr",
-                     kind: :Attr
+                     impl: nil,
+                     private: false
                    }
                  ],
-                 calls: [],
+                 name: "Foo",
                  note: "Foo description"
                },
-               ["Root", "Foo", "Bar"] => %{
+               ["Root", "Foo", "Bar"] => %Concept{
+                 context: ["Root", "Foo", "Bar"],
                  functions: [
-                   %{
-                     arguments: [
-                       %{type: %{type: :anything, kind: :Literal}, body: "baz", kind: :Variable}
-                     ],
-                     body: "bar",
-                     kind: :Function
+                   %Function{
+                     body: %Call{
+                       name: "bar",
+                       arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
+                     },
+                     impl: nil,
+                     private: false
                    }
                  ],
-                 context: ["Root", "Foo", "Bar"],
-                 body: "Bar",
-                 kind: :Concept,
-                 guards: [],
-                 types: [],
-                 attrs: [],
-                 calls: [],
+                 name: "Bar",
                  note: "Bar description"
                },
-               ["Root", "Foo", "Baz"] => %{
+               ["Root", "Foo", "Baz"] => %Concept{
+                 context: ["Root", "Foo", "Baz"],
                  functions: [
-                   %{
-                     arguments: [
-                       %{type: %{type: :anything, kind: :Literal}, body: "foo", kind: :Variable}
-                     ],
-                     body: "baz",
-                     kind: :Function
+                   %Function{
+                     body: %Call{
+                       name: "baz",
+                       arguments: [%Variable{body: "foo", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
+                     },
+                     impl: nil,
+                     private: false
                    }
                  ],
-                 context: ["Root", "Foo", "Baz"],
-                 body: "Baz",
-                 kind: :Concept,
-                 guards: [],
-                 types: [],
-                 attrs: [],
-                 calls: [],
+                 name: "Baz",
                  note: "Baz description"
                }
-             } ==
-               Parser.parse_raw(code)
+             } == Parser.parse_raw(code)
     end
 
     test "parsing error", %{} do
@@ -247,15 +230,12 @@ defmodule Umwelt.ParserTest do
 
     test "read_ast success", %{code: code} do
       assert {:ok,
-              {
-                :defmodule,
-                [line: 1],
-                [
-                  {:__aliases__, [line: 1], [:Root]},
-                  [
-                    do: {
-                      :__block__,
-                      [],
+              {:defmodule, [line: 1],
+               [
+                 {:__aliases__, [line: 1], [:Root]},
+                 [
+                   do:
+                     {:__block__, [],
                       [
                         {:@, [line: 2], [{:moduledoc, [line: 2], ["Root description"]}]},
                         {:@, [line: 3], [{:root_attr, [line: 3], [:root_attribute]}]},
@@ -313,127 +293,102 @@ defmodule Umwelt.ParserTest do
                                 ]}
                            ]
                          ]}
-                      ]
-                    }
-                  ]
-                ]
-              }} == Parser.read_ast({:ok, code})
+                      ]}
+                 ]
+               ]}} == Parser.read_ast({:ok, code})
     end
   end
 
   describe "parsing ast" do
     test "general example", %{code: code} do
       assert %{
-               ["Root"] => %{
-                 body: "Root",
-                 context: ["Root"],
+               ["Root"] => %Root{
                  attrs: [
-                   %{
-                     value: %{
-                       type: %{kind: :Literal, type: :atom},
-                       body: "root_attribute",
-                       kind: :Value
-                     },
-                     body: "root_attr",
-                     kind: :Attr
+                   %Attribute{
+                     name: "root_attr",
+                     value: %Value{body: "root_attribute", type: %Literal{type: :atom}}
                    }
                  ],
-                 calls: [],
-                 guards: [],
-                 types: [],
+                 context: ["Root"],
                  functions: [
-                   %{
-                     arguments: [
-                       %{type: %{kind: :Literal, type: :anything}, body: "once", kind: :Variable}
-                     ],
-                     body: "root_one",
-                     kind: :Function
+                   %Function{
+                     body: %Call{
+                       name: "root_one",
+                       arguments: [%Variable{body: "once", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
+                     },
+                     impl: nil,
+                     private: false
                    },
-                   %{
-                     arguments: [
-                       %{type: %{kind: :Literal, type: :anything}, body: "twice", kind: :Variable}
-                     ],
-                     body: "root_two",
-                     kind: :Function
+                   %Function{
+                     body: %Call{
+                       name: "root_two",
+                       arguments: [%Variable{body: "twice", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
+                     },
+                     impl: nil,
+                     private: false
                    }
                  ],
-                 kind: :Root,
+                 name: "Root",
                  note: "Root description"
                },
-               ["Root", "Foo"] => %{
-                 body: "Foo",
-                 context: ["Root", "Foo"],
+               ["Root", "Foo"] => %Concept{
                  attrs: [
-                   %{
-                     value: %{
-                       type: %{kind: :Literal, type: :atom},
-                       body: "baz_attribute",
-                       kind: :Value
-                     },
-                     body: "baz_attr",
-                     kind: :Attr
+                   %Attribute{
+                     name: "baz_attr",
+                     value: %Value{body: "baz_attribute", type: %Literal{type: :atom}}
                    },
-                   %{
-                     value: %{
-                       type: %{kind: :Literal, type: :atom},
-                       body: "bar_attribute",
-                       kind: :Value
-                     },
-                     body: "bar_attr",
-                     kind: :Attr
+                   %Attribute{
+                     name: "bar_attr",
+                     value: %Value{body: "bar_attribute", type: %Literal{type: :atom}}
                    }
                  ],
-                 calls: [],
-                 guards: [],
-                 types: [],
+                 context: ["Root", "Foo"],
                  functions: [
-                   %{
-                     arguments: [
-                       %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
-                     ],
-                     body: "foo",
-                     kind: :Function
+                   %Function{
+                     body: %Call{
+                       name: "foo",
+                       arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
+                     },
+                     impl: nil,
+                     private: false
                    }
                  ],
-                 kind: :Concept,
+                 name: "Foo",
                  note: "Foo description"
                },
-               ["Root", "Foo", "Bar"] => %{
-                 body: "Bar",
+               ["Root", "Foo", "Bar"] => %Concept{
                  context: ["Root", "Foo", "Bar"],
-                 attrs: [],
-                 calls: [],
-                 guards: [],
-                 types: [],
                  functions: [
-                   %{
-                     arguments: [
-                       %{type: %{kind: :Literal, type: :anything}, body: "baz", kind: :Variable}
-                     ],
-                     body: "bar",
-                     kind: :Function
+                   %Function{
+                     body: %Call{
+                       name: "bar",
+                       arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
+                     },
+                     impl: nil,
+                     private: false
                    }
                  ],
-                 kind: :Concept,
+                 name: "Bar",
                  note: "Bar description"
                },
-               ["Root", "Foo", "Baz"] => %{
-                 body: "Baz",
+               ["Root", "Foo", "Baz"] => %Concept{
                  context: ["Root", "Foo", "Baz"],
-                 attrs: [],
-                 calls: [],
-                 guards: [],
-                 types: [],
                  functions: [
-                   %{
-                     arguments: [
-                       %{type: %{kind: :Literal, type: :anything}, body: "foo", kind: :Variable}
-                     ],
-                     body: "baz",
-                     kind: :Function
+                   %Function{
+                     body: %Call{
+                       name: "baz",
+                       arguments: [%Variable{body: "foo", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
+                     },
+                     impl: nil,
+                     private: false
                    }
                  ],
-                 kind: :Concept,
+                 name: "Baz",
                  note: "Baz description"
                }
              } ==
@@ -451,24 +406,26 @@ defmodule Umwelt.ParserTest do
         """
         |> Code.string_to_quoted()
 
-      assert %{
-               body: "when",
-               kind: :Operator,
-               left: %{
-                 arguments: [
-                   %{body: "a", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-                   %{body: "b", kind: :Variable, type: %{kind: :Literal, type: :anything}}
-                 ],
-                 body: "bar",
-                 kind: :Call
+      assert %Function{
+               body: %Operator{
+                 name: "when",
+                 left: %Call{
+                   name: "bar",
+                   arguments: [
+                     %Variable{body: "a", type: %Literal{type: :anything}},
+                     %Variable{body: "b", type: %Literal{type: :anything}}
+                   ],
+                   type: %Literal{type: :anything}
+                 },
+                 right: %Operator{
+                   name: "and",
+                   left: %Variable{body: "a", type: %Literal{type: :anything}},
+                   right: %Variable{body: "b", type: %Literal{type: :anything}}
+                 }
                },
-               right: %{
-                 body: "and",
-                 kind: :Operator,
-                 left: %{body: "a", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-                 right: %{body: "b", kind: :Variable, type: %{kind: :Literal, type: :anything}}
-               }
-             } == Parser.parse(ast, [])
+               impl: nil,
+               private: false
+             } == Parser.parse(ast, [], [])
     end
 
     test "kernel operator" do
@@ -480,97 +437,85 @@ defmodule Umwelt.ParserTest do
         """
         |> Code.string_to_quoted()
 
-      assert %{
-               body: "when",
-               kind: :Operator,
-               left: %{
-                 arguments: [
-                   %{body: "a", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-                   %{body: "b", kind: :Variable, type: %{kind: :Literal, type: :anything}}
-                 ],
-                 body: "bar",
-                 kind: :Call
+      assert %Function{
+               body: %Operator{
+                 name: "when",
+                 left: %Call{
+                   name: "bar",
+                   arguments: [
+                     %Variable{body: "a", type: %Literal{type: :anything}},
+                     %Variable{body: "b", type: %Literal{type: :anything}}
+                   ],
+                   type: %Literal{type: :anything}
+                 },
+                 right: %Operator{
+                   name: "and",
+                   left: %Variable{body: "a", type: %Literal{type: :anything}},
+                   right: %Variable{body: "b", type: %Literal{type: :anything}}
+                 }
                },
-               right: %{
-                 body: "and",
-                 kind: :Operator,
-                 left: %{body: "a", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-                 right: %{body: "b", kind: :Variable, type: %{kind: :Literal, type: :anything}}
-               }
-             } == Parser.parse(ast, [])
+               impl: nil,
+               private: false
+             } == Parser.parse(ast, [], [])
     end
 
     test "tuple pair" do
       {:ok, ast} = Code.string_to_quoted("{:ok, msg}")
 
-      assert %{
-               kind: :Value,
-               type: %{kind: :Structure, type: :tuple},
+      assert %Structure{
+               type: %Literal{type: :tuple},
                elements: [
-                 %{body: "ok", kind: :Value, type: %{kind: :Literal, type: :atom}},
-                 %{body: "msg", kind: :Variable, type: %{kind: :Literal, type: :anything}}
+                 %Value{body: "ok", type: %Literal{type: :atom}},
+                 %Variable{body: "msg", type: %Literal{type: :anything}}
                ]
-             } == Parser.parse(ast, [[:Foo, :Bar]])
+             } == Parser.parse(ast, [[:Foo, :Bar]], [])
     end
 
     test "string value" do
       {:ok, ast} = Code.string_to_quoted("\"foo\"")
 
-      assert %{
-               body: "foo",
-               kind: :Value,
-               type: %{kind: :Literal, type: :binary}
-             } == Parser.parse(ast, [[:Foo, :Bar]])
+      assert %Value{body: "foo", type: %Literal{type: :string}} ==
+               Parser.parse(ast, [[:Foo, :Bar]], [])
     end
 
     test "raw string" do
       {:ok, ast} = Code.string_to_quoted("<<1,2,3>>")
 
-      assert %{
-               kind: :Value,
-               type: %{kind: :Structure, type: :bitstring},
-               bits: [
-                 %{type: %{kind: :Literal, type: :integer}, body: "1", kind: :Value},
-                 %{type: %{kind: :Literal, type: :integer}, body: "2", kind: :Value},
-                 %{type: %{kind: :Literal, type: :integer}, body: "3", kind: :Value}
+      assert %Structure{
+               type: %Literal{type: :bitstring},
+               elements: [
+                 %Value{type: %Literal{type: :integer}, body: "1"},
+                 %Value{type: %Literal{type: :integer}, body: "2"},
+                 %Value{type: %Literal{type: :integer}, body: "3"}
                ]
-             } == Parser.parse(ast, [[:Foo, :Bar]])
+             } == Parser.parse(ast, [[:Foo, :Bar]], [])
     end
 
     test "tuple value" do
       {:ok, ast} = Code.string_to_quoted("{:ok, 13}")
 
-      assert %{
-               kind: :Value,
-               type: %{kind: :Structure, type: :tuple},
+      assert %Structure{
+               type: %Literal{type: :tuple},
                elements: [
-                 %{body: "ok", kind: :Value, type: %{kind: :Literal, type: :atom}},
-                 %{body: "13", kind: :Value, type: %{kind: :Literal, type: :integer}}
+                 %Value{body: "ok", type: %Literal{type: :atom}},
+                 %Value{body: "13", type: %Literal{type: :integer}}
                ]
-             } == Parser.parse(ast, [[:Foo, :Bar]])
+             } == Parser.parse(ast, [[:Foo, :Bar]], [])
     end
 
     test "value list with pipe" do
       {:ok, ast} = Code.string_to_quoted("[head | tail]")
 
-      assert %{
-               kind: :Value,
-               type: %{kind: :Structure, type: :list},
-               values: [
-                 %{
-                   body: "|",
-                   kind: :Pipe,
-                   left: %{
-                     type: %{type: :anything, kind: :Literal},
-                     body: "head",
-                     kind: :Variable
-                   },
-                   right: [
-                     %{type: %{type: :anything, kind: :Literal}, body: "tail", kind: :Variable}
-                   ]
+      assert %Structure{
+               type: %Literal{type: :list},
+               elements: [
+                 %Operator{
+                   left: %Variable{body: "head", type: %Literal{type: :anything}},
+                   right: %Variable{body: "tail", type: %Literal{type: :anything}},
+                   name: "alter"
                  }
                ]
-             } == Parser.parse(ast, [])
+             } == Parser.parse(ast, [], [])
     end
   end
 end

@@ -4,7 +4,7 @@ defmodule Umwelt.MixProject do
   def project do
     [
       app: :umwelt,
-      version: "0.2.0",
+      version: "0.3.0",
       elixir: "~> 1.17",
       compilers: [:leex, :yecc] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -14,7 +14,8 @@ defmodule Umwelt.MixProject do
       description: "Umwelt is an Elixir parser for umwelt.dev",
       package: package(),
       homepage_url: "https://umwelt.dev/",
-      source_url: "https://github.com/sovetnik/umwelt"
+      source_url: "https://github.com/sovetnik/umwelt",
+      test_coverage: [summary: [threshold: 88]]
     ]
   end
 

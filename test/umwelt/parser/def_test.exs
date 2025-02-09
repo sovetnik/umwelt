@@ -1,7 +1,19 @@
 defmodule Umwelt.Parser.DefTest do
   use ExUnit.Case, async: true
 
-  alias Umwelt.Parser.Def
+  alias Umwelt.Felixir.{
+    Alias,
+    Call,
+    Concept,
+    Function,
+    Literal,
+    Operator,
+    Structure,
+    Value,
+    Variable
+  }
+
+  alias Umwelt.Parser.{Def, Defmodule}
 
   test "arity/0" do
     {:ok, ast} =
@@ -11,11 +23,12 @@ defmodule Umwelt.Parser.DefTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{
-             arguments: [],
-             body: "div",
-             kind: :Function
-           } == Def.parse(ast, [])
+    assert %Function{
+             body: %Call{
+               name: "div",
+               type: %Literal{type: :anything}
+             }
+           } == Def.parse(ast, [], [])
   end
 
   test "simpliest case" do
@@ -27,52 +40,117 @@ defmodule Umwelt.Parser.DefTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{
-             arguments: [
-               %{body: "a", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-               %{body: "b", kind: :Variable, type: %{kind: :Literal, type: :anything}}
-             ],
-             body: "div",
-             kind: :Function
-           } == Def.parse(ast, [])
+    assert %Function{
+             body: %Call{
+               name: "div",
+               arguments: [
+                 %Variable{body: "a", type: %Literal{type: :anything}},
+                 %Variable{body: "b", type: %Literal{type: :anything}}
+               ]
+             }
+           } == Def.parse(ast, [], [])
+  end
+
+  test "keyword arg" do
+    {:ok, ast} =
+      """
+        def boogie(a, b: c) do
+          a / b
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert %Function{
+             body: %Call{
+               name: "boogie",
+               arguments: [
+                 %Variable{body: "a", type: %Literal{type: :anything}},
+                 %Structure{
+                   type: %Literal{type: :list},
+                   elements: [
+                     %Structure{
+                       type: %Literal{type: :tuple},
+                       elements: [
+                         %Value{body: "b", type: %Literal{type: :atom}},
+                         %Variable{body: "c", type: %Literal{type: :anything}}
+                       ]
+                     }
+                   ]
+                 }
+               ],
+               type: %Literal{type: :anything}
+             }
+           } == Def.parse(ast, [], [])
+  end
+
+  test "keyword list arg" do
+    {:ok, ast} =
+      """
+        def woogie([a, b: c]) do
+          a / b
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert %Function{
+             body: %Call{
+               name: "woogie",
+               arguments: [
+                 %Structure{
+                   type: %Literal{type: :list},
+                   elements: [
+                     %Variable{body: "a", type: %Literal{type: :anything}},
+                     %Structure{
+                       type: %Literal{type: :tuple},
+                       elements: [
+                         %Value{body: "b", type: %Literal{type: :atom}},
+                         %Variable{body: "c", type: %Literal{type: :anything}}
+                       ]
+                     }
+                   ]
+                 }
+               ],
+               type: %Literal{type: :anything}
+             }
+           } == Def.parse(ast, [], [])
   end
 
   test "typed variable Bar.Baz" do
     {:ok, ast} = Code.string_to_quoted("def foo(%Bar.Baz{} = bar)")
 
-    assert %{
-             arguments: [
-               %{
-                 body: "bar",
-                 kind: :Variable,
-                 type: %{name: "Baz", path: ["Bar", "Baz"], kind: :Alias},
-                 keyword: []
-               }
-             ],
-             body: "foo",
-             kind: :Function
-           } == Def.parse(ast, [])
+    assert %Function{
+             body: %Call{
+               name: "foo",
+               arguments: [
+                 %Operator{
+                   name: "match",
+                   left: %Structure{type: %Alias{name: "Baz", path: ["Bar", "Baz"]}},
+                   right: %Variable{body: "bar", type: %Literal{type: :anything}}
+                 }
+               ],
+               type: %Literal{type: :anything}
+             }
+           } == Def.parse(ast, [], [])
   end
 
   test "typed variable Bar.Baz aliased" do
     {:ok, ast} = Code.string_to_quoted("def foo(%Bar.Baz{} = bar)")
 
-    assert %{
-             body: "foo",
-             kind: :Function,
-             arguments: [
-               %{
-                 body: "bar",
-                 keyword: [],
-                 kind: :Variable,
-                 type: %{
-                   name: "Baz",
-                   path: ["Foo", "Bar", "Baz"],
-                   kind: :Alias
+    assert %Function{
+             body: %Call{
+               name: "foo",
+               arguments: [
+                 %Operator{
+                   name: "match",
+                   left: %Structure{
+                     type: %Alias{name: "Baz", path: ["Foo", "Bar", "Baz"]}
+                   },
+                   right: %Variable{body: "bar", type: %Literal{type: :anything}}
                  }
-               }
-             ]
-           } == Def.parse(ast, [%{name: "Bar", path: ["Foo", "Bar"], kind: :Alias}])
+               ],
+               type: %Literal{type: :anything}
+             }
+           } == Def.parse(ast, [%Alias{name: "Bar", path: ["Foo", "Bar"]}], [])
   end
 
   test "match in argument" do
@@ -83,22 +161,26 @@ defmodule Umwelt.Parser.DefTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{
-             kind: :Function,
-             body: "foo",
-             arguments: [
-               %{
-                 body: "result",
-                 kind: :Variable,
-                 type: %{kind: :Structure, type: :tuple},
-                 elements: [
-                   %{type: %{kind: :Literal, type: :atom}, body: "ok", kind: :Value},
-                   %{type: %{kind: :Literal, type: :anything}, body: "term", kind: :Variable}
-                 ]
-               },
-               %{body: "count", kind: :Variable, type: %{kind: :Literal, type: :anything}}
-             ]
-           } == Def.parse(ast, [])
+    assert %Function{
+             body: %Call{
+               name: "foo",
+               arguments: [
+                 %Operator{
+                   name: "match",
+                   left: %Structure{
+                     type: %Literal{type: :tuple},
+                     elements: [
+                       %Value{body: "ok", type: %Literal{type: :atom}},
+                       %Variable{body: "term", type: %Literal{type: :anything}}
+                     ]
+                   },
+                   right: %Variable{body: "result", type: %Literal{type: :anything}}
+                 },
+                 %Variable{body: "count", type: %Literal{type: :anything}}
+               ],
+               type: %Literal{type: :anything}
+             }
+           } == Def.parse(ast, [], [])
   end
 
   test "list match [head | tail] value in argument" do
@@ -109,19 +191,24 @@ defmodule Umwelt.Parser.DefTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{
-             arguments: [
-               %{
-                 body: "_",
-                 kind: :Value,
-                 type: %{kind: :Structure, type: :list},
-                 head: %{type: %{kind: :Literal, type: :anything}, body: "head", kind: :Variable},
-                 tail: %{type: %{kind: :Literal, type: :anything}, body: "tail", kind: :Variable}
-               }
-             ],
-             body: "reverse",
-             kind: :Function
-           } == Def.parse(ast, [])
+    assert %Function{
+             body: %Call{
+               name: "reverse",
+               arguments: [
+                 %Structure{
+                   type: %Literal{type: :list},
+                   elements: [
+                     %Operator{
+                       name: "alter",
+                       left: %Variable{body: "head", type: %Literal{type: :anything}},
+                       right: %Variable{body: "tail", type: %Literal{type: :anything}}
+                     }
+                   ]
+                 }
+               ],
+               type: %Literal{type: :anything}
+             }
+           } == Def.parse(ast, [], [])
   end
 
   test "list match [head | tail] variable in argument" do
@@ -132,35 +219,28 @@ defmodule Umwelt.Parser.DefTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{
-             arguments: [
-               %{
-                 body: "list",
-                 kind: :Variable,
-                 type: %{kind: :Structure, type: :list},
-                 values: [
-                   %{
-                     left: %{
-                       type: %{type: :anything, kind: :Literal},
-                       body: "first",
-                       kind: :Variable
-                     },
-                     right: [
-                       %{
-                         type: %{type: :anything, kind: :Literal},
-                         body: "rest",
-                         kind: :Variable
+    assert %Function{
+             body: %Call{
+               name: "reverse",
+               arguments: [
+                 %Operator{
+                   name: "match",
+                   left: %Structure{
+                     type: %Literal{type: :list},
+                     elements: [
+                       %Operator{
+                         name: "alter",
+                         left: %Variable{body: "first", type: %Literal{type: :anything}},
+                         right: %Variable{body: "rest", type: %Literal{type: :anything}}
                        }
-                     ],
-                     body: "|",
-                     kind: :Pipe
-                   }
-                 ]
-               }
-             ],
-             body: "reverse",
-             kind: :Function
-           } == Def.parse(ast, [])
+                     ]
+                   },
+                   right: %Variable{body: "list", type: %Literal{type: :anything}}
+                 }
+               ],
+               type: %Literal{type: :anything}
+             }
+           } == Def.parse(ast, [], [])
   end
 
   test "method call in argument" do
@@ -172,30 +252,29 @@ defmodule Umwelt.Parser.DefTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{
-             body: "list_from_root",
-             kind: :Function,
-             arguments: [
-               %{body: "path", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-               %{
-                 body: "project",
-                 default: %{
-                   key: %{type: %{kind: :Literal, type: :atom}, body: "app", kind: :Value},
-                   source: %{
-                     context: ["Mix", "Project"],
-                     arguments: [
-                       %{type: %{kind: :Literal, type: :atom}, body: "dev", kind: :Value}
-                     ],
-                     body: "config",
-                     kind: :Call
-                   },
-                   kind: :Access
-                 },
-                 kind: :Variable,
-                 type: %{kind: :Literal, type: :anything}
-               }
-             ]
-           } == Def.parse(ast, [])
+    assert %Function{
+             body: %Call{
+               name: "list_from_root",
+               arguments: [
+                 %Variable{body: "path", type: %Literal{type: :anything}},
+                 %Operator{
+                   name: "default",
+                   left: %Variable{body: "project", type: %Literal{type: :anything}},
+                   right: %Operator{
+                     name: "access",
+                     left: %Call{
+                       name: "config",
+                       arguments: [%Value{body: "dev", type: %Literal{type: :atom}}],
+                       context: ["Mix", "Project"],
+                       type: %Literal{type: :anything}
+                     },
+                     right: %Value{body: "app", type: %Literal{type: :atom}}
+                   }
+                 }
+               ],
+               type: %Literal{type: :anything}
+             }
+           } == Def.parse(ast, [], [])
   end
 
   describe "functions with guards" do
@@ -210,58 +289,50 @@ defmodule Umwelt.Parser.DefTest do
         """
         |> Code.string_to_quoted()
 
-      assert %{
-               body: "when",
-               kind: :Operator,
-               left: %{
-                 arguments: [
-                   %{type: %{kind: :Literal, type: :anything}, body: "ast", kind: :Variable},
-                   %{type: %{kind: :Literal, type: :anything}, body: "_aliases", kind: :Variable}
-                 ],
-                 body: "parse_tuple_child",
-                 kind: :Call
-               },
-               right: %{
-                 body: "or",
-                 kind: :Operator,
-                 left: %{
-                   body: "or",
-                   kind: :Operator,
-                   left: %{
-                     body: "or",
-                     kind: :Operator,
-                     left: %{
-                       body: "is_atom",
-                       kind: :Call,
-                       arguments: [
-                         %{type: %{kind: :Literal, type: :anything}, body: "ast", kind: :Variable}
-                       ]
+      assert %Function{
+               body: %Operator{
+                 name: "when",
+                 left: %Call{
+                   name: "parse_tuple_child",
+                   arguments: [
+                     %Variable{body: "ast", type: %Literal{type: :anything}},
+                     %Variable{body: "_aliases", type: %Literal{type: :anything}}
+                   ],
+                   type: %Literal{type: :anything}
+                 },
+                 right: %Operator{
+                   name: "or",
+                   left: %Operator{
+                     name: "or",
+                     left: %Operator{
+                       name: "or",
+                       left: %Call{
+                         name: "is_atom",
+                         arguments: [%Variable{body: "ast", type: %Literal{type: :anything}}],
+                         type: %Literal{type: :anything}
+                       },
+                       right: %Call{
+                         name: "is_binary",
+                         arguments: [%Variable{body: "ast", type: %Literal{type: :anything}}],
+                         type: %Literal{type: :anything}
+                       }
                      },
-                     right: %{
-                       body: "is_binary",
-                       kind: :Call,
-                       arguments: [
-                         %{type: %{kind: :Literal, type: :anything}, body: "ast", kind: :Variable}
-                       ]
+                     right: %Call{
+                       name: "is_integer",
+                       arguments: [%Variable{body: "ast", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
                      }
                    },
-                   right: %{
-                     body: "is_integer",
-                     kind: :Call,
-                     arguments: [
-                       %{type: %{kind: :Literal, type: :anything}, body: "ast", kind: :Variable}
-                     ]
+                   right: %Call{
+                     name: "is_float",
+                     arguments: [%Variable{body: "ast", type: %Literal{type: :anything}}],
+                     type: %Literal{type: :anything}
                    }
-                 },
-                 right: %{
-                   body: "is_float",
-                   kind: :Call,
-                   arguments: [
-                     %{type: %{kind: :Literal, type: :anything}, body: "ast", kind: :Variable}
-                   ]
                  }
-               }
-             } == Def.parse(ast, [])
+               },
+               impl: nil,
+               private: false
+             } == Def.parse(ast, [], [])
     end
 
     test "parse with or guard" do
@@ -274,36 +345,34 @@ defmodule Umwelt.Parser.DefTest do
         """
         |> Code.string_to_quoted()
 
-      assert %{
-               body: "when",
-               kind: :Operator,
-               left: %{
-                 arguments: [
-                   %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable},
-                   %{type: %{kind: :Literal, type: :anything}, body: "baz", kind: :Variable}
-                 ],
-                 body: "foo",
-                 kind: :Call
+      assert %Function{
+               body: %Operator{
+                 name: "when",
+                 left: %Call{
+                   name: "foo",
+                   arguments: [
+                     %Variable{body: "bar", type: %Literal{type: :anything}},
+                     %Variable{body: "baz", type: %Literal{type: :anything}}
+                   ],
+                   type: %Literal{type: :anything}
+                 },
+                 right: %Operator{
+                   name: "or",
+                   left: %Call{
+                     name: "is_integer",
+                     arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
+                     type: %Literal{type: :anything}
+                   },
+                   right: %Call{
+                     name: "is_float",
+                     arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
+                     type: %Literal{type: :anything}
+                   }
+                 }
                },
-               right: %{
-                 left: %{
-                   arguments: [
-                     %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
-                   ],
-                   body: "is_integer",
-                   kind: :Call
-                 },
-                 right: %{
-                   arguments: [
-                     %{type: %{kind: :Literal, type: :anything}, body: "baz", kind: :Variable}
-                   ],
-                   body: "is_float",
-                   kind: :Call
-                 },
-                 body: "or",
-                 kind: :Operator
-               }
-             } == Def.parse(ast, [])
+               impl: nil,
+               private: false
+             } == Def.parse(ast, [], [])
     end
 
     test "parse with many guards" do
@@ -316,36 +385,32 @@ defmodule Umwelt.Parser.DefTest do
         """
         |> Code.string_to_quoted()
 
-      assert %{
-               body: "when",
-               kind: :Operator,
-               left: %{
-                 arguments: [
-                   %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable},
-                   %{type: %{kind: :Literal, type: :anything}, body: "baz", kind: :Variable}
-                 ],
-                 body: "foo",
-                 kind: :Call
-               },
-               right: %{
-                 left: %{
+      assert %Function{
+               body: %Operator{
+                 name: "when",
+                 left: %Call{
+                   name: "foo",
                    arguments: [
-                     %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
+                     %Variable{body: "bar", type: %Literal{type: :anything}},
+                     %Variable{body: "baz", type: %Literal{type: :anything}}
                    ],
-                   body: "is_integer",
-                   kind: :Call
+                   type: %Literal{type: :anything}
                  },
-                 right: %{
-                   arguments: [
-                     %{type: %{kind: :Literal, type: :anything}, body: "baz", kind: :Variable}
-                   ],
-                   body: "is_float",
-                   kind: :Call
-                 },
-                 body: "when",
-                 kind: :Operator
+                 right: %Operator{
+                   name: "when",
+                   left: %Call{
+                     name: "is_integer",
+                     arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
+                     type: %Literal{type: :anything}
+                   },
+                   right: %Call{
+                     name: "is_float",
+                     arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
+                     type: %Literal{type: :anything}
+                   }
+                 }
                }
-             } == Def.parse(ast, [])
+             } == Def.parse(ast, [], [])
     end
 
     test "parse with guard and default value" do
@@ -358,45 +423,194 @@ defmodule Umwelt.Parser.DefTest do
         """
         |> Code.string_to_quoted()
 
-      assert %{
-               body: "when",
-               kind: :Operator,
-               left: %{
-                 body: "increase",
-                 kind: :Call,
-                 arguments: [
-                   %{type: %{kind: :Literal, type: :anything}, body: "num", kind: :Variable},
-                   %{
-                     body: "add",
-                     default: %{
-                       type: %{kind: :Literal, type: :integer},
-                       body: "1",
-                       kind: :Value
-                     },
-                     kind: :Variable,
-                     type: %{kind: :Literal, type: :anything}
-                   }
-                 ]
-               },
-               right: %{
-                 body: "or",
-                 kind: :Operator,
-                 left: %{
+      assert %Function{
+               body: %Operator{
+                 left: %Call{
                    arguments: [
-                     %{type: %{kind: :Literal, type: :anything}, body: "num", kind: :Variable}
+                     %Variable{body: "num", type: %Literal{type: :anything}},
+                     %Operator{
+                       left: %Variable{body: "add", type: %Literal{type: :anything}},
+                       name: "default",
+                       right: %Value{body: "1", type: %Literal{type: :integer}}
+                     }
                    ],
-                   body: "is_integer",
-                   kind: :Call
+                   name: "increase",
+                   type: %Literal{type: :anything}
                  },
-                 right: %{
-                   arguments: [
-                     %{type: %{kind: :Literal, type: :anything}, body: "num", kind: :Variable}
-                   ],
-                   body: "is_float",
-                   kind: :Call
+                 name: "when",
+                 right: %Operator{
+                   left: %Call{
+                     arguments: [%Variable{body: "num", type: %Literal{type: :anything}}],
+                     name: "is_integer",
+                     type: %Literal{type: :anything}
+                   },
+                   name: "or",
+                   right: %Call{
+                     arguments: [%Variable{body: "num", type: %Literal{type: :anything}}],
+                     name: "is_float",
+                     type: %Literal{type: :anything}
+                   }
                  }
                }
-             } == Def.parse(ast, [])
+             } == Def.parse(ast, [], [])
+    end
+
+    test "parse in module with guard and default value" do
+      {:ok, ast} =
+        ~S"""
+        defmodule Foo.Bar do
+          @moduledoc "Structures examples"
+          def foobar(foo) when foo in [:bar, :baz]
+        end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %Concept{
+                 name: "Bar",
+                 note: "Structures examples",
+                 context: ["Foo", "Bar"],
+                 functions: [
+                   %Function{
+                     body: %Operator{
+                       name: "when",
+                       left: %Call{
+                         name: "foobar",
+                         arguments: [%Variable{body: "foo", type: %Literal{type: :anything}}],
+                         context: ["Foo", "Bar"],
+                         type: %Literal{type: :anything}
+                       },
+                       right: %Operator{
+                         name: "membership",
+                         left: %Variable{body: "foo", type: %Literal{type: :anything}},
+                         right: [
+                           %Value{body: "bar", type: %Literal{type: :atom}},
+                           %Value{body: "baz", type: %Literal{type: :atom}}
+                         ]
+                       }
+                     },
+                     private: false,
+                     impl: nil
+                   }
+                 ]
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+  end
+
+  describe "multiple clauses" do
+    test "matching arguments" do
+      {:ok, ast} =
+        ~S"""
+              defmodule Foo.Bar do
+                @moduledoc "Matching examples"
+                @doc "Head of fizzbuzz/2"
+                @spec fizzbuzz(list, integer) :: atom
+                def fizzbuzz(matches, number) 
+                def fizzbuzz([], number), do: number
+                def fizzbuzz([:fizz], number), do: :fizz
+                def fizzbuzz([:buzz], number), do: :buzz
+                def fizzbuzz([:fizz, :buzz], number), do: :fizzbuzz
+              end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %Concept{
+                 name: "Bar",
+                 note: "Matching examples",
+                 context: ["Foo", "Bar"],
+                 functions: [
+                   %Function{
+                     body: %Call{
+                       name: "fizzbuzz",
+                       arguments: [
+                         %Variable{body: "matches", type: %Literal{type: :list}},
+                         %Variable{body: "number", type: %Literal{type: :integer}}
+                       ],
+                       context: [],
+                       note: "",
+                       type: %Literal{type: :atom}
+                     },
+                     impl: nil,
+                     note: "Head of fizzbuzz/2",
+                     private: false
+                   },
+                   %Function{
+                     private: false,
+                     impl: nil,
+                     body: %Call{
+                       name: "fizzbuzz",
+                       note: "",
+                       arguments: [
+                         %Structure{type: %Literal{type: :list}, elements: []},
+                         %Variable{body: "number", type: %Literal{type: :anything}}
+                       ],
+                       context: [],
+                       type: %Literal{type: :anything}
+                     },
+                     note: ""
+                   },
+                   %Function{
+                     private: false,
+                     impl: nil,
+                     body: %Call{
+                       name: "fizzbuzz",
+                       note: "",
+                       arguments: [
+                         %Structure{
+                           type: %Literal{type: :list},
+                           elements: [%Value{body: "fizz", type: %Literal{type: :atom}}]
+                         },
+                         %Variable{body: "number", type: %Literal{type: :anything}}
+                       ],
+                       context: [],
+                       type: %Literal{type: :anything}
+                     },
+                     note: ""
+                   },
+                   %Function{
+                     private: false,
+                     impl: nil,
+                     body: %Call{
+                       name: "fizzbuzz",
+                       note: "",
+                       arguments: [
+                         %Structure{
+                           type: %Literal{type: :list},
+                           elements: [%Value{body: "buzz", type: %Literal{type: :atom}}]
+                         },
+                         %Variable{body: "number", type: %Literal{type: :anything}}
+                       ],
+                       context: [],
+                       type: %Literal{type: :anything}
+                     },
+                     note: ""
+                   },
+                   %Function{
+                     private: false,
+                     impl: nil,
+                     body: %Call{
+                       name: "fizzbuzz",
+                       note: "",
+                       arguments: [
+                         %Structure{
+                           type: %Literal{type: :list},
+                           elements: [
+                             %Value{body: "fizz", type: %Literal{type: :atom}},
+                             %Value{body: "buzz", type: %Literal{type: :atom}}
+                           ]
+                         },
+                         %Variable{body: "number", type: %Literal{type: :anything}}
+                       ],
+                       context: [],
+                       type: %Literal{type: :anything}
+                     },
+                     note: ""
+                   }
+                 ]
+               }
+             ] == Defmodule.parse(ast, [])
     end
   end
 end

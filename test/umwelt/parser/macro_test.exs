@@ -1,6 +1,19 @@
 defmodule Umwelt.Parser.MacroTest do
   use ExUnit.Case, async: true
 
+  alias Umwelt.Felixir.{
+    Alias,
+    Call,
+    Concept,
+    Function,
+    Literal,
+    Operator,
+    Sigil,
+    Structure,
+    Value,
+    Variable
+  }
+
   alias Umwelt.Parser
   alias Umwelt.Parser.Macro
 
@@ -40,53 +53,38 @@ defmodule Umwelt.Parser.MacroTest do
     test "just variable" do
       {:ok, ast} = Code.string_to_quoted("foo")
 
-      assert %{
-               body: "foo",
-               kind: :Variable,
-               type: %{kind: :Literal, type: :anything}
-             } == Macro.parse(ast, [])
+      assert %Variable{body: "foo", type: %Literal{type: :anything}} ==
+               Macro.parse(ast, [], [])
     end
 
     test "typed variable Bar" do
       {:ok, ast} = Code.string_to_quoted("%Bar{} = bar")
 
-      assert %{
-               body: "bar",
-               kind: :Match,
-               term: %{
-                 kind: :Value,
-                 keyword: [],
-                 type: %{name: "Bar", path: ["Bar"], kind: :Alias}
-               }
-             } == Macro.parse(ast, [])
+      assert %Operator{
+               left: %Structure{type: %Alias{name: "Bar", path: ["Foo", "Bar"]}, elements: []},
+               name: "match",
+               right: %Variable{body: "bar", type: %Literal{type: :anything}}
+             } == Macro.parse(ast, [%Alias{name: "Bar", path: ["Foo", "Bar"]}], [])
     end
 
     test "typed variable Bar.Baz" do
       {:ok, ast} = Code.string_to_quoted("%Bar.Baz{} = bar")
 
-      assert %{
-               body: "bar",
-               kind: :Match,
-               term: %{
-                 kind: :Value,
-                 type: %{name: "Baz", path: ["Bar", "Baz"], kind: :Alias},
-                 keyword: []
-               }
-             } == Macro.parse(ast, [])
+      assert %Operator{
+               left: %Structure{type: %Alias{name: "Baz", path: ["Bar", "Baz"]}, elements: []},
+               name: "match",
+               right: %Variable{body: "bar", type: %Literal{type: :anything}}
+             } == Macro.parse(ast, [], [])
     end
 
     test "typed variable Bar.Baz aliased" do
       {:ok, ast} = Code.string_to_quoted("%Bar.Baz{} = bar")
 
-      assert %{
-               body: "bar",
-               kind: :Match,
-               term: %{
-                 kind: :Value,
-                 type: %{name: "Baz", path: ["Foo", "Bar", "Baz"], kind: :Alias},
-                 keyword: []
-               }
-             } == Macro.parse(ast, [%{name: "Bar", path: ["Foo", "Bar"], kind: :Alias}])
+      assert %Operator{
+               left: %Structure{type: %Alias{name: "Baz", path: ["Foo", "Bar", "Baz"]}},
+               name: "match",
+               right: %Variable{body: "bar", type: %Literal{type: :anything}}
+             } == Macro.parse(ast, [%{name: "Bar", path: ["Foo", "Bar"], kind: :Alias}], [])
     end
   end
 
@@ -94,7 +92,7 @@ defmodule Umwelt.Parser.MacroTest do
     test "sigil W" do
       {:ok, ast} = Code.string_to_quoted("~w|foo bar|a")
 
-      assert %{body: "foo bar", kind: :Sigil, note: "sigil_w|a"} == Parser.parse(ast, [])
+      assert %Sigil{string: "foo bar", mod: "sigil_w|a"} == Parser.parse(ast, [], [])
     end
   end
 
@@ -102,12 +100,11 @@ defmodule Umwelt.Parser.MacroTest do
     test "pipe list head | tail" do
       {:ok, ast} = Code.string_to_quoted("head | tail")
 
-      assert %{
-               body: "|",
-               kind: :Pipe,
-               left: %{type: %{type: :anything, kind: :Literal}, body: "head", kind: :Variable},
-               right: [%{type: %{type: :anything, kind: :Literal}, body: "tail", kind: :Variable}]
-             } == Parser.parse(ast, [])
+      assert %Operator{
+               left: %Variable{body: "head", type: %Literal{type: :anything}},
+               right: %Variable{body: "tail", type: %Literal{type: :anything}},
+               name: "alter"
+             } == Parser.parse(ast, [], [])
     end
 
     test "defmodule macro" do
@@ -123,26 +120,21 @@ defmodule Umwelt.Parser.MacroTest do
         |> Code.string_to_quoted()
 
       assert [
-               %{
-                 body: "Bar",
+               %Concept{
+                 name: "Bar",
                  context: ["Foo", "Bar"],
-                 attrs: [],
-                 calls: [],
-                 guards: [],
-                 types: [],
                  functions: [
-                   %{
-                     arguments: [
-                       %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
-                     ],
-                     body: "foo",
-                     kind: :Function
+                   %Function{
+                     body: %Call{
+                       name: "foo",
+                       arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
+                     }
                    }
                  ],
-                 kind: :Concept,
                  note: "Foobar description"
                }
-             ] == Macro.parse(ast, [])
+             ] == Macro.parse(ast, [], [])
     end
 
     test "def macro" do
@@ -154,53 +146,41 @@ defmodule Umwelt.Parser.MacroTest do
         """
         |> Code.string_to_quoted()
 
-      assert %{
-               arguments: [],
-               body: "div",
-               kind: :Function
-             } == Macro.parse(ast, [])
+      assert %Function{body: %Call{name: "div", type: %Literal{type: :anything}}} ==
+               Macro.parse(ast, [], [])
     end
 
     test "match macro" do
       {:ok, ast} = Code.string_to_quoted("%Foo{} = msg")
 
-      assert %{
-               body: "msg",
-               kind: :Match,
-               term: %{
-                 kind: :Value,
-                 type: %{name: "Foo", path: ["Foo"], kind: :Alias},
-                 keyword: []
-               }
-             } == Macro.parse(ast, [])
+      assert %Operator{
+               name: "match",
+               left: %Structure{type: %Alias{name: "Foo", path: ["Foo"]}, elements: []},
+               right: %Variable{body: "msg", type: %Umwelt.Felixir.Literal{type: :anything}}
+             } == Macro.parse(ast, [], [])
     end
 
     test "struct macro" do
       {:ok, ast} = Code.string_to_quoted("%Foo{}")
 
-      assert %{
-               keyword: [],
-               kind: :Value,
-               type: %{name: "Foo", path: ["Foo"], kind: :Alias}
-             } == Macro.parse(ast, [])
+      assert %Structure{type: %Alias{name: "Foo", path: ["Foo"]}, elements: []} ==
+               Macro.parse(ast, [], [])
     end
 
     test "tuple macro" do
       {:ok, ast} = Code.string_to_quoted("{:ok, one, [:two]}")
 
-      assert %{
-               kind: :Value,
-               type: %{kind: :Structure, type: :tuple},
+      assert %Structure{
+               type: %Literal{type: :tuple},
                elements: [
-                 %{body: "ok", kind: :Value, type: %{kind: :Literal, type: :atom}},
-                 %{body: "one", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-                 %{
-                   type: %{kind: :Structure, type: :list},
-                   values: [%{type: %{kind: :Literal, type: :atom}, body: "two", kind: :Value}],
-                   kind: :Value
+                 %Value{body: "ok", type: %Literal{type: :atom}},
+                 %Variable{body: "one", type: %Literal{type: :anything}},
+                 %Structure{
+                   type: %Literal{type: :list},
+                   elements: [%Value{type: %Literal{type: :atom}, body: "two"}]
                  }
                ]
-             } == Macro.parse(ast, [[:Foo, :Bar]])
+             } == Macro.parse(ast, [[:Foo, :Bar]], [])
     end
   end
 
@@ -208,7 +188,7 @@ defmodule Umwelt.Parser.MacroTest do
     test "unquote" do
       {:ok, ast} = Code.string_to_quoted("unquote(name)(opts)")
 
-      assert %{unquoted: []} == Macro.parse(ast, [])
+      assert %{unquoted: []} == Macro.parse(ast, [], [])
     end
   end
 end

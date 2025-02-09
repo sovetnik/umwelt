@@ -7,15 +7,17 @@ defmodule Umwelt.Parser.Sigil do
   @kernel_sigils ~w|C c D N R r S s T U W w|
   @sigil_names Enum.map(@kernel_sigils, &String.to_atom("sigil_#{&1}"))
 
+  alias Umwelt.Felixir.Sigil
+
   defguard is_sigil(term) when term in @sigil_names
 
   def parse({sigil, [delimiter: delimiter, line: _], [value, mods]}, _aliases)
-      when is_sigil(sigil),
-      do: %{
-        body: extract_value(value),
-        kind: :Sigil,
-        note: to_string(sigil) <> delimiter <> to_string(mods)
-      }
+      when is_sigil(sigil) do
+    %Sigil{
+      string: extract_value(value),
+      mod: to_string(sigil) <> delimiter <> to_string(mods)
+    }
+  end
 
   def parse(ast, _aliases) do
     Logger.warning("#{@log_message}/2\n #{inspect(ast)}")

@@ -3,6 +3,7 @@ defmodule Umwelt.Parser do
 
   import Umwelt.Parser.Macro, only: [is_macro: 1]
 
+  alias Umwelt.Felixir.Structure
   alias Umwelt.{Files, Parser}
 
   def parse_raw(code) do
@@ -29,33 +30,41 @@ defmodule Umwelt.Parser do
   def parse_root({:ok, ast}),
     do: ast |> Parser.Root.parse() |> index()
 
-  def parse_ast({:ok, ast}), do: ast |> parse([]) |> index()
-  def parse_ast({:error, _}), do: %{[] => %{}}
+  # AST of blanc file
+  def parse_ast({:ok, {:__block__, [line: 1], []}}),
+    do: %{[] => %{}}
 
-  def parse(ast, aliases) when is_macro(ast),
-    do: Parser.Macro.parse(ast, aliases)
+  # AST of good file
+  def parse_ast({:ok, ast}),
+    do: ast |> parse([], []) |> index()
 
-  def parse({_, _} = ast, aliases),
-    do: Parser.Tuple.parse(ast, aliases)
+  # AST of wrong file
+  def parse_ast({:error, _}),
+    do: %{[] => %{}}
 
-  def parse(ast, aliases) when is_list(ast),
-    do: %{
-      kind: :Value,
-      type: %{kind: :Structure, type: :list},
-      values: parse_list(ast, aliases)
+  def parse(ast, aliases, context) when is_macro(ast),
+    do: Parser.Macro.parse(ast, aliases, context)
+
+  def parse({_, _} = ast, aliases, context),
+    do: Parser.Structure.parse(ast, aliases, context)
+
+  def parse(ast, aliases, context) when is_list(ast),
+    do: %Structure{
+      type: Parser.Literal.type_of(:list),
+      elements: parse_list(ast, aliases, context)
     }
 
-  def parse(ast, _aliases),
+  def parse(ast, _aliases, _context),
     do: Parser.Literal.parse(ast)
 
-  def maybe_list_parse(ast, aliases) when is_list(ast),
-    do: parse_list(ast, aliases)
+  def maybe_list_parse(ast, aliases, context) when is_list(ast),
+    do: parse_list(ast, aliases, context)
 
-  def maybe_list_parse(ast, aliases),
-    do: parse(ast, aliases)
+  def maybe_list_parse(ast, aliases, context),
+    do: parse(ast, aliases, context)
 
-  def parse_list(ast, aliases) when is_list(ast),
-    do: Enum.map(ast, &parse(&1, aliases))
+  def parse_list(ast, aliases, context) when is_list(ast),
+    do: Enum.map(ast, &parse(&1, aliases, context))
 
   defp index(parsed) do
     parsed
@@ -96,7 +105,12 @@ defmodule Umwelt.Parser do
   defp parse_other_sources(project) do
     project
     |> Files.list_root_dir()
-    |> Enum.map(&(&1 |> File.read() |> read_ast() |> parse_ast()))
+    |> Enum.map(
+      &(&1
+        |> File.read()
+        |> read_ast()
+        |> parse_ast())
+    )
     |> Enum.reduce(&Map.merge/2)
   end
 end

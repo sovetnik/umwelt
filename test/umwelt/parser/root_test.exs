@@ -1,7 +1,20 @@
 defmodule Umwelt.Parser.RootTest do
   use ExUnit.Case, async: true
 
-  alias Umwelt.Parser.Root
+  alias Umwelt.Felixir.{
+    Attribute,
+    Call,
+    Concept,
+    Field,
+    Function,
+    Literal,
+    Root,
+    Structure,
+    Value,
+    Variable
+  }
+
+  alias Umwelt.Parser
 
   describe "expandind path to the root module" do
     test "inner module expands aliases" do
@@ -26,75 +39,48 @@ defmodule Umwelt.Parser.RootTest do
         |> Code.string_to_quoted()
 
       assert [
-               %{
-                 body: "Foo",
-                 context: ["Foo"],
-                 attrs: [],
-                 calls: [],
-                 guards: [],
-                 types: [],
-                 functions: [],
-                 kind: :Root
-               },
+               %Root{name: "Foo", context: ["Foo"]},
                [
-                 %{
-                   body: "Bar",
-                   kind: :Concept,
+                 %Concept{
+                   name: "Bar",
                    note: "Foobar description",
                    context: ["Foo", "Bar"],
                    attrs: [
-                     %{
-                       value: %{type: %{kind: :Literal, type: :atom}, body: "bar", kind: :Value},
-                       body: "foo",
-                       kind: :Attr
+                     %Attribute{
+                       name: "foo",
+                       value: %Value{type: %Literal{type: :atom}, body: "bar"}
                      }
                    ],
-                   calls: [],
-                   guards: [],
-                   types: [],
                    functions: [
-                     %{
-                       arguments: [
-                         %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
-                       ],
-                       body: "foo",
-                       kind: :Function,
+                     %Function{
+                       body: %Call{
+                         name: "foo",
+                         arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
+                         type: %Literal{type: :anything}
+                       },
                        note: "bar -> baz"
                      }
                    ]
                  },
                  [
-                   %{
-                     body: "Baz",
-                     kind: :Concept,
+                   %Concept{
+                     name: "Baz",
                      note: "Baz description",
                      context: ["Foo", "Bar", "Baz"],
-                     attrs: [],
-                     calls: [],
-                     guards: [],
-                     types: [],
                      functions: [
-                       %{
-                         arguments: [
-                           %{
-                             type: %{kind: :Literal, type: :anything},
-                             body: "baz",
-                             kind: :Variable
-                           }
-                         ],
-                         impl: %{
-                           type: %{kind: :Literal, type: :boolean},
-                           body: "true",
-                           kind: :Value
+                       %Function{
+                         body: %Call{
+                           name: "bar",
+                           arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
+                           type: %Literal{type: :anything}
                          },
-                         body: "bar",
-                         kind: :Function
+                         impl: %Value{type: %Literal{type: :boolean}, body: "true"}
                        }
                      ]
                    }
                  ]
                ]
-             ] == Root.parse(ast)
+             ] == Parser.Root.parse(ast)
     end
 
     test "deep inner module expands aliases" do
@@ -131,104 +117,86 @@ defmodule Umwelt.Parser.RootTest do
         |> Code.string_to_quoted()
 
       assert [
-               %{
+               %Root{
+                 context: ["Root"],
                  functions: [
-                   %{
-                     arguments: [
-                       %{type: %{kind: :Literal, type: :anything}, body: "once", kind: :Variable}
-                     ],
-                     body: "root_one",
-                     kind: :Function
+                   %Function{
+                     body: %Call{
+                       name: "root_one",
+                       arguments: [%Variable{body: "once", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
+                     },
+                     impl: nil,
+                     private: false
                    },
-                   %{
-                     arguments: [
-                       %{type: %{kind: :Literal, type: :anything}, body: "twice", kind: :Variable}
-                     ],
-                     body: "root_two",
-                     kind: :Function
+                   %Function{
+                     body: %Call{
+                       name: "root_two",
+                       arguments: [%Variable{body: "twice", type: %Literal{type: :anything}}],
+                       type: %Literal{type: :anything}
+                     },
+                     impl: nil,
+                     private: false
                    }
                  ],
-                 context: ["Root"],
-                 attrs: [],
-                 calls: [],
-                 guards: [],
-                 types: [],
-                 body: "Root",
-                 kind: :Root,
+                 name: "Root",
                  note: "Root description"
                },
                [
-                 %{
+                 %Concept{
+                   context: ["Root", "Foo"],
                    functions: [
-                     %{
-                       arguments: [
-                         %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
-                       ],
-                       body: "foo",
-                       kind: :Function
+                     %Function{
+                       body: %Call{
+                         name: "foo",
+                         arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
+                         type: %Literal{type: :anything}
+                       },
+                       impl: nil,
+                       private: false
                      }
                    ],
-                   context: ["Root", "Foo"],
-                   attrs: [],
-                   calls: [],
-                   guards: [],
-                   types: [],
-                   body: "Foo",
-                   kind: :Concept,
+                   name: "Foo",
                    note: "Foo description"
                  },
                  [
-                   %{
+                   %Concept{
+                     context: ["Root", "Foo", "Bar"],
                      functions: [
-                       %{
-                         arguments: [
-                           %{
-                             type: %{kind: :Literal, type: :anything},
-                             body: "baz",
-                             kind: :Variable
-                           }
-                         ],
-                         body: "bar",
-                         kind: :Function
+                       %Function{
+                         body: %Call{
+                           name: "bar",
+                           arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
+                           type: %Literal{type: :anything}
+                         },
+                         impl: nil,
+                         private: false
                        }
                      ],
-                     context: ["Root", "Foo", "Bar"],
-                     attrs: [],
-                     calls: [],
-                     guards: [],
-                     types: [],
-                     body: "Bar",
-                     kind: :Concept,
+                     name: "Bar",
                      note: "Bar description"
                    }
                  ],
                  [
-                   %{
+                   %Concept{
+                     context: ["Root", "Foo", "Baz"],
                      functions: [
-                       %{
-                         arguments: [
-                           %{
-                             type: %{kind: :Literal, type: :anything},
-                             body: "foo",
-                             kind: :Variable
-                           }
-                         ],
-                         body: "baz",
-                         kind: :Function
+                       %Function{
+                         body: %Call{
+                           name: "baz",
+                           arguments: [%Variable{body: "foo", type: %Literal{type: :anything}}],
+                           type: %Literal{type: :anything}
+                         },
+                         impl: nil,
+                         private: false
                        }
                      ],
-                     context: ["Root", "Foo", "Baz"],
-                     attrs: [],
-                     calls: [],
-                     guards: [],
-                     types: [],
-                     body: "Baz",
-                     kind: :Concept,
+                     name: "Baz",
                      note: "Baz description"
                    }
                  ]
                ]
-             ] == Root.parse(ast)
+             ] == Parser.Root.parse(ast)
     end
 
     test "empty inner modules expands aliases" do
@@ -244,41 +212,12 @@ defmodule Umwelt.Parser.RootTest do
         |> Code.string_to_quoted()
 
       assert [
-               %{
-                 body: "Foo",
-                 kind: :Root,
-                 context: ["Foo"],
-                 attrs: [],
-                 calls: [],
-                 guards: [],
-                 types: [],
-                 functions: []
-               },
+               %Root{name: "Foo", context: ["Foo"]},
                [
-                 %{
-                   body: "Bar",
-                   kind: :Concept,
-                   context: ["Foo", "Bar"],
-                   attrs: [],
-                   calls: [],
-                   guards: [],
-                   types: [],
-                   functions: []
-                 },
-                 [
-                   %{
-                     body: "Baz",
-                     kind: :Concept,
-                     context: ["Foo", "Bar", "Baz"],
-                     attrs: [],
-                     calls: [],
-                     guards: [],
-                     types: [],
-                     functions: []
-                   }
-                 ]
+                 %Concept{name: "Bar", context: ["Foo", "Bar"]},
+                 [%Concept{name: "Baz", context: ["Foo", "Bar", "Baz"]}]
                ]
-             ] == Root.parse(ast)
+             ] == Parser.Root.parse(ast)
     end
 
     test "empty inner module expands aliases" do
@@ -292,41 +231,12 @@ defmodule Umwelt.Parser.RootTest do
         |> Code.string_to_quoted()
 
       assert [
-               %{
-                 context: ["Foo"],
-                 body: "Foo",
-                 kind: :Root,
-                 attrs: [],
-                 calls: [],
-                 guards: [],
-                 types: [],
-                 functions: []
-               },
+               %Root{context: ["Foo"], name: "Foo"},
                [
-                 %{
-                   context: ["Foo", "Bar"],
-                   body: "Bar",
-                   kind: :Concept,
-                   attrs: [],
-                   calls: [],
-                   guards: [],
-                   types: [],
-                   functions: []
-                 },
-                 [
-                   %{
-                     context: ["Foo", "Bar", "Baz"],
-                     body: "Baz",
-                     kind: :Concept,
-                     attrs: [],
-                     calls: [],
-                     guards: [],
-                     types: [],
-                     functions: []
-                   }
-                 ]
+                 %Concept{context: ["Foo", "Bar"], name: "Bar"},
+                 [%Concept{context: ["Foo", "Bar", "Baz"], name: "Baz"}]
                ]
-             ] == Root.parse(ast)
+             ] == Parser.Root.parse(ast)
     end
 
     test "empty inner module expands aliases deeply" do
@@ -338,41 +248,12 @@ defmodule Umwelt.Parser.RootTest do
         |> Code.string_to_quoted()
 
       assert [
-               %{
-                 context: ["Foo"],
-                 body: "Foo",
-                 kind: :Root,
-                 attrs: [],
-                 calls: [],
-                 guards: [],
-                 types: [],
-                 functions: []
-               },
+               %Root{context: ["Foo"], name: "Foo"},
                [
-                 %{
-                   context: ["Foo", "Bar"],
-                   body: "Bar",
-                   kind: :Concept,
-                   attrs: [],
-                   calls: [],
-                   guards: [],
-                   types: [],
-                   functions: []
-                 },
-                 [
-                   %{
-                     context: ["Foo", "Bar", "Baz"],
-                     body: "Baz",
-                     kind: :Concept,
-                     attrs: [],
-                     calls: [],
-                     guards: [],
-                     types: [],
-                     functions: []
-                   }
-                 ]
+                 %Concept{context: ["Foo", "Bar"], name: "Bar"},
+                 [%Concept{context: ["Foo", "Bar", "Baz"], name: "Baz"}]
                ]
-             ] == Root.parse(ast)
+             ] == Parser.Root.parse(ast)
     end
   end
 
@@ -394,59 +275,47 @@ defmodule Umwelt.Parser.RootTest do
         |> Code.string_to_quoted()
 
       assert [
-               %{
-                 body: "Foo",
-                 context: ["Foo"],
-                 attrs: [],
-                 calls: [],
-                 guards: [],
-                 types: [],
-                 functions: [],
-                 kind: :Root
-               },
+               %Root{name: "Foo", context: ["Foo"]},
                [
-                 %{
-                   body: "Bar",
+                 %Concept{
+                   name: "Bar",
                    note: "Foobar description",
-                   kind: :Concept,
                    context: ["Foo", "Bar"],
-                   attrs: [],
-                   calls: [],
-                   guards: [],
-                   types: [],
                    fields: [
-                     %{
-                       kind: :Field,
-                       type: %{kind: :Literal, type: :anything},
-                       body: "foo",
-                       value: %{type: %{kind: :Literal, type: :atom}, body: "nil", kind: :Value}
+                     %Field{
+                       name: "foo",
+                       type: %Literal{type: :anything},
+                       value: %Value{type: %Literal{type: :atom}, body: "nil"}
                      },
-                     %{
-                       kind: :Field,
-                       type: %{kind: :Literal, type: :anything},
-                       body: "tree",
-                       value: %{type: %{kind: :Structure, type: :map}, kind: :Value, keyword: []}
+                     %Field{
+                       name: "tree",
+                       type: %Literal{type: :anything},
+                       value: %Structure{type: %Literal{type: :map}}
                      }
                    ],
                    functions: [
-                     %{
-                       arguments: [
-                         %{body: "bar", kind: :Variable, type: %{kind: :Literal, type: :anything}}
-                       ],
-                       body: "foo",
-                       kind: :Function
+                     %Function{
+                       body: %Call{
+                         name: "foo",
+                         arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
+                         type: %Literal{type: :anything}
+                       },
+                       impl: nil,
+                       private: false
                      },
-                     %{
-                       arguments: [
-                         %{type: %{kind: :Literal, type: :anything}, body: "baz", kind: :Variable}
-                       ],
-                       body: "bar",
-                       kind: :Function
+                     %Function{
+                       body: %Call{
+                         name: "bar",
+                         arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
+                         type: %Literal{type: :anything}
+                       },
+                       impl: nil,
+                       private: false
                      }
                    ]
                  }
                ]
-             ] == Root.parse(ast)
+             ] == Parser.Root.parse(ast)
     end
 
     test "just a module with function" do
@@ -462,38 +331,24 @@ defmodule Umwelt.Parser.RootTest do
         |> Code.string_to_quoted()
 
       assert [
-               %{
-                 body: "Foo",
-                 context: ["Foo"],
-                 attrs: [],
-                 calls: [],
-                 guards: [],
-                 types: [],
-                 functions: [],
-                 kind: :Root
-               },
+               %Root{name: "Foo", context: ["Foo"]},
                [
-                 %{
-                   body: "Bar",
-                   kind: :Concept,
+                 %Concept{
+                   name: "Bar",
                    context: ["Foo", "Bar"],
-                   attrs: [],
-                   calls: [],
-                   guards: [],
-                   types: [],
                    functions: [
-                     %{
-                       arguments: [
-                         %{type: %{kind: :Literal, type: :anything}, body: "bar", kind: :Variable}
-                       ],
-                       body: "foo",
-                       kind: :Function
+                     %Function{
+                       body: %Call{
+                         name: "foo",
+                         arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
+                         type: %Literal{type: :anything}
+                       }
                      }
                    ],
                    note: "Foobar description"
                  }
                ]
-             ] == Root.parse(ast)
+             ] == Parser.Root.parse(ast)
     end
 
     test "just a module with moduledoc only" do
@@ -506,30 +361,9 @@ defmodule Umwelt.Parser.RootTest do
         |> Code.string_to_quoted()
 
       assert [
-               %{
-                 body: "Foo",
-                 kind: :Root,
-                 context: ["Foo"],
-                 attrs: [],
-                 calls: [],
-                 guards: [],
-                 types: [],
-                 functions: []
-               },
-               [
-                 %{
-                   body: "Bar",
-                   kind: :Concept,
-                   context: ["Foo", "Bar"],
-                   note: "Foobar description",
-                   attrs: [],
-                   calls: [],
-                   guards: [],
-                   types: [],
-                   functions: []
-                 }
-               ]
-             ] == Root.parse(ast)
+               %Root{name: "Foo", context: ["Foo"]},
+               [%Concept{name: "Bar", context: ["Foo", "Bar"], note: "Foobar description"}]
+             ] == Parser.Root.parse(ast)
     end
   end
 end

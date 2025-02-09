@@ -1,6 +1,7 @@
 defmodule Umwelt.Parser.TypespecTest do
   use ExUnit.Case, async: true
 
+  alias Umwelt.Felixir.{Call, Literal, Operator, Structure, Type, Variable}
   alias Umwelt.Parser.Typespec
 
   describe "parse @spec" do
@@ -12,16 +13,12 @@ defmodule Umwelt.Parser.TypespecTest do
         |> Code.string_to_quoted()
 
       assert %{
-               kind: :Spec,
-               spec: %{body: "atom", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-               type: %{
-                 arguments: [
-                   %{type: %{kind: :Literal, type: :anything}, body: "integer", kind: :Variable}
-                 ],
-                 body: "function",
-                 kind: :Call
+               spec: %Call{
+                 name: "function",
+                 arguments: [%Variable{type: %Literal{type: :anything}, body: "integer"}],
+                 type: %Literal{type: :atom}
                }
-             } == Typespec.parse(ast, [])
+             } == Typespec.parse(ast, [], [])
     end
 
     test "parse Struct.t" do
@@ -32,16 +29,12 @@ defmodule Umwelt.Parser.TypespecTest do
         |> Code.string_to_quoted()
 
       assert %{
-               kind: :Spec,
-               spec: %{context: ["String"], arguments: [], body: "t", kind: :Call},
-               type: %{
-                 arguments: [
-                   %{body: "num", kind: :Variable, type: %{kind: :Literal, type: :integer}}
-                 ],
-                 body: "function",
-                 kind: :Call
+               spec: %Call{
+                 name: "function",
+                 arguments: [%Variable{body: "num", type: %Literal{type: :integer}}],
+                 type: %Call{context: ["String"], arguments: [], name: "t"}
                }
-             } == Typespec.parse(ast, [])
+             } == Typespec.parse(ast, [], [])
     end
 
     test "good case" do
@@ -52,18 +45,16 @@ defmodule Umwelt.Parser.TypespecTest do
         |> Code.string_to_quoted()
 
       assert %{
-               kind: :Spec,
-               spec: %{type: %{kind: :Literal, type: :anything}, body: "integer", kind: :Variable},
-               type: %{
+               spec: %Call{
                  arguments: [
-                   %{type: %{kind: :Literal, type: :integer}, body: "year", kind: :Variable},
-                   %{type: %{kind: :Literal, type: :integer}, body: "month", kind: :Variable},
-                   %{type: %{kind: :Literal, type: :integer}, body: "day", kind: :Variable}
+                   %Variable{type: %Literal{type: :integer}, body: "year"},
+                   %Variable{type: %Literal{type: :integer}, body: "month"},
+                   %Variable{type: %Literal{type: :integer}, body: "day"}
                  ],
-                 body: "days_since_epoch",
-                 kind: :Call
+                 type: %Literal{type: :integer},
+                 name: "days_since_epoch"
                }
-             } == Typespec.parse(ast, [])
+             } == Typespec.parse(ast, [], [])
     end
   end
 
@@ -75,15 +66,8 @@ defmodule Umwelt.Parser.TypespecTest do
         """
         |> Code.string_to_quoted()
 
-      assert %{
-               kind: :Type,
-               spec: %{type: %{kind: :Literal, type: :anything}, body: "boolean", kind: :Variable},
-               type: %{
-                 type: %{kind: :Literal, type: :anything},
-                 body: "type_name",
-                 kind: :Variable
-               }
-             } == Typespec.parse(ast, [])
+      assert %Type{name: "type_name", spec: %Literal{type: :boolean}} ==
+               Typespec.parse(ast, [], [])
     end
 
     test "type call like" do
@@ -93,11 +77,8 @@ defmodule Umwelt.Parser.TypespecTest do
         """
         |> Code.string_to_quoted()
 
-      assert %{
-               kind: :Type,
-               spec: %{body: "t", kind: :Call, arguments: [], context: ["String"]},
-               type: %{body: "word", kind: :Call, arguments: []}
-             } == Typespec.parse(ast, [])
+      assert %Type{name: "word", spec: %Call{name: "t", arguments: [], context: ["String"]}} ==
+               Typespec.parse(ast, [], [])
     end
 
     test "complex type" do
@@ -107,33 +88,25 @@ defmodule Umwelt.Parser.TypespecTest do
         """
         |> Code.string_to_quoted()
 
-      assert %{
-               kind: :Type,
-               spec: %{
-                 kind: :Value,
-                 keyword: [
-                   %{
-                     type: %{type: :tuple, kind: :Structure},
-                     kind: :Value,
+      assert %Type{
+               name: "shape",
+               spec: %Structure{
+                 type: %Literal{type: :map},
+                 elements: [
+                   %Structure{
+                     type: %Literal{type: :tuple},
                      elements: [
-                       %{
-                         arguments: [%{arguments: [], body: "atom", kind: :Call}],
-                         body: "required",
-                         kind: :Call
-                       },
-                       %{
-                         left: %{arguments: [], body: "simple_type", kind: :Call},
-                         right: [%{arguments: [], body: "estructura_type", kind: :Call}],
-                         body: "|",
-                         kind: :Pipe
+                       %Call{arguments: [%Call{arguments: [], name: "atom"}], name: "required"},
+                       %Operator{
+                         name: "alter",
+                         left: %Call{arguments: [], name: "simple_type"},
+                         right: %Call{arguments: [], name: "estructura_type"}
                        }
                      ]
                    }
-                 ],
-                 type: %{type: :map, kind: :Structure}
-               },
-               type: %{body: "shape", kind: :Variable, type: %{type: :anything, kind: :Literal}}
-             } == Typespec.parse(ast, [])
+                 ]
+               }
+             } == Typespec.parse(ast, [], [])
     end
   end
 end

@@ -1,7 +1,17 @@
 defmodule Umwelt.Parser.OperatorTest do
   use ExUnit.Case, async: true
 
-  alias Umwelt.Parser.Operator
+  alias Umwelt.Felixir.{
+    Alias,
+    Literal,
+    Operator,
+    Structure,
+    Unary,
+    Value,
+    Variable
+  }
+
+  alias Umwelt.Parser
 
   import Umwelt.Parser.Operator,
     only: [
@@ -55,39 +65,38 @@ defmodule Umwelt.Parser.OperatorTest do
     test "membership insclusion" do
       {:ok, ast} = Code.string_to_quoted("foobar in [:foo, :bar, :baz]")
 
-      assert %{
-               body: "membership",
-               kind: :Operator,
-               left: %{body: "foobar", kind: :Variable, type: %{kind: :Literal, type: :anything}},
+      assert %Operator{
+               name: "membership",
+               left: %Variable{
+                 body: "foobar",
+                 type: %Literal{type: :anything}
+               },
                right: [
-                 %{body: "foo", kind: :Value, type: %{kind: :Literal, type: :atom}},
-                 %{body: "bar", kind: :Value, type: %{kind: :Literal, type: :atom}},
-                 %{body: "baz", kind: :Value, type: %{kind: :Literal, type: :atom}}
+                 %Value{body: "foo", type: %Literal{type: :atom}},
+                 %Value{body: "bar", type: %Literal{type: :atom}},
+                 %Value{body: "baz", type: %Literal{type: :atom}}
                ]
-             } == Operator.parse(ast, [])
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "membership exsclusion" do
       {:ok, ast} = Code.string_to_quoted("foobar not in [:foo, :bar, :baz]")
 
-      assert %{
-               body: "not",
-               kind: :Operator,
-               expr: %{
-                 body: "membership",
-                 kind: :Operator,
-                 left: %{
-                   type: %{kind: :Literal, type: :anything},
-                   body: "foobar",
-                   kind: :Variable
+      assert %Unary{
+               name: "not",
+               expr: %Operator{
+                 name: "membership",
+                 left: %Variable{
+                   type: %Literal{type: :anything},
+                   body: "foobar"
                  },
                  right: [
-                   %{type: %{kind: :Literal, type: :atom}, body: "foo", kind: :Value},
-                   %{type: %{kind: :Literal, type: :atom}, body: "bar", kind: :Value},
-                   %{type: %{kind: :Literal, type: :atom}, body: "baz", kind: :Value}
+                   %Value{body: "foo", type: %Literal{type: :atom}},
+                   %Value{body: "bar", type: %Literal{type: :atom}},
+                   %Value{body: "baz", type: %Literal{type: :atom}}
                  ]
                }
-             } == Operator.parse(ast, [])
+             } == Parser.Operator.parse(ast, [], [])
     end
   end
 
@@ -95,58 +104,70 @@ defmodule Umwelt.Parser.OperatorTest do
     test "right match tuple" do
       {:ok, ast} = Code.string_to_quoted("{:ok, foo} = bar")
 
-      assert %{
-               body: "bar",
-               kind: :Match,
-               term: %{
-                 kind: :Value,
-                 type: %{kind: :Structure, type: :tuple},
+      assert %Operator{
+               name: "match",
+               left: %Structure{
+                 type: %Literal{type: :tuple},
                  elements: [
-                   %{type: %{kind: :Literal, type: :atom}, body: "ok", kind: :Value},
-                   %{type: %{kind: :Literal, type: :anything}, body: "foo", kind: :Variable}
+                   %Value{type: %Literal{type: :atom}, body: "ok"},
+                   %Variable{type: %Literal{type: :anything}, body: "foo"}
                  ]
+               },
+               right: %Umwelt.Felixir.Variable{
+                 body: "bar",
+                 type: %Umwelt.Felixir.Literal{type: :anything}
                }
-             } == Operator.parse(ast, [])
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "match typed variable Bar" do
       {:ok, ast} = Code.string_to_quoted("%Bar{} = bar")
 
-      assert %{
-               body: "bar",
-               kind: :Match,
-               term: %{
-                 kind: :Value,
-                 type: %{name: "Bar", path: ["Bar"], kind: :Alias},
-                 keyword: []
+      assert %Operator{
+               name: "match",
+               left: %Structure{
+                 type: %Alias{name: "Bar", path: ["Bar"]},
+                 elements: []
+               },
+               right: %Umwelt.Felixir.Variable{
+                 body: "bar",
+                 type: %Umwelt.Felixir.Literal{type: :anything}
                }
-             } == Operator.parse(ast, [])
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "match list with atom" do
       {:ok, ast} = Code.string_to_quoted(":foo = bar")
 
-      assert %{
-               body: "bar",
-               kind: :Match,
-               term: %{type: %{kind: :Literal, type: :atom}, body: "foo", kind: :Value}
-             } == Operator.parse(ast, [])
+      assert %Operator{
+               name: "match",
+               left: %Umwelt.Felixir.Value{
+                 body: "foo",
+                 type: %Umwelt.Felixir.Literal{type: :atom}
+               },
+               right: %Umwelt.Felixir.Variable{
+                 body: "bar",
+                 type: %Umwelt.Felixir.Literal{type: :anything}
+               }
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "match list with atom in list" do
       {:ok, ast} = Code.string_to_quoted("[:foo] = bar")
 
-      assert %{
-               body: "bar",
-               kind: :Match,
-               term: %{
-                 kind: :Value,
-                 type: %{kind: :Structure, type: :list},
-                 values: [
-                   %{type: %{kind: :Literal, type: :atom}, body: "foo", kind: :Value}
+      assert %Operator{
+               left: %Umwelt.Felixir.Structure{
+                 type: %Umwelt.Felixir.Literal{type: :list},
+                 elements: [
+                   %Umwelt.Felixir.Value{body: "foo", type: %Umwelt.Felixir.Literal{type: :atom}}
                  ]
+               },
+               name: "match",
+               right: %Umwelt.Felixir.Variable{
+                 body: "bar",
+                 type: %Umwelt.Felixir.Literal{type: :anything}
                }
-             } == Operator.parse(ast, [])
+             } == Parser.Operator.parse(ast, [], [])
     end
   end
 
@@ -154,70 +175,63 @@ defmodule Umwelt.Parser.OperatorTest do
     test "strict boolean and" do
       {:ok, ast} = Code.string_to_quoted("true and false")
 
-      assert %{
-               body: "and",
-               kind: :Operator,
-               left: %{body: "true", kind: :Value, type: %{kind: :Literal, type: :boolean}},
-               right: %{body: "false", kind: :Value, type: %{kind: :Literal, type: :boolean}}
-             } == Operator.parse(ast, [])
+      assert %Operator{
+               name: "and",
+               left: %Value{body: "true", type: %Literal{type: :boolean}},
+               right: %Value{body: "false", type: %Literal{type: :boolean}}
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "and negate" do
       {:ok, ast} = Code.string_to_quoted("true and not false")
 
-      assert %{
-               body: "and",
-               kind: :Operator,
-               left: %{body: "true", kind: :Value, type: %{kind: :Literal, type: :boolean}},
-               right: %{
-                 body: "not",
-                 kind: :Operator,
-                 expr: %{body: "false", kind: :Value, type: %{kind: :Literal, type: :boolean}}
+      assert %Operator{
+               name: "and",
+               left: %Value{body: "true", type: %Literal{type: :boolean}},
+               right: %Unary{
+                 name: "not",
+                 expr: %Value{body: "false", type: %Literal{type: :boolean}}
                }
-             } == Operator.parse(ast, [])
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "strict boolean negate" do
       {:ok, ast} = Code.string_to_quoted("not false")
 
-      assert %{
-               body: "not",
-               kind: :Operator,
-               expr: %{body: "false", kind: :Value, type: %{kind: :Literal, type: :boolean}}
-             } == Operator.parse(ast, [])
+      assert %Unary{
+               name: "not",
+               expr: %Value{body: "false", type: %Literal{type: :boolean}}
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "strict boolean or" do
       {:ok, ast} = Code.string_to_quoted("false or true")
 
-      assert %{
-               body: "or",
-               kind: :Operator,
-               left: %{body: "false", kind: :Value, type: %{kind: :Literal, type: :boolean}},
-               right: %{body: "true", kind: :Value, type: %{kind: :Literal, type: :boolean}}
-             } == Operator.parse(ast, [])
+      assert %Operator{
+               name: "or",
+               left: %Value{body: "false", type: %Literal{type: :boolean}},
+               right: %Value{body: "true", type: %Literal{type: :boolean}}
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "strictly equal to" do
       {:ok, ast} = Code.string_to_quoted("foo === :bar")
 
-      assert %{
-               body: "===",
-               kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-               right: %{body: "bar", kind: :Value, type: %{kind: :Literal, type: :atom}}
-             } == Operator.parse(ast, [])
+      assert %Operator{
+               name: "===",
+               left: %Variable{body: "foo", type: %Literal{type: :anything}},
+               right: %Value{body: "bar", type: %Literal{type: :atom}}
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "strictly not equal to" do
       {:ok, ast} = Code.string_to_quoted("1 !== 1.0")
 
-      assert %{
-               body: "!==",
-               kind: :Operator,
-               left: %{body: "1", kind: :Value, type: %{kind: :Literal, type: :integer}},
-               right: %{body: "1.0", kind: :Value, type: %{kind: :Literal, type: :float}}
-             } == Operator.parse(ast, [])
+      assert %Operator{
+               name: "!==",
+               left: %Value{body: "1", type: %Literal{type: :integer}},
+               right: %Value{body: "1.0", type: %Literal{type: :float}}
+             } == Parser.Operator.parse(ast, [], [])
     end
   end
 
@@ -225,23 +239,21 @@ defmodule Umwelt.Parser.OperatorTest do
     test "equal to" do
       {:ok, ast} = Code.string_to_quoted("foo == :bar")
 
-      assert %{
-               body: "==",
-               kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-               right: %{body: "bar", kind: :Value, type: %{kind: :Literal, type: :atom}}
-             } == Operator.parse(ast, [])
+      assert %Operator{
+               name: "==",
+               left: %Variable{body: "foo", type: %Literal{type: :anything}},
+               right: %Value{body: "bar", type: %Literal{type: :atom}}
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "not equal to" do
       {:ok, ast} = Code.string_to_quoted("foo != :bar")
 
-      assert %{
-               body: "!=",
-               kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-               right: %{body: "bar", kind: :Value, type: %{kind: :Literal, type: :atom}}
-             } == Operator.parse(ast, [])
+      assert %Operator{
+               name: "!=",
+               left: %Variable{body: "foo", type: %Literal{type: :anything}},
+               right: %Value{body: "bar", type: %Literal{type: :atom}}
+             } == Parser.Operator.parse(ast, [], [])
     end
   end
 
@@ -249,45 +261,41 @@ defmodule Umwelt.Parser.OperatorTest do
     test "less-than" do
       {:ok, ast} = Code.string_to_quoted("foo < 5")
 
-      assert %{
-               body: "<",
-               kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-               right: %{body: "5", kind: :Value, type: %{kind: :Literal, type: :integer}}
-             } == Operator.parse(ast, [])
+      assert %Operator{
+               name: "<",
+               left: %Variable{body: "foo", type: %Literal{type: :anything}},
+               right: %Value{body: "5", type: %Literal{type: :integer}}
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "more-than" do
       {:ok, ast} = Code.string_to_quoted("foo > 5")
 
-      assert %{
-               body: ">",
-               kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-               right: %{body: "5", kind: :Value, type: %{kind: :Literal, type: :integer}}
-             } == Operator.parse(ast, [])
+      assert %Operator{
+               name: ">",
+               left: %Variable{body: "foo", type: %Literal{type: :anything}},
+               right: %Value{body: "5", type: %Literal{type: :integer}}
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "less-than or equal to" do
       {:ok, ast} = Code.string_to_quoted("foo <= 5")
 
-      assert %{
-               body: "<=",
-               kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-               right: %{body: "5", kind: :Value, type: %{kind: :Literal, type: :integer}}
-             } == Operator.parse(ast, [])
+      assert %Operator{
+               name: "<=",
+               left: %Variable{body: "foo", type: %Literal{type: :anything}},
+               right: %Value{body: "5", type: %Literal{type: :integer}}
+             } == Parser.Operator.parse(ast, [], [])
     end
 
     test "greater-than or equal to" do
       {:ok, ast} = Code.string_to_quoted("foo >= 5")
 
-      assert %{
-               body: ">=",
-               kind: :Operator,
-               left: %{body: "foo", kind: :Variable, type: %{kind: :Literal, type: :anything}},
-               right: %{body: "5", kind: :Value, type: %{kind: :Literal, type: :integer}}
-             } == Operator.parse(ast, [])
+      assert %Operator{
+               name: ">=",
+               left: %Variable{body: "foo", type: %Literal{type: :anything}},
+               right: %Value{body: "5", type: %Literal{type: :integer}}
+             } == Parser.Operator.parse(ast, [], [])
     end
   end
 end
