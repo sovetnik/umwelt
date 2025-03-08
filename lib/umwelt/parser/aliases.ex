@@ -3,6 +3,8 @@ defmodule Umwelt.Parser.Aliases do
 
   alias Umwelt.Felixir.Alias
 
+  def parse({:alias, _, [{{:., _, [{:__MODULE__, _, nil}, :{}]}, _, _}]}, _, _), do: []
+
   def parse({:alias, _, [{:__aliases__, _, module}]}, aliases, context),
     do: %Alias{
       name: module_name(module, context),
@@ -37,8 +39,7 @@ defmodule Umwelt.Parser.Aliases do
       path: full_path(module, aliases, context)
     }
 
-  def full_path(module, [], context),
-    do: module |> expand_module(context) |> stringify_path()
+  def full_path(module, [], context), do: module |> expand_module(context) |> stringify_path()
 
   def full_path(module, aliases, context) do
     module = module |> expand_module(context)

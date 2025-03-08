@@ -4,25 +4,25 @@ defmodule Umwelt.Parser.Root do
   alias Umwelt.Felixir.{Concept, Root, Type}
   alias Umwelt.Parser
 
+  def combine(block_children, module) do
+    types = Parser.Types.extract(block_children)
+
+    this_module =
+      block_children
+      |> Concept.combine(module)
+      |> Map.put(:functions, Parser.Functions.combine(block_children, types))
+      |> Map.put(:types, Enum.reject(types, &match?(%Type{name: "t"}, &1)))
+      |> Parser.Defstruct.combine(types)
+
+    [this_module | Enum.filter(block_children, &is_list(&1))]
+  end
+
   def parse({:defmodule, _meta, [{:__aliases__, _, module}, [do: block_children]]}),
     do: do_parse(block_children, module)
 
-  def combine(block_children, concept) do
-    types = Parser.Types.extract(block_children)
-
-    this_concept =
-      block_children
-      |> Concept.combine(concept)
-      |> Map.put(:functions, Parser.Functions.combine(block_children, types))
-      |> Map.put(:types, Enum.reject(types, &match?(%Type{name: "t"}, &1)))
-      |> Parser.Defstruct.combine(types, concept.aliases, concept.context)
-
-    [this_concept | Enum.filter(block_children, &is_list(&1))]
-  end
-
   defp do_parse(block_children, [module]) do
     block_children
-    |> Parser.Defmodule.parse_block([module])
+    |> Parser.Defmodule.parse_block(root(module, [module]))
     |> combine(root(module, [module]))
   end
 
@@ -31,7 +31,7 @@ defmodule Umwelt.Parser.Root do
 
     append_dummy(rest, [
       block_children
-      |> Parser.Defmodule.parse_block(module)
+      |> Parser.Defmodule.parse_block(concept(this_module, module))
       |> combine(concept(this_module, module))
     ])
   end

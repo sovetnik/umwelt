@@ -1,5 +1,5 @@
 defmodule Umwelt.Felixir.Structure do
-  @moduledoc "Felixir Structure"
+  @moduledoc "Felixir Structure AST"
   alias Umwelt.Felixir.Literal
 
   @type t() :: %__MODULE__{

@@ -8,20 +8,13 @@ defmodule Umwelt.Parser do
 
   def parse_raw(code) do
     case read_ast({:ok, code}) do
-      {:ok, ast} ->
-        parse_ast({:ok, ast})
-
-      {:error, message} ->
-        {:error, message}
+      {:ok, ast} -> parse_ast({:ok, ast})
+      {:error, message} -> {:error, message}
     end
   end
 
-  def parse_source(project) do
-    Map.merge(
-      parse_root_source(project),
-      parse_other_sources(project)
-    )
-  end
+  def parse_source(project),
+    do: Map.merge(parse_root_source(project), parse_other_sources(project))
 
   def read_ast({:ok, code}), do: Code.string_to_quoted(code)
   def read_ast({:error, msg}), do: {:error, msg}
@@ -31,16 +24,13 @@ defmodule Umwelt.Parser do
     do: ast |> Parser.Root.parse() |> index()
 
   # AST of blanc file
-  def parse_ast({:ok, {:__block__, [line: 1], []}}),
-    do: %{[] => %{}}
+  def parse_ast({:ok, {:__block__, [line: 1], []}}), do: %{[] => %{}}
 
   # AST of good file
-  def parse_ast({:ok, ast}),
-    do: ast |> parse([], []) |> index()
+  def parse_ast({:ok, ast}), do: ast |> parse([], []) |> index()
 
   # AST of wrong file
-  def parse_ast({:error, _}),
-    do: %{[] => %{}}
+  def parse_ast({:error, _}), do: %{[] => %{}}
 
   def parse(ast, aliases, context) when is_macro(ast),
     do: Parser.Macro.parse(ast, aliases, context)
@@ -79,20 +69,18 @@ defmodule Umwelt.Parser do
     |> Enum.reduce(%{}, &Map.put(&2, context(&1), List.first(&1)))
   end
 
-  defp root_module(parsed),
+  defp context(module),
+    do: Enum.flat_map(module, fn %{context: context} -> List.wrap(context) end)
+
+  defp root_module(parsed) when is_list(parsed),
     do: [parsed |> Enum.filter(&is_map/1)]
 
-  defp inner_modules(parsed),
+  defp root_module(_parsed), do: []
+
+  defp inner_modules(parsed) when is_list(parsed),
     do: parsed |> Enum.filter(&is_list/1)
 
-  defp context(module) do
-    module
-    |> Enum.flat_map(fn
-      %{context: context} ->
-        List.wrap(context)
-        # _ -> []
-    end)
-  end
+  defp inner_modules(_parsed), do: []
 
   defp parse_root_source(project) do
     project

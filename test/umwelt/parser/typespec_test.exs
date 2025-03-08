@@ -1,7 +1,7 @@
 defmodule Umwelt.Parser.TypespecTest do
   use ExUnit.Case, async: true
 
-  alias Umwelt.Felixir.{Call, Literal, Operator, Structure, Type, Variable}
+  alias Umwelt.Felixir.{Call, Literal, Operator, Structure, Type, Value, Variable}
   alias Umwelt.Parser.Typespec
 
   describe "parse @spec" do
@@ -77,8 +77,66 @@ defmodule Umwelt.Parser.TypespecTest do
         """
         |> Code.string_to_quoted()
 
-      assert %Type{name: "word", spec: %Call{name: "t", arguments: [], context: ["String"]}} ==
-               Typespec.parse(ast, [], [])
+      assert %Type{
+               name: "word",
+               spec: %Call{name: "t", arguments: [], context: ["String"]}
+             } == Typespec.parse(ast, [], [])
+    end
+
+    test "type or (alter)" do
+      {:ok, ast} =
+        """
+        @spec validate(any, String.t()) ::
+           {:ok, String.t()} | {:error, String.t()}
+        """
+        |> Code.string_to_quoted()
+
+      assert %{
+               spec: %Call{
+                 arguments: [
+                   %Variable{type: %Literal{type: :anything}, body: "any"},
+                   %Call{
+                     name: "t",
+                     type: %Literal{type: :anything},
+                     context: ["String"],
+                     arguments: [],
+                     note: ""
+                   }
+                 ],
+                 context: [],
+                 name: "validate",
+                 note: "",
+                 type: %Operator{
+                   left: %Structure{
+                     type: %Literal{type: :tuple},
+                     elements: [
+                       %Value{body: "ok", type: %Literal{type: :atom}},
+                       %Call{
+                         name: "t",
+                         note: "",
+                         arguments: [],
+                         context: ["String"],
+                         type: %Literal{type: :anything}
+                       }
+                     ]
+                   },
+                   name: "alter",
+                   right: %Structure{
+                     type: %Literal{type: :tuple},
+                     elements: [
+                       %Value{body: "error", type: %Literal{type: :atom}},
+                       %Call{
+                         name: "t",
+                         note: "",
+                         arguments: [],
+                         context: ["String"],
+                         type: %Literal{type: :anything}
+                       }
+                     ]
+                   }
+                 }
+               }
+             } == Typespec.parse(ast, [], [])
     end
 
     test "complex type" do

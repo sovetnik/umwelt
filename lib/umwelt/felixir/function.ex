@@ -32,6 +32,9 @@ defmodule Umwelt.Felixir.Function do
     |> Enum.map(&combine/1)
   end
 
+  defp combine({%Operator{left: variable}, %Variable{type: type}}),
+    do: Map.put(variable, :type, type)
+
   defp combine({%Variable{} = variable, %Variable{type: type}}),
     do: Map.put(variable, :type, type)
 

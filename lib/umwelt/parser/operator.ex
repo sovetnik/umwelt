@@ -45,6 +45,8 @@ defmodule Umwelt.Parser.Operator do
       when is_atom(term),
       do: Parser.parse({term, [], arguments}, aliases, context)
 
+  # {{:., _, [:erlang, :map_get]}, _, [:id, {:user, _, nil}]}
+
   # qualified call node
   def parse({{:., _, [{:__aliases__, _, module}, term]}, _, arguments}, aliases, context)
       when is_atom(term),
@@ -64,6 +66,15 @@ defmodule Umwelt.Parser.Operator do
         name: "access",
         left: Parser.parse(from, aliases, context),
         right: Parser.parse(key, aliases, context)
+      }
+
+  # qualified call erlang
+  def parse({{:., _, [erl_module, term]}, _, arguments}, aliases, context)
+      when is_atom(erl_module) and is_atom(term),
+      do: %Call{
+        name: to_string(term),
+        context: Parser.parse(erl_module, aliases, context),
+        arguments: Parser.parse_list(arguments, aliases, context)
       }
 
   def parse({:\\, _, [left, right]}, aliases, context),

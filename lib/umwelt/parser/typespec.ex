@@ -6,6 +6,9 @@ defmodule Umwelt.Parser.Typespec do
 
   import Umwelt.Parser.Literal, only: [is_literal: 1]
 
+  def parse({:|, _, _} = ast, aliases, context),
+    do: Parser.parse(ast, aliases, context)
+
   def parse({:type, _, [value]}, aliases, context),
     do: Parser.parse(value, aliases, context)
 

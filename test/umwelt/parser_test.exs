@@ -220,6 +220,18 @@ defmodule Umwelt.ParserTest do
                  end_column: 11
                ], "missing terminator: end", ""}} == Parser.parse_raw("def foo do")
     end
+
+    test "protocol skipped for now" do
+      code = """
+      defprotocol Umwelt.Parsed do
+        @moduledoc " Parsed felixir protocol"
+        @spec unparse(t()) :: map()
+        def unparse(t)
+      end
+      """
+
+      assert %{} == Parser.parse_raw(code)
+    end
   end
 
   describe "reading ast" do
@@ -425,6 +437,37 @@ defmodule Umwelt.ParserTest do
                },
                impl: nil,
                private: false
+             } == Parser.parse(ast, [], [])
+    end
+
+    test "Erlang operator" do
+      # not is_nil(:erlang.map_get(:finished_at, phase))
+      {:ok, ast} =
+        """
+          def handle(term) when :erlang.map_get(:finished_at, term) do
+            :baz
+          end
+        """
+        |> Code.string_to_quoted()
+
+      assert %Function{
+               body: %Operator{
+                 left: %Call{
+                   arguments: [%Variable{body: "term", type: %Literal{type: :anything}}],
+                   name: "handle",
+                   type: %Literal{type: :anything}
+                 },
+                 name: "when",
+                 right: %Call{
+                   name: "map_get",
+                   arguments: [
+                     %Value{body: "finished_at", type: %Literal{type: :atom}},
+                     %Variable{body: "term", type: %Literal{type: :anything}}
+                   ],
+                   context: %Value{type: %Literal{type: :atom}, body: "erlang"},
+                   type: %Literal{type: :anything}
+                 }
+               }
              } == Parser.parse(ast, [], [])
     end
 

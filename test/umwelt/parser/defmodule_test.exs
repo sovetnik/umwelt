@@ -134,7 +134,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                types: [
                  %Type{
                    doc: "A word from the dictionary",
-                   spec: %Umwelt.Felixir.Call{
+                   spec: %Call{
                      context: ["String"],
                      name: "t",
                      type: %Literal{type: :anything}
@@ -198,7 +198,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                types: [
                  %Type{
                    doc: "A word from the dictionary",
-                   spec: %Umwelt.Felixir.Call{
+                   spec: %Call{
                      context: ["String"],
                      name: "t",
                      type: %Literal{type: :anything}
@@ -244,7 +244,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  name: "Bar",
                  note: "Felixir Structure",
                  context: ["Foo", "Bar"],
-                 aliases: [%Umwelt.Felixir.Alias{name: "Baz", path: ~w[Foo Bar Baz]}],
+                 aliases: [%Alias{name: "Baz", path: ~w[Foo Bar Baz]}],
                  fields: [
                    %Field{
                      name: "buzz",
@@ -1387,5 +1387,98 @@ defmodule Umwelt.Parser.DefmoduleTest do
                [%Concept{context: ["Foo", "Bar", "Baz"], name: "Baz"}]
              ] == Defmodule.parse(ast, [])
     end
+  end
+
+  test "module and struct with fields from  attrs" do
+    {:ok, ast} =
+      """
+        defmodule Foo.Bar do
+          @enforce_keys [:index, :states]
+          defstruct @enforce_keys
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             %Concept{
+               name: "Bar",
+               attrs: [
+                 %Attribute{
+                   name: "enforce_keys",
+                   value: %Structure{
+                     type: %Literal{type: :list},
+                     elements: [
+                       %Value{body: "index", type: %Literal{type: :atom}},
+                       %Value{body: "states", type: %Literal{type: :atom}}
+                     ]
+                   }
+                 }
+               ],
+               context: ["Foo", "Bar"],
+               fields: [
+                 %Field{
+                   name: "index",
+                   type: %Literal{type: :anything},
+                   value: %Value{type: %Literal{type: :atom}, body: "nil"}
+                 },
+                 %Field{
+                   name: "states",
+                   type: %Literal{type: :anything},
+                   value: %Value{type: %Literal{type: :atom}, body: "nil"}
+                 }
+               ]
+             }
+           ] ==
+             Defmodule.parse(ast, [])
+  end
+
+  test "module and struct with enforce_keys" do
+    {:ok, ast} =
+      """
+        defmodule Foo.Bar do
+          @enforce_keys [:index, :states]
+          defstruct index: %{}, states: %{}
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             %Concept{
+               name: "Bar",
+               note: "",
+               aliases: [],
+               attrs: [
+                 %Attribute{
+                   name: "enforce_keys",
+                   value: %Structure{
+                     type: %Literal{type: :list},
+                     elements: [
+                       %Value{body: "index", type: %Literal{type: :atom}},
+                       %Value{body: "states", type: %Literal{type: :atom}}
+                     ]
+                   }
+                 }
+               ],
+               calls: [],
+               context: ["Foo", "Bar"],
+               fields: [
+                 %Field{
+                   name: "index",
+                   type: %Literal{type: :anything},
+                   value: %Structure{type: %Literal{type: :map}, elements: []}
+                 },
+                 %Field{
+                   name: "states",
+                   type: %Literal{type: :anything},
+                   value: %Structure{type: %Literal{type: :map}, elements: []}
+                 }
+               ],
+               functions: [],
+               guards: [],
+               specs: [],
+               types: []
+             }
+           ] ==
+             Defmodule.parse(ast, [])
   end
 end
