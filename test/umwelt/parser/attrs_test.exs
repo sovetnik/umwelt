@@ -98,4 +98,30 @@ defmodule Umwelt.Parser.AttrsTest do
              }
            } == Attrs.parse(ast, [])
   end
+
+  describe "skipped" do
+    test "behaviour" do
+      {:ok, ast} =
+        "@behaviour Foo.Bar"
+        |> Code.string_to_quoted()
+
+      assert nil == Attrs.parse(ast, [])
+    end
+
+    test "opacue" do
+      {:ok, ast} =
+        "@opaque type_name :: type"
+        |> Code.string_to_quoted()
+
+      assert nil == Attrs.parse(ast, [])
+    end
+
+    test "typep" do
+      {:ok, ast} =
+        "@typep type_name :: type"
+        |> Code.string_to_quoted()
+
+      assert nil == Attrs.parse(ast, [])
+    end
+  end
 end

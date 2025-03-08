@@ -1481,4 +1481,23 @@ defmodule Umwelt.Parser.DefmoduleTest do
            ] ==
              Defmodule.parse(ast, [])
   end
+
+  test "skip some childs" do
+    {:ok, ast} =
+      """
+        defmodule Foo.Bar do
+          defdelegate bar(baz), to: Baz
+          defmacro macro_unless(clause, do: expression) do
+            quote do
+              if(!unquote(clause), do: unquote(expression))
+            end
+          end
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             %Concept{context: ["Foo", "Bar"], name: "Bar"}
+           ] == Defmodule.parse(ast, [])
+  end
 end

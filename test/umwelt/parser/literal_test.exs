@@ -4,6 +4,35 @@ defmodule Umwelt.Parser.LiteralTest do
   alias Umwelt.Felixir.{Literal, Value, Variable}
   alias Umwelt.Parser
 
+  import Umwelt.Parser.Literal,
+    only: [
+      is_literal_term: 1,
+      is_literal_structure: 1,
+      is_literal: 1
+    ]
+
+  describe "literal guards" do
+    test "guard is_literal_term" do
+      ~w|atom boolean binary float integer read_attr string|a
+      |> Enum.map(&assert is_literal_term(&1))
+    end
+
+    test "guard is_literal_structure" do
+      ~w|bitstring list map tuple|a
+      |> Enum.map(&assert is_literal_structure(&1))
+    end
+
+    test "guard is_literal" do
+      ~w|atom float map tuple|a
+      |> Enum.map(&assert is_literal(&1))
+    end
+
+    test "guard fails" do
+      ~w|foo bar baz|a
+      |> Enum.map(&refute is_literal(&1))
+    end
+  end
+
   test "undefined variable" do
     {:ok, ast} = Code.string_to_quoted("foo")
 

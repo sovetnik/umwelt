@@ -14,10 +14,7 @@ defmodule Umwelt.Parser.Literal do
 
   def type_of(:any), do: %Literal{type: :anything}
 
-  def type_of(type) when is_literal_term(type),
-    do: %Literal{type: type}
-
-  def type_of(type) when is_literal_structure(type),
+  def type_of(type) when is_literal(type),
     do: %Literal{type: type}
 
   def type_of(_), do: %Literal{type: :anything}
