@@ -4,7 +4,17 @@ defmodule Umwelt.Parser.Types do
   # require Logger
   # @log_message "Unknown AST skipped in Type reducer."
 
-  alias Umwelt.Felixir.{Call, Function, Literal, Operator, Structure, Type, Value, Variable}
+  alias Umwelt.Felixir.{
+    Call,
+    Function,
+    Literal,
+    Operator,
+    Signature,
+    Structure,
+    Type,
+    Value,
+    Variable
+  }
 
   import Umwelt.Parser.Literal, only: [is_literal: 1]
   import Umwelt.Parser.Util, only: [string_or: 2]
@@ -16,6 +26,9 @@ defmodule Umwelt.Parser.Types do
 
   def specify(%Operator{left: left} = op, types),
     do: Map.put(op, :left, specify(left, types))
+
+  def specify(%Signature{body: body} = sign, types),
+    do: Map.put(sign, :body, specify(body, types))
 
   def specify(%Call{arguments: args} = call, types),
     do: Map.put(call, :arguments, Enum.map(args, &add_type(&1, types)))

@@ -31,12 +31,26 @@ defmodule Umwelt.Parser.Macro do
   def parse({:@, _, [{_, _, nil}]} = ast, _aliases, _context),
     do: Parser.Literal.parse(ast)
 
+  def parse({:@, _, _} = ast, aliases, context),
+    do: Parser.Attrs.parse(ast, aliases, context)
+
+  def parse({:alias, _, _} = ast, aliases, context),
+    do: Parser.Aliases.parse(ast, aliases, context)
+
   def parse({:__aliases__, _, _} = ast, aliases, context),
     do: Parser.Aliases.parse(ast, aliases, context)
 
   def parse({term, _, _} = ast, _aliases, context)
       when term in [:defmodule] and is_macro(ast),
       do: Parser.Defmodule.parse(ast, context)
+
+  def parse({term, _, _} = ast, _aliases, context)
+      when term in [:defprotocol] and is_macro(ast),
+      do: Parser.Defprotocol.parse(ast, context)
+
+  def parse({term, _, _} = ast, aliases, context)
+      when term in [:defstruct] and is_macro(ast),
+      do: Parser.Defstruct.parse(ast, aliases, context)
 
   def parse({:defguard, _, [{:when, _, _} = when_ast]}, aliases, context),
     do: %{defguard: parse(when_ast, aliases, context)}

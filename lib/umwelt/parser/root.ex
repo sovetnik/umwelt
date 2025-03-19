@@ -4,34 +4,34 @@ defmodule Umwelt.Parser.Root do
   alias Umwelt.Felixir.{Concept, Root, Type}
   alias Umwelt.Parser
 
-  def combine(block_children, module) do
-    types = Parser.Types.extract(block_children)
+  def combine(block, module) do
+    types = Parser.Types.extract(block)
 
     this_module =
-      block_children
+      block
       |> Concept.combine(module)
-      |> Map.put(:functions, Parser.Functions.combine(block_children, types))
+      |> Map.put(:functions, Parser.Functions.combine(block, types))
       |> Map.put(:types, Enum.reject(types, &match?(%Type{name: "t"}, &1)))
       |> Parser.Defstruct.combine(types)
 
-    [this_module | Enum.filter(block_children, &is_list(&1))]
+    [this_module | Enum.filter(block, &is_list/1)]
   end
 
-  def parse({:defmodule, _meta, [{:__aliases__, _, module}, [do: block_children]]}),
-    do: do_parse(block_children, module)
+  def parse({:defmodule, _meta, [{:__aliases__, _, module}, [do: block]]}),
+    do: do_parse(block, module)
 
-  defp do_parse(block_children, [module]) do
-    block_children
-    |> Parser.Defmodule.parse_block(root(module, [module]))
+  defp do_parse(block, [module]) do
+    block
+    |> Parser.Block.parse(root(module, [module]))
     |> combine(root(module, [module]))
   end
 
-  defp do_parse(block_children, module) do
+  defp do_parse(block, module) do
     [this_module | rest] = Enum.reverse(module)
 
     append_dummy(rest, [
-      block_children
-      |> Parser.Defmodule.parse_block(concept(this_module, module))
+      block
+      |> Parser.Block.parse(concept(this_module, module))
       |> combine(concept(this_module, module))
     ])
   end
@@ -42,8 +42,14 @@ defmodule Umwelt.Parser.Root do
     do: append_dummy(rest, [[concept(this_module, Enum.reverse(module)) | block]])
 
   defp root(this_module, context),
-    do: %Root{name: to_string(this_module), context: Enum.map(context, &to_string/1)}
+    do: %Root{
+      name: to_string(this_module),
+      context: Enum.map(context, &to_string/1)
+    }
 
   defp concept(this_module, context),
-    do: %Concept{name: to_string(this_module), context: Enum.map(context, &to_string/1)}
+    do: %Concept{
+      name: to_string(this_module),
+      context: Enum.map(context, &to_string/1)
+    }
 end

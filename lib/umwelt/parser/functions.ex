@@ -4,9 +4,9 @@ defmodule Umwelt.Parser.Functions do
   # require Logger
   # @log_message "Unknown AST skipped in Functions."
 
-  alias Umwelt.Felixir.{Function, Operator}
-
+  alias Umwelt.Felixir.{Function, Operator, Signature}
   alias Umwelt.Parser.Types
+
   import Umwelt.Parser.Util, only: [string_or: 2]
 
   def combine(block_children, types) do
@@ -43,7 +43,15 @@ defmodule Umwelt.Parser.Functions do
           function
           |> Map.put(:impl, head.impl)
           |> Map.put(:note, head.note)
-          |> Function.merge(:body, head.body)
+          |> Function.merge(head.body)
+          | rest
+        ]
+
+      %Signature{} = signature, [head | rest] ->
+        [
+          %Function{},
+          signature
+          |> Signature.merge(head)
           | rest
         ]
 
@@ -51,7 +59,7 @@ defmodule Umwelt.Parser.Functions do
         # Logger.warning("#{@log_message}extract_functions/1\n #{inspect(other, pretty: true)}")
         acc
     end)
-    |> Enum.reject(&match?(%Function{body: nil}, &1))
+    |> Enum.reject(&match?(%{body: nil}, &1))
     |> Enum.reverse()
   end
 end

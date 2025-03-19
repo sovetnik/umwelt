@@ -10,6 +10,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
     Function,
     Literal,
     Operator,
+    Signature,
     Structure,
     Type,
     Unary,
@@ -890,7 +891,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  name: "Enumeric",
                  context: ["Enumeric"],
                  functions: [
-                   %Function{
+                   %Signature{
                      body: %Call{
                        name: "reverse",
                        arguments: [
@@ -902,9 +903,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                          }
                        ],
                        type: %Literal{type: :anything}
-                     },
-                     impl: nil,
-                     private: false
+                     }
                    },
                    %Function{
                      body: %Call{
@@ -1445,8 +1444,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
     assert [
              %Concept{
                name: "Bar",
-               note: "",
-               aliases: [],
                attrs: [
                  %Attribute{
                    name: "enforce_keys",
@@ -1459,24 +1456,19 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    }
                  }
                ],
-               calls: [],
                context: ["Foo", "Bar"],
                fields: [
                  %Field{
                    name: "index",
                    type: %Literal{type: :anything},
-                   value: %Structure{type: %Literal{type: :map}, elements: []}
+                   value: %Structure{type: %Literal{type: :map}}
                  },
                  %Field{
                    name: "states",
                    type: %Literal{type: :anything},
-                   value: %Structure{type: %Literal{type: :map}, elements: []}
+                   value: %Structure{type: %Literal{type: :map}}
                  }
-               ],
-               functions: [],
-               guards: [],
-               specs: [],
-               types: []
+               ]
              }
            ] ==
              Defmodule.parse(ast, [])

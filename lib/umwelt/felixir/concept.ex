@@ -18,7 +18,6 @@ defmodule Umwelt.Felixir.Concept do
           fields: list,
           functions: list,
           guards: list,
-          specs: list,
           types: list
         }
 
@@ -31,11 +30,10 @@ defmodule Umwelt.Felixir.Concept do
             fields: [],
             functions: [],
             guards: [],
-            specs: [],
             types: []
 
-  def combine(block_children, module) when is_list(block_children) do
-    Enum.reduce(block_children, module, fn
+  def combine(block, module) when is_list(block) do
+    Enum.reduce(block, module, fn
       %{moduledoc: [value]}, module ->
         Map.put(module, :note, string_or(value, "Description of #{module.name}"))
 
@@ -73,7 +71,5 @@ defmodule Umwelt.Felixir.Concept do
     end)
   end
 
-  def combine(block_children, module) do
-    combine([block_children], module)
-  end
+  def combine(block, module), do: combine([block], module)
 end

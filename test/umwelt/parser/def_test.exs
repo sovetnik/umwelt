@@ -8,6 +8,7 @@ defmodule Umwelt.Parser.DefTest do
     Function,
     Literal,
     Operator,
+    Signature,
     Structure,
     Value,
     Variable
@@ -118,7 +119,7 @@ defmodule Umwelt.Parser.DefTest do
   test "typed variable Bar.Baz" do
     {:ok, ast} = Code.string_to_quoted("def foo(%Bar.Baz{} = bar)")
 
-    assert %Function{
+    assert %Signature{
              body: %Call{
                name: "foo",
                arguments: [
@@ -136,7 +137,7 @@ defmodule Umwelt.Parser.DefTest do
   test "typed variable Bar.Baz aliased" do
     {:ok, ast} = Code.string_to_quoted("def foo(%Bar.Baz{} = bar)")
 
-    assert %Function{
+    assert %Signature{
              body: %Call{
                name: "foo",
                arguments: [
@@ -517,98 +518,74 @@ defmodule Umwelt.Parser.DefTest do
 
       assert [
                %Concept{
-                 name: "Bar",
-                 note: "Matching examples",
                  context: ["Foo", "Bar"],
                  functions: [
-                   %Function{
+                   %Signature{
                      body: %Call{
-                       name: "fizzbuzz",
                        arguments: [
                          %Variable{body: "matches", type: %Literal{type: :list}},
                          %Variable{body: "number", type: %Literal{type: :integer}}
                        ],
-                       context: [],
-                       note: "",
+                       name: "fizzbuzz",
                        type: %Literal{type: :atom}
                      },
-                     impl: nil,
-                     note: "Head of fizzbuzz/2",
-                     private: false
+                     note: "Head of fizzbuzz/2"
                    },
                    %Function{
-                     private: false,
-                     impl: nil,
                      body: %Call{
                        name: "fizzbuzz",
-                       note: "",
+                       type: %Literal{type: :anything},
                        arguments: [
-                         %Structure{type: %Literal{type: :list}, elements: []},
+                         %Structure{type: %Literal{type: :list}},
                          %Variable{body: "number", type: %Literal{type: :anything}}
-                       ],
-                       context: [],
-                       type: %Literal{type: :anything}
-                     },
-                     note: ""
+                       ]
+                     }
                    },
                    %Function{
-                     private: false,
-                     impl: nil,
                      body: %Call{
                        name: "fizzbuzz",
-                       note: "",
+                       type: %Literal{type: :anything},
                        arguments: [
                          %Structure{
                            type: %Literal{type: :list},
                            elements: [%Value{body: "fizz", type: %Literal{type: :atom}}]
                          },
                          %Variable{body: "number", type: %Literal{type: :anything}}
-                       ],
-                       context: [],
-                       type: %Literal{type: :anything}
-                     },
-                     note: ""
+                       ]
+                     }
                    },
                    %Function{
-                     private: false,
-                     impl: nil,
                      body: %Call{
-                       name: "fizzbuzz",
-                       note: "",
                        arguments: [
                          %Structure{
-                           type: %Literal{type: :list},
-                           elements: [%Value{body: "buzz", type: %Literal{type: :atom}}]
+                           elements: [%Value{body: "buzz", type: %Literal{type: :atom}}],
+                           type: %Literal{type: :list}
                          },
                          %Variable{body: "number", type: %Literal{type: :anything}}
                        ],
-                       context: [],
+                       name: "fizzbuzz",
                        type: %Literal{type: :anything}
-                     },
-                     note: ""
+                     }
                    },
                    %Function{
-                     private: false,
-                     impl: nil,
                      body: %Call{
-                       name: "fizzbuzz",
-                       note: "",
                        arguments: [
                          %Structure{
-                           type: %Literal{type: :list},
                            elements: [
                              %Value{body: "fizz", type: %Literal{type: :atom}},
                              %Value{body: "buzz", type: %Literal{type: :atom}}
-                           ]
+                           ],
+                           type: %Literal{type: :list}
                          },
                          %Variable{body: "number", type: %Literal{type: :anything}}
                        ],
-                       context: [],
+                       name: "fizzbuzz",
                        type: %Literal{type: :anything}
-                     },
-                     note: ""
+                     }
                    }
-                 ]
+                 ],
+                 name: "Bar",
+                 note: "Matching examples"
                }
              ] == Defmodule.parse(ast, [])
     end

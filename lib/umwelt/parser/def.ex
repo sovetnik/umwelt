@@ -1,10 +1,7 @@
 defmodule Umwelt.Parser.Def do
   @moduledoc "Parses Function AST"
 
-  require Logger
-  @log_message "Unknown AST skipped in Def.parse"
-
-  alias Umwelt.Felixir.{Call, Function}
+  alias Umwelt.Felixir.{Call, Function, Signature}
   alias Umwelt.Parser
 
   import Umwelt.Parser.Macro, only: [is_atom_macro: 1]
@@ -24,12 +21,7 @@ defmodule Umwelt.Parser.Def do
 
   def parse({type, _, [function]}, aliases, context)
       when is_atom_macro(function),
-      do: %Function{body: parse_body(function, aliases, context), private: private?(type)}
-
-  def parse(ast, _aliases, _context) do
-    Logger.warning("#{@log_message}/2\n #{inspect(ast)}")
-    nil
-  end
+      do: %Signature{body: parse_body(function, aliases, context), private: private?(type)}
 
   defp private?(:def), do: false
   defp private?(:defp), do: true

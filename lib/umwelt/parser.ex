@@ -20,8 +20,7 @@ defmodule Umwelt.Parser do
   def read_ast({:error, msg}), do: {:error, msg}
   def read_ast(code) when is_binary(code), do: read_ast({:ok, code})
 
-  def parse_root({:ok, ast}),
-    do: ast |> Parser.Root.parse() |> index()
+  def parse_root({:ok, ast}), do: ast |> Parser.Root.parse() |> index()
 
   # AST of blanc file
   def parse_ast({:ok, {:__block__, [line: 1], []}}), do: %{[] => %{}}

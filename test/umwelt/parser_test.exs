@@ -8,7 +8,9 @@ defmodule Umwelt.ParserTest do
     Function,
     Literal,
     Operator,
+    Protocol,
     Root,
+    Signature,
     Structure,
     Value,
     Variable
@@ -64,7 +66,7 @@ defmodule Umwelt.ParserTest do
       assert %{
                ["Foobar"] => %Concept{
                  functions: [
-                   %Function{
+                   %Signature{
                      body: %Call{
                        name: "foo",
                        arguments: [
@@ -92,7 +94,7 @@ defmodule Umwelt.ParserTest do
       assert %{
                ["Context"] => %Concept{
                  functions: [
-                   %Function{
+                   %Signature{
                      body: %Call{
                        name: "foo",
                        arguments: [
@@ -219,18 +221,6 @@ defmodule Umwelt.ParserTest do
                  end_line: 1,
                  end_column: 11
                ], "missing terminator: end", ""}} == Parser.parse_raw("def foo do")
-    end
-
-    test "protocol skipped for now" do
-      code = """
-      defprotocol Umwelt.Parsed do
-        @moduledoc " Parsed felixir protocol"
-        @spec unparse(t()) :: map()
-        def unparse(t)
-      end
-      """
-
-      assert %{} == Parser.parse_raw(code)
     end
   end
 
@@ -499,6 +489,46 @@ defmodule Umwelt.ParserTest do
                },
                impl: nil,
                private: false
+             } == Parser.parse(ast, [], [])
+    end
+
+    test "defprotocol with signatures" do
+      {:ok, ast} =
+        """
+        defprotocol Umwelt.Parsed do
+          @moduledoc "Parsed felixir protocol"
+          @spec unparse(t()) :: map()
+          def unparse(t)
+        end
+        """
+        |> Code.string_to_quoted()
+
+      assert %Protocol{
+               name: "Parsed",
+               context: ["Umwelt", "Parsed"],
+               note: "Parsed felixir protocol",
+               signatures: [
+                 %Signature{
+                   private: false,
+                   body: %Call{
+                     name: "unparse",
+                     type: %Literal{type: :map},
+                     context: [],
+                     arguments: [
+                       %Umwelt.Felixir.Variable{
+                         type: %Umwelt.Felixir.Call{
+                           type: %Umwelt.Felixir.Literal{type: :anything},
+                           arguments: [],
+                           context: ["Umwelt", "Parsed"],
+                           name: "t",
+                           note: ""
+                         },
+                         body: "t"
+                       }
+                     ]
+                   }
+                 }
+               ]
              } == Parser.parse(ast, [], [])
     end
 

@@ -66,6 +66,9 @@ defmodule Umwelt.Parser.Typespec do
       spec: spec(right, [], [])
     }
 
+  def parse(term, aliases, context) when is_atom(term),
+    do: Parser.parse(term, aliases, context)
+
   defp name(%Call{name: name}), do: name
   defp name(%Variable{body: name}), do: name
 
