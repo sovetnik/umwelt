@@ -33,22 +33,8 @@ defmodule Umwelt.Felixir.Operator do
     Map.put(op, :right, right)
   end
 
-  def type_equation(
-        %Operator{
-          name: "membership"
-          # left: %{type: left_type},
-          # right: %{type: %Literal{type: :anything}} = right
-        } = op
-      ) do
-    op
+  defimpl Umwelt.Argument, for: __MODULE__ do
+    def resolve(%Operator{left: variable}, %{type: type}),
+      do: Map.put(variable, :type, type)
   end
 end
-
-# %Umwelt.Felixir.Operator{
-#   name: "membership",
-#   left: %Umwelt.Felixir.Variable{body: "foo", type: %Umwelt.Felixir.Literal{type: :anything}},
-#   right: [
-#     %Umwelt.Felixir.Value{body: "bar", type: %Umwelt.Felixir.Literal{type: :atom}},
-#     %Umwelt.Felixir.Value{body: "baz", type: %Umwelt.Felixir.Literal{type: :atom}}
-#   ]
-# }

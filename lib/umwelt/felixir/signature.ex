@@ -1,6 +1,7 @@
 defmodule Umwelt.Felixir.Signature do
   @moduledoc "Parses Signature AST"
 
+  alias Umwelt.Argument
   alias Umwelt.Felixir.{Call, Signature}
 
   @type t() :: %__MODULE__{
@@ -15,6 +16,6 @@ defmodule Umwelt.Felixir.Signature do
   def merge(%Signature{} = signature, %{body: body, note: note}) do
     signature
     |> Map.put(:note, note)
-    |> Map.put(:body, Call.add_types(signature.body, body))
+    |> Map.put(:body, Argument.resolve(signature.body, body))
   end
 end

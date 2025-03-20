@@ -1,7 +1,8 @@
 defmodule Umwelt.Felixir.Call do
   @moduledoc "Parses Call AST"
 
-  alias Umwelt.Felixir.{Literal, Variable}
+  alias Umwelt.Argument
+  alias Umwelt.Felixir.Literal
 
   @type t() :: %__MODULE__{
           name: String.t(),
@@ -17,14 +18,16 @@ defmodule Umwelt.Felixir.Call do
             context: [],
             type: %Literal{type: :anything}
 
-  def add_types(call, nil), do: call
+  defimpl Argument, for: __MODULE__ do
+    def resolve(fun, nil), do: fun
 
-  def add_types(call, value) do
-    call
-    |> Map.put(
-      :arguments,
-      Variable.add_types(call.arguments, value.arguments)
-    )
-    |> Map.put(:type, value.type)
+    def resolve(call, value) do
+      call
+      |> Map.put(:type, value.type)
+      |> Map.put(
+        :arguments,
+        Argument.resolve(call.arguments, value.arguments)
+      )
+    end
   end
 end

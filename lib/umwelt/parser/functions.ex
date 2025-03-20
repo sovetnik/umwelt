@@ -4,6 +4,7 @@ defmodule Umwelt.Parser.Functions do
   # require Logger
   # @log_message "Unknown AST skipped in Functions."
 
+  alias Umwelt.Argument
   alias Umwelt.Felixir.{Function, Operator, Signature}
   alias Umwelt.Parser.Types
 
@@ -43,7 +44,7 @@ defmodule Umwelt.Parser.Functions do
           function
           |> Map.put(:impl, head.impl)
           |> Map.put(:note, head.note)
-          |> Function.merge(head.body)
+          |> Argument.resolve(head.body)
           | rest
         ]
 

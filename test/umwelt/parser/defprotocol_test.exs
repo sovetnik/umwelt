@@ -132,4 +132,54 @@ defmodule Umwelt.Parser.DefprotocolTest do
              ]
            } == Defprotocol.parse(ast, [])
   end
+
+  test "signature with complex spec" do
+    {:ok, ast} =
+      """
+      defprotocol Foo.Bar do
+      @spec foobar(
+          t(),
+          {term(), integer() | list()},
+          {integer(), list()}
+        ) :: :ok
+      def foobar(foo, bar, baz)
+      end
+      """
+      |> Code.string_to_quoted()
+
+    assert %Protocol{
+             name: "Bar",
+             note: "Bar protocol",
+             context: ["Foo", "Bar"],
+             signatures: [
+               %Signature{
+                 body: %Call{
+                   arguments: [
+                     %Umwelt.Felixir.Variable{
+                       body: "foo",
+                       type: %Umwelt.Felixir.Call{
+                         type: %Umwelt.Felixir.Literal{type: :anything},
+                         context: ["Foo", "Bar"],
+                         name: "t"
+                       }
+                     },
+                     %Umwelt.Felixir.Variable{
+                       type: %Umwelt.Felixir.Literal{type: :tuple},
+                       body: "bar"
+                     },
+                     %Umwelt.Felixir.Variable{
+                       type: %Umwelt.Felixir.Literal{type: :tuple},
+                       body: "baz"
+                     }
+                   ],
+                   name: "foobar",
+                   type: %Umwelt.Felixir.Value{
+                     type: %Umwelt.Felixir.Literal{type: :atom},
+                     body: "ok"
+                   }
+                 }
+               }
+             ]
+           } == Defprotocol.parse(ast, [])
+  end
 end
