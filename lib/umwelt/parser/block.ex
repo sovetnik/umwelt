@@ -1,8 +1,8 @@
 defmodule Umwelt.Parser.Block do
   @moduledoc "Parses list of ASTs from block"
 
-  @skip_terms ~w{ |> = alias defdelegate defimpl defmacro defmacrop if case }a
-  @block_children ~w|def defp import require use defguard defmodule|a
+  @skip_terms ~w{ |> = alias defdelegate  defmacro defmacrop if case }a
+  @block_children ~w|def defp defguard defimpl defmodule defprotocol import require use|a
 
   import Umwelt.Parser.Macro, only: [is_macro: 1]
 

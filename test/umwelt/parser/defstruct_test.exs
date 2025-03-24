@@ -25,6 +25,41 @@ defmodule Umwelt.Parser.DefstructTest do
            } == Defstruct.parse(ast, [], [])
   end
 
+  test "just one field" do
+    {:ok, ast} =
+      """
+        defmodule Foo.Bar do
+          @moduledoc "Foobar module"
+          defstruct [ :baz ]
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             %Concept{
+               context: ["Foo", "Bar"],
+               name: "Bar",
+               note: "Foobar module",
+               aliases: [],
+               fields: [
+                 %Field{
+                   name: "baz",
+                   type: %Literal{
+                     type: :anything
+                   },
+                   value: %Value{
+                     body: "nil",
+                     type: %Literal{
+                       type: :atom
+                     }
+                   }
+                 }
+               ],
+               types: []
+             }
+           ] == Defmodule.parse(ast, [])
+  end
+
   test "empty inner module expands aliases" do
     {:ok, ast} =
       """

@@ -7,4 +7,11 @@ defmodule Umwelt.Felixir.Alias do
         }
 
   defstruct name: "", path: []
+
+  def from_path(path) do
+    %__MODULE__{
+      name: List.last(path),
+      path: path
+    }
+  end
 end

@@ -24,10 +24,7 @@ defmodule Umwelt.Felixir.Call do
     def resolve(call, value) do
       call
       |> Map.put(:type, value.type)
-      |> Map.put(
-        :arguments,
-        Argument.resolve(call.arguments, value.arguments)
-      )
+      |> Map.put(:arguments, Argument.resolve(call.arguments, value.arguments))
     end
   end
 end

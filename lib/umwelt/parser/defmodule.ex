@@ -8,7 +8,7 @@ defmodule Umwelt.Parser.Defmodule do
   alias Umwelt.Parser
 
   def parse({:defmodule, _meta, children}, context),
-    do: parse_children(children, [], context)
+    do: parse_children(children, [], context) |> List.wrap()
 
   defp parse_children([{:__aliases__, _, module}, [do: block]], _, context) do
     concept =
@@ -32,29 +32,22 @@ defmodule Umwelt.Parser.Defmodule do
     end)
     |> List.flatten()
     |> Enum.reduce(concept, fn
-      %Attribute{} = value, %{attrs: attrs} = concept ->
-        Map.put(concept, :attrs, [value | attrs])
-
-      _other, concept ->
-        # Logger.warning("#{@log_message}combine/2\n #{inspect(other, pretty: true)}")
-        concept
+      %Attribute{} = value, %{attrs: attrs} = concept -> Map.put(concept, :attrs, [value | attrs])
+      _other, concept -> concept
     end)
   end
 
+  # alias Foo.{ Bar, Baz } => [~Bar, ~Baz]
+  # as compact alias clause produces list
   def extract_aliases({:__block__, _, block}, context) do
-    # alias Foo.{ Bar, Baz } => [~Bar, ~Baz]
-    # compact alias clause produces list
     block
     |> Enum.map(fn
       {:alias, _, _} = ast -> extract_aliases(ast, context)
-      _other -> nil
+      _other -> []
     end)
     |> List.flatten()
-    |> Enum.reject(&is_nil/1)
   end
 
-  def extract_aliases({:alias, _, _} = ast, context),
-    do: Parser.Aliases.parse(ast, [], context)
-
+  def extract_aliases({:alias, _, _} = ast, context), do: Parser.Aliases.parse(ast, [], context)
   def extract_aliases(_, _), do: []
 end

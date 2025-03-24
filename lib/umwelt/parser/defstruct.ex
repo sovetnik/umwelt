@@ -5,20 +5,19 @@ defmodule Umwelt.Parser.Defstruct do
   alias Umwelt.Parser
 
   def combine(%{fields: fields} = concept, types) do
-    Map.put(
-      concept,
-      :fields,
-      add_types(fields, Parser.Struct.types(types, concept.aliases, concept.context))
-    )
+    types
+    |> Parser.Struct.types(concept.aliases, concept.context)
+    |> then(&add_types(fields, &1))
+    |> then(&Map.put(concept, :fields, &1))
   end
 
   def parse({:defstruct, _, [{:@, _, [{name, _, nil}]}]}, _aliases, concept) do
     str_name = to_string(name)
-    [attr] = Enum.filter(concept.attrs, &match?(%{name: ^str_name}, &1))
 
-    %{
-      defstruct: Enum.map(attr.value.elements, &parse_field(&1, concept.aliases, concept.context))
-    }
+    [%{value: %{elements: elements}}] =
+      Enum.filter(concept.attrs, &match?(%{name: ^str_name}, &1))
+
+    %{defstruct: Enum.map(elements, &parse_field(&1, concept.aliases, concept.context))}
   end
 
   def parse({:defstruct, _, [fields]}, aliases, context),

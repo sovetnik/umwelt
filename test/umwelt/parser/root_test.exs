@@ -126,7 +126,6 @@ defmodule Umwelt.Parser.RootTest do
                        arguments: [%Variable{body: "once", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    },
                    %Function{
@@ -135,7 +134,6 @@ defmodule Umwelt.Parser.RootTest do
                        arguments: [%Variable{body: "twice", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    }
                  ],
@@ -152,7 +150,6 @@ defmodule Umwelt.Parser.RootTest do
                          arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
                          type: %Literal{type: :anything}
                        },
-                       impl: nil,
                        private: false
                      }
                    ],
@@ -169,7 +166,6 @@ defmodule Umwelt.Parser.RootTest do
                            arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
                            type: %Literal{type: :anything}
                          },
-                         impl: nil,
                          private: false
                        }
                      ],
@@ -187,7 +183,6 @@ defmodule Umwelt.Parser.RootTest do
                            arguments: [%Variable{body: "foo", type: %Literal{type: :anything}}],
                            type: %Literal{type: :anything}
                          },
-                         impl: nil,
                          private: false
                        }
                      ],
@@ -300,7 +295,6 @@ defmodule Umwelt.Parser.RootTest do
                          arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
                          type: %Literal{type: :anything}
                        },
-                       impl: nil,
                        private: false
                      },
                      %Function{
@@ -309,7 +303,6 @@ defmodule Umwelt.Parser.RootTest do
                          arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
                          type: %Literal{type: :anything}
                        },
-                       impl: nil,
                        private: false
                      }
                    ]

@@ -28,6 +28,9 @@ defmodule Umwelt.Parser.Macro do
   def parse({_, _, nil} = ast, _aliases, _context),
     do: Parser.Literal.parse(ast)
 
+  def parse({:__block__, _, _} = block, aliases, context),
+    do: Parser.Block.parse(block, aliases, context)
+
   def parse({:@, _, [{_, _, nil}]} = ast, _aliases, _context),
     do: Parser.Literal.parse(ast)
 
@@ -39,6 +42,10 @@ defmodule Umwelt.Parser.Macro do
 
   def parse({:__aliases__, _, _} = ast, aliases, context),
     do: Parser.Aliases.parse(ast, aliases, context)
+
+  def parse({term, _, _} = ast, aliases, context)
+      when term in [:defimpl] and is_macro(ast),
+      do: Parser.Defimpl.parse(ast, aliases, context)
 
   def parse({term, _, _} = ast, _aliases, context)
       when term in [:defmodule] and is_macro(ast),

@@ -5,6 +5,7 @@ defmodule Umwelt.Parser.Types do
   # @log_message "Unknown AST skipped in Type reducer."
 
   alias Umwelt.Felixir.{
+    Alias,
     Call,
     Function,
     Literal,
@@ -16,7 +17,7 @@ defmodule Umwelt.Parser.Types do
     Variable
   }
 
-  import Umwelt.Parser.Literal, only: [is_literal: 1]
+  import Umwelt.Parser.Literal, only: [type_of: 1]
   import Umwelt.Parser.Util, only: [string_or: 2]
 
   def specify(term, types)
@@ -31,36 +32,40 @@ defmodule Umwelt.Parser.Types do
     do: Map.put(sign, :body, specify(body, types))
 
   def specify(%Call{arguments: args} = call, types),
-    do: Map.put(call, :arguments, Enum.map(args, &add_type(&1, types)))
+    do: Map.put(call, :arguments, with_types(args, types))
 
-  defp add_type(%Operator{} = op, _index),
-    do: Operator.type_equation(op)
+  defp with_types(args, types) do
+    Enum.map(args, fn
+      %Call{name: name, type: type} = variable ->
+        Map.put(variable, :type, types[name] || type)
 
-  defp add_type(%Call{name: name, type: type} = var, index),
-    do: Map.put(var, :type, index[name] || type)
+      %Operator{} = operator ->
+        Operator.type_equation(operator)
 
-  defp add_type(%Structure{} = structure, _index), do: structure
-  defp add_type(%Value{} = value, _index), do: value
+      %Structure{} = structure ->
+        structure
 
-  defp add_type(%Variable{type: %Call{name: name} = type} = var, index),
-    do: Map.put(var, :type, index[name] || type)
+      %Value{} = value ->
+        value
 
-  defp add_type(%Variable{body: name, type: %Literal{type: :anything}} = var, index),
-    do: Map.put(var, :type, index[name] || maybe_literal(name))
+      %Variable{type: %Call{name: name} = type} = variable ->
+        Map.put(variable, :type, types[name] || type)
 
-  defp add_type(%Variable{type: %Literal{}} = var, _index), do: var
-  defp add_type(%Variable{type: %Type{}} = variable, _index), do: variable
+      %Variable{body: name, type: %Literal{type: :anything}} = var ->
+        Map.put(var, :type, types[name] || maybe_literal(name))
 
-  defp add_type(%Variable{body: name} = var, index),
-    do: Map.put(var, :type, index[name] || maybe_literal(name))
+      %Variable{type: %Alias{}} = variable ->
+        variable
 
-  def maybe_literal(name) do
-    if is_literal(String.to_atom(name)) do
-      %Literal{type: String.to_atom(name)}
-    else
-      %Literal{type: :anything}
-    end
+      %Variable{type: %Literal{}} = variable ->
+        variable
+
+      %Variable{type: %Type{}} = variable ->
+        variable
+    end)
   end
+
+  def maybe_literal(name), do: name |> String.to_atom() |> type_of()
 
   def extract(block_children) do
     Enum.reduce([[%Type{}] | block_children], fn
@@ -84,9 +89,6 @@ defmodule Umwelt.Parser.Types do
     |> Enum.reverse()
   end
 
-  defp reduce(type, name, spec) do
-    type
-    |> Map.put(:name, name)
-    |> Map.put(:spec, spec)
-  end
+  defp reduce(type, name, spec),
+    do: type |> Map.put(:name, name) |> Map.put(:spec, spec)
 end

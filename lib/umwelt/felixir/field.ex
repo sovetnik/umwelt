@@ -1,11 +1,11 @@
 defmodule Umwelt.Felixir.Field do
   @moduledoc "Parses Struct definition AST"
 
-  alias Umwelt.Felixir.Literal
+  alias Umwelt.Felixir.{Alias, Literal}
 
   @type t() :: %__MODULE__{
           name: String.t(),
-          type: map,
+          type: %Alias{} | %Literal{},
           value: map
         }
 

@@ -2,10 +2,12 @@ defmodule Umwelt.ParserTest do
   use ExUnit.Case, async: true
 
   alias Umwelt.Felixir.{
+    Alias,
     Attribute,
     Call,
     Concept,
     Function,
+    Implement,
     Literal,
     Operator,
     Protocol,
@@ -134,7 +136,6 @@ defmodule Umwelt.ParserTest do
                        arguments: [%Variable{body: "once", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    },
                    %Function{
@@ -143,7 +144,6 @@ defmodule Umwelt.ParserTest do
                        arguments: [%Variable{body: "twice", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    }
                  ],
@@ -169,7 +169,6 @@ defmodule Umwelt.ParserTest do
                        arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    }
                  ],
@@ -185,7 +184,6 @@ defmodule Umwelt.ParserTest do
                        arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    }
                  ],
@@ -201,7 +199,6 @@ defmodule Umwelt.ParserTest do
                        arguments: [%Variable{body: "foo", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    }
                  ],
@@ -319,7 +316,6 @@ defmodule Umwelt.ParserTest do
                        arguments: [%Variable{body: "once", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    },
                    %Function{
@@ -328,7 +324,6 @@ defmodule Umwelt.ParserTest do
                        arguments: [%Variable{body: "twice", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    }
                  ],
@@ -354,7 +349,6 @@ defmodule Umwelt.ParserTest do
                        arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    }
                  ],
@@ -370,7 +364,6 @@ defmodule Umwelt.ParserTest do
                        arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    }
                  ],
@@ -386,7 +379,6 @@ defmodule Umwelt.ParserTest do
                        arguments: [%Variable{body: "foo", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    }
                  ],
@@ -397,6 +389,7 @@ defmodule Umwelt.ParserTest do
                {:ok, code}
                |> Parser.read_ast()
                |> Parser.parse_root()
+               |> Parser.index_deep()
     end
 
     test "weird pipe operator" do
@@ -425,7 +418,6 @@ defmodule Umwelt.ParserTest do
                    right: %Variable{body: "b", type: %Literal{type: :anything}}
                  }
                },
-               impl: nil,
                private: false
              } == Parser.parse(ast, [], [])
     end
@@ -487,48 +479,7 @@ defmodule Umwelt.ParserTest do
                    right: %Variable{body: "b", type: %Literal{type: :anything}}
                  }
                },
-               impl: nil,
                private: false
-             } == Parser.parse(ast, [], [])
-    end
-
-    test "defprotocol with signatures" do
-      {:ok, ast} =
-        """
-        defprotocol Umwelt.Parsed do
-          @moduledoc "Parsed felixir protocol"
-          @spec unparse(t()) :: map()
-          def unparse(t)
-        end
-        """
-        |> Code.string_to_quoted()
-
-      assert %Protocol{
-               name: "Parsed",
-               context: ["Umwelt", "Parsed"],
-               note: "Parsed felixir protocol",
-               signatures: [
-                 %Signature{
-                   private: false,
-                   body: %Call{
-                     name: "unparse",
-                     type: %Literal{type: :map},
-                     context: [],
-                     arguments: [
-                       %Umwelt.Felixir.Variable{
-                         type: %Umwelt.Felixir.Call{
-                           type: %Umwelt.Felixir.Literal{type: :anything},
-                           arguments: [],
-                           context: ["Umwelt", "Parsed"],
-                           name: "t",
-                           note: ""
-                         },
-                         body: "t"
-                       }
-                     ]
-                   }
-                 }
-               ]
              } == Parser.parse(ast, [], [])
     end
 
@@ -589,6 +540,289 @@ defmodule Umwelt.ParserTest do
                  }
                ]
              } == Parser.parse(ast, [], [])
+    end
+  end
+
+  describe "defprotocol & defimpl" do
+    test "in separate modules" do
+      {:ok, ast} =
+        """
+        defmodule Foo.Bar do
+          @moduledoc "Foobar module"
+          @spec baz(t()) :: map()
+          def baz(t)
+        end
+
+        defprotocol Foo.Baz do
+          def baz(t)
+        end
+
+        defimpl Foo.Baz, for: Foo.Bar do
+          def baz(foo, types) do
+          end
+        end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               [
+                 %Concept{
+                   name: "Bar",
+                   note: "Foobar module",
+                   context: ["Foo", "Bar"],
+                   functions: [
+                     %Signature{
+                       body: %Call{
+                         name: "baz",
+                         arguments: [
+                           %Variable{
+                             body: "t",
+                             type: %Call{
+                               name: "t",
+                               context: ["Foo", "Bar"],
+                               type: %Literal{type: :anything}
+                             }
+                           }
+                         ],
+                         type: %Literal{type: :map}
+                       }
+                     }
+                   ]
+                 }
+               ],
+               [
+                 %Protocol{
+                   name: "Baz",
+                   note: "Baz protocol",
+                   signatures: [
+                     %Signature{
+                       body: %Call{
+                         name: "baz",
+                         arguments: [%Variable{body: "t", type: %Literal{type: :anything}}],
+                         type: %Literal{type: :anything}
+                       }
+                     }
+                   ],
+                   context: ["Foo", "Baz"]
+                 }
+               ],
+               [
+                 %Implement{
+                   context: ["Foo", "Bar", "Baz"],
+                   name: "Baz",
+                   note: "impl Baz for Bar",
+                   protocol: %Alias{name: "Baz", path: ["Foo", "Baz"]},
+                   subject: %Alias{name: "Bar", path: ["Foo", "Bar"]},
+                   functions: [
+                     %Function{
+                       impl: true,
+                       body: %Call{
+                         name: "baz",
+                         type: %Literal{type: :anything},
+                         arguments: [
+                           %Variable{
+                             body: "foo",
+                             type: %Alias{name: "Bar", path: ["Foo", "Bar"]}
+                           },
+                           %Variable{body: "types", type: %Literal{type: :anything}}
+                         ]
+                       }
+                     }
+                   ]
+                 }
+               ]
+             ] == Parser.parse(ast, [], [])
+    end
+
+    test "in one module" do
+      {:ok, ast} =
+        """
+        defmodule Foo do
+          @moduledoc "Foo concept"
+          alias Foo.{Bar, Baz}
+          defmodule Bar do
+            @moduledoc "Bar concept"
+            @spec baz(t()) :: map()
+            def baz(t)
+          end
+
+          defprotocol Baz do
+            def baz(t)
+          end
+
+          defimpl Baz, for: Bar do
+            def baz(foo, types) do
+            end
+          end
+        end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %Concept{
+                 context: ["Foo"],
+                 name: "Foo",
+                 note: "Foo concept",
+                 aliases: [
+                   %Umwelt.Felixir.Alias{name: "Bar", path: ["Foo", "Bar"]},
+                   %Umwelt.Felixir.Alias{name: "Baz", path: ["Foo", "Baz"]}
+                 ]
+               },
+               [
+                 %Concept{
+                   name: "Bar",
+                   note: "Bar concept",
+                   context: ["Foo", "Bar"],
+                   functions: [
+                     %Signature{
+                       body: %Call{
+                         name: "baz",
+                         arguments: [
+                           %Variable{
+                             body: "t",
+                             type: %Call{
+                               name: "t",
+                               note: "",
+                               context: ["Foo", "Bar"],
+                               type: %Literal{type: :anything}
+                             }
+                           }
+                         ],
+                         type: %Literal{type: :map}
+                       },
+                       private: false
+                     }
+                   ]
+                 }
+               ],
+               [
+                 %Protocol{
+                   name: "Baz",
+                   note: "Baz protocol",
+                   signatures: [
+                     %Signature{
+                       body: %Call{
+                         name: "baz",
+                         arguments: [%Variable{body: "t", type: %Literal{type: :anything}}],
+                         type: %Literal{type: :anything}
+                       },
+                       private: false
+                     }
+                   ],
+                   context: ["Foo", "Baz"]
+                 }
+               ],
+               [
+                 %Implement{
+                   context: ["Foo", "Bar", "Baz"],
+                   name: "Baz",
+                   note: "impl Baz for Bar",
+                   protocol: %Alias{name: "Baz", path: ["Foo", "Baz"]},
+                   subject: %Alias{name: "Bar", path: ["Foo", "Bar"]},
+                   functions: [
+                     %Function{
+                       private: false,
+                       impl: true,
+                       body: %Call{
+                         name: "baz",
+                         type: %Literal{
+                           type: :anything
+                         },
+                         context: [],
+                         arguments: [
+                           %Variable{
+                             body: "foo",
+                             type: %Alias{name: "Bar", path: ["Foo", "Bar"]}
+                           },
+                           %Variable{
+                             body: "types",
+                             type: %Literal{type: :anything}
+                           }
+                         ]
+                       },
+                       note: ""
+                     }
+                   ]
+                 }
+               ]
+             ] == Parser.parse_ast({:ok, ast})
+    end
+
+    test "in one module as __MODULE__" do
+      {:ok, ast} =
+        """
+          defprotocol Foo.Baz do
+            @spec foo(t()) :: boolean()
+            def foo(t)
+          end
+
+          defmodule Foo.Bar do
+            @moduledoc "Bar concept"
+
+            alias Foo.Baz  
+
+
+            defimpl Baz, for: __MODULE__ do
+              def foo(bar) do
+              end
+            end
+          end
+        """
+        |> Code.string_to_quoted()
+
+      assert %{
+               ["Foo", "Bar"] => %Concept{
+                 name: "Bar",
+                 context: ["Foo", "Bar"],
+                 aliases: [%Alias{name: "Baz", path: ["Foo", "Baz"]}],
+                 note: "Bar concept"
+               },
+               ["Foo", "Bar", "Baz"] => %Implement{
+                 name: "Baz",
+                 note: "impl Baz for Bar",
+                 context: ["Foo", "Bar", "Baz"],
+                 protocol: %Alias{name: "Baz", path: ["Foo", "Baz"]},
+                 subject: %Alias{name: "Bar", path: ["Foo", "Bar"]},
+                 functions: [
+                   %Function{
+                     body: %Call{
+                       name: "foo",
+                       arguments: [
+                         %Variable{body: "bar", type: %Alias{name: "Bar", path: ["Foo", "Bar"]}}
+                       ],
+                       type: %Literal{type: :anything}
+                     },
+                     impl: true
+                   }
+                 ]
+               },
+               ["Foo", "Baz"] => %Protocol{
+                 name: "Baz",
+                 context: ["Foo", "Baz"],
+                 signatures: [
+                   %Signature{
+                     body: %Call{
+                       name: "foo",
+                       arguments: [
+                         %Variable{
+                           body: "t",
+                           type: %Call{
+                             name: "t",
+                             context: ["Foo", "Baz"],
+                             type: %Literal{type: :anything}
+                           }
+                         }
+                       ],
+                       type: %Literal{type: :boolean}
+                     },
+                     private: false
+                   }
+                 ],
+                 note: "Baz protocol"
+               }
+             } ==
+               Parser.parse_ast({:ok, ast})
+               |> Parser.index_deep()
     end
   end
 end

@@ -21,20 +21,22 @@ defmodule Umwelt.Parser.DefprotocolTest do
       """
       |> Code.string_to_quoted()
 
-    assert %Protocol{
-             name: "Bar",
-             note: "Bar protocol",
-             context: ["Foo", "Bar"],
-             signatures: [
-               %Signature{
-                 body: %Call{
-                   name: "unparse",
-                   type: %Literal{type: :anything},
-                   arguments: [%Variable{body: "t", type: %Literal{type: :anything}}]
+    assert [
+             %Protocol{
+               name: "Bar",
+               note: "Bar protocol",
+               context: ["Foo", "Bar"],
+               signatures: [
+                 %Signature{
+                   body: %Call{
+                     name: "unparse",
+                     type: %Literal{type: :anything},
+                     arguments: [%Variable{body: "t", type: %Literal{type: :anything}}]
+                   }
                  }
-               }
-             ]
-           } == Defprotocol.parse(ast, [])
+               ]
+             }
+           ] == Defprotocol.parse(ast, [])
   end
 
   test "many signatures" do
@@ -47,46 +49,48 @@ defmodule Umwelt.Parser.DefprotocolTest do
       """
       |> Code.string_to_quoted()
 
-    assert %Protocol{
-             name: "Bar",
-             note: "Bar protocol",
-             context: ["Foo", "Bar"],
-             aliases: [],
-             signatures: [
-               %Signature{
-                 body: %Call{
-                   arguments: [
-                     %Variable{
-                       body: "t",
-                       type: %Literal{type: :anything}
-                     }
-                   ],
-                   context: [],
-                   name: "fizz",
+    assert [
+             %Protocol{
+               name: "Bar",
+               note: "Bar protocol",
+               context: ["Foo", "Bar"],
+               aliases: [],
+               signatures: [
+                 %Signature{
+                   body: %Call{
+                     arguments: [
+                       %Variable{
+                         body: "t",
+                         type: %Literal{type: :anything}
+                       }
+                     ],
+                     context: [],
+                     name: "fizz",
+                     note: "",
+                     type: %Literal{type: :anything}
+                   },
                    note: "",
-                   type: %Literal{type: :anything}
+                   private: false
                  },
-                 note: "",
-                 private: false
-               },
-               %Signature{
-                 private: false,
-                 body: %Call{
-                   name: "buzz",
-                   type: %Literal{type: :anything},
-                   context: [],
-                   arguments: [
-                     %Variable{
-                       body: "t",
-                       type: %Literal{type: :anything}
-                     }
-                   ],
+                 %Signature{
+                   private: false,
+                   body: %Call{
+                     name: "buzz",
+                     type: %Literal{type: :anything},
+                     context: [],
+                     arguments: [
+                       %Variable{
+                         body: "t",
+                         type: %Literal{type: :anything}
+                       }
+                     ],
+                     note: ""
+                   },
                    note: ""
-                 },
-                 note: ""
-               }
-             ]
-           } == Defprotocol.parse(ast, [])
+                 }
+               ]
+             }
+           ] == Defprotocol.parse(ast, [])
   end
 
   test "expands aliases" do
@@ -102,35 +106,37 @@ defmodule Umwelt.Parser.DefprotocolTest do
       """
       |> Code.string_to_quoted()
 
-    assert %Protocol{
-             name: "Bar",
-             note: "Unparses parsed to term",
-             context: ["Foo", "Bar"],
-             aliases: [%Alias{name: "Baz", path: ["Foo", "Baz"]}],
-             signatures: [
-               %Signature{
-                 body: %Call{
-                   arguments: [
-                     %Variable{
-                       type: %Call{
-                         type: %Literal{type: :anything},
-                         context: ["Foo", "Bar"],
-                         name: "t"
-                       },
-                       body: "t"
+    assert [
+             %Protocol{
+               name: "Bar",
+               note: "Unparses parsed to term",
+               context: ["Foo", "Bar"],
+               aliases: [%Alias{name: "Baz", path: ["Foo", "Baz"]}],
+               signatures: [
+                 %Signature{
+                   body: %Call{
+                     arguments: [
+                       %Variable{
+                         type: %Call{
+                           type: %Literal{type: :anything},
+                           context: ["Foo", "Bar"],
+                           name: "t"
+                         },
+                         body: "t"
+                       }
+                     ],
+                     name: "unparse",
+                     type: %Call{
+                       type: %Literal{type: :anything},
+                       context: ["Baz"],
+                       name: "t"
                      }
-                   ],
-                   name: "unparse",
-                   type: %Call{
-                     type: %Literal{type: :anything},
-                     context: ["Baz"],
-                     name: "t"
-                   }
-                 },
-                 note: "unparsing"
-               }
-             ]
-           } == Defprotocol.parse(ast, [])
+                   },
+                   note: "unparsing"
+                 }
+               ]
+             }
+           ] == Defprotocol.parse(ast, [])
   end
 
   test "signature with complex spec" do
@@ -147,39 +153,41 @@ defmodule Umwelt.Parser.DefprotocolTest do
       """
       |> Code.string_to_quoted()
 
-    assert %Protocol{
-             name: "Bar",
-             note: "Bar protocol",
-             context: ["Foo", "Bar"],
-             signatures: [
-               %Signature{
-                 body: %Call{
-                   arguments: [
-                     %Umwelt.Felixir.Variable{
-                       body: "foo",
-                       type: %Umwelt.Felixir.Call{
-                         type: %Umwelt.Felixir.Literal{type: :anything},
-                         context: ["Foo", "Bar"],
-                         name: "t"
+    assert [
+             %Protocol{
+               name: "Bar",
+               note: "Bar protocol",
+               context: ["Foo", "Bar"],
+               signatures: [
+                 %Signature{
+                   body: %Call{
+                     arguments: [
+                       %Umwelt.Felixir.Variable{
+                         body: "foo",
+                         type: %Umwelt.Felixir.Call{
+                           type: %Umwelt.Felixir.Literal{type: :anything},
+                           context: ["Foo", "Bar"],
+                           name: "t"
+                         }
+                       },
+                       %Umwelt.Felixir.Variable{
+                         type: %Umwelt.Felixir.Literal{type: :tuple},
+                         body: "bar"
+                       },
+                       %Umwelt.Felixir.Variable{
+                         type: %Umwelt.Felixir.Literal{type: :tuple},
+                         body: "baz"
                        }
-                     },
-                     %Umwelt.Felixir.Variable{
-                       type: %Umwelt.Felixir.Literal{type: :tuple},
-                       body: "bar"
-                     },
-                     %Umwelt.Felixir.Variable{
-                       type: %Umwelt.Felixir.Literal{type: :tuple},
-                       body: "baz"
+                     ],
+                     name: "foobar",
+                     type: %Umwelt.Felixir.Value{
+                       type: %Umwelt.Felixir.Literal{type: :atom},
+                       body: "ok"
                      }
-                   ],
-                   name: "foobar",
-                   type: %Umwelt.Felixir.Value{
-                     type: %Umwelt.Felixir.Literal{type: :atom},
-                     body: "ok"
                    }
                  }
-               }
-             ]
-           } == Defprotocol.parse(ast, [])
+               ]
+             }
+           ] == Defprotocol.parse(ast, [])
   end
 end

@@ -33,13 +33,28 @@ defmodule Umwelt.Parser.Aliases do
     end)
   end
 
-  def parse({:__aliases__, _, module}, aliases, context),
-    do: %Alias{
-      name: module_name(module, context),
-      path: full_path(module, aliases, context)
-    }
+  def parse({:__aliases__, _, module}, aliases, context) do
+    [module_head | _] =
+      module_path = module |> expand_module(context) |> stringify_path()
 
-  def full_path(module, [], context), do: module |> expand_module(context) |> stringify_path()
+    case Enum.find(aliases, &match?(%{name: ^module_head}, &1)) do
+      %{path: path} -> path ++ tl(module_path)
+      _ -> module_path
+    end
+    |> then(&Alias.from_path/1)
+  end
+
+  def parse_impl({:__MODULE__, _, nil}, _aliases, context), do: Alias.from_path(context)
+
+  def parse_impl({:__aliases__, _, [head | _] = module}, aliases, _context) do
+    head_str = to_string(head)
+
+    case Enum.find(aliases, &match?(%{name: ^head_str}, &1)) do
+      %{path: path} -> path
+      _ -> stringify_path(module)
+    end
+    |> then(&Alias.from_path/1)
+  end
 
   def full_path(module, aliases, context) do
     module = module |> expand_module(context)

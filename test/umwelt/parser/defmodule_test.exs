@@ -8,6 +8,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
     Concept,
     Field,
     Function,
+    Implement,
     Literal,
     Operator,
     Signature,
@@ -128,7 +129,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        type: %Literal{type: :anything}
                      }
                    },
-                   impl: nil,
                    private: false
                  }
                ],
@@ -192,7 +192,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        type: %Literal{type: :anything}
                      }
                    },
-                   impl: nil,
                    private: false
                  }
                ],
@@ -849,7 +848,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                          type: %Literal{type: :anything}
                        }
                      },
-                     impl: nil,
                      private: false
                    }
                  ],
@@ -914,7 +912,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        ],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    },
                    %Function{
@@ -935,7 +932,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        ],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    }
                  ]
@@ -1048,7 +1044,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    },
                    %Function{
@@ -1057,7 +1052,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    }
                  ]
@@ -1207,7 +1201,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        name: "foo",
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      note: "bar -> baz",
                      private: false
                    }
@@ -1277,7 +1270,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        arguments: [%Variable{body: "once", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    },
                    %Function{
@@ -1286,7 +1278,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                        arguments: [%Variable{body: "twice", type: %Literal{type: :anything}}],
                        type: %Literal{type: :anything}
                      },
-                     impl: nil,
                      private: false
                    }
                  ],
@@ -1303,7 +1294,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                          arguments: [%Variable{body: "bar", type: %Literal{type: :anything}}],
                          type: %Literal{type: :anything}
                        },
-                       impl: nil,
                        private: false
                      }
                    ],
@@ -1320,7 +1310,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                            arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
                            type: %Literal{type: :anything}
                          },
-                         impl: nil,
                          private: false
                        }
                      ],
@@ -1338,7 +1327,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
                            arguments: [%Variable{body: "foo", type: %Literal{type: :anything}}],
                            type: %Literal{type: :anything}
                          },
-                         impl: nil,
                          private: false
                        }
                      ],
@@ -1474,6 +1462,53 @@ defmodule Umwelt.Parser.DefmoduleTest do
              Defmodule.parse(ast, [])
   end
 
+  test "module with function with __MODULE__ in argument" do
+    {:ok, ast} =
+      """
+        defmodule Foo.Bar do
+          defp expand_module([{:__MODULE__, _, nil} | rest], context), 
+          do: context ++ rest
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             %Concept{
+               context: ["Foo", "Bar"],
+               name: "Bar",
+               functions: [
+                 %Function{
+                   private: true,
+                   body: %Call{
+                     name: "expand_module",
+                     type: %Literal{type: :anything},
+                     arguments: [
+                       %Structure{
+                         type: %Literal{type: :list},
+                         elements: [
+                           %Operator{
+                             name: "alter",
+                             left: %Structure{
+                               type: %Literal{type: :tuple},
+                               elements: [
+                                 %Value{body: "__MODULE__", type: %Literal{type: :atom}},
+                                 %Variable{body: "_", type: %Literal{type: :anything}},
+                                 %Value{body: "nil", type: %Literal{type: :atom}}
+                               ]
+                             },
+                             right: %Variable{body: "rest", type: %Literal{type: :anything}}
+                           }
+                         ]
+                       },
+                       %Variable{body: "context", type: %Literal{type: :anything}}
+                     ]
+                   }
+                 }
+               ]
+             }
+           ] == Defmodule.parse(ast, [])
+  end
+
   test "skip some childs" do
     {:ok, ast} =
       """
@@ -1490,6 +1525,70 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
     assert [
              %Concept{context: ["Foo", "Bar"], name: "Bar"}
+           ] == Defmodule.parse(ast, [])
+  end
+
+  test "with submodule and impl" do
+    {:ok, ast} =
+      """
+      defmodule Foo do
+        @moduledoc "Foo concept"
+        defmodule Bar do
+          @moduledoc "Bar concept"
+          defstruct [ :foo, :bar ]
+        end
+
+        defimpl Foo.Baz, for: Foo.Bar do
+          def baz(bar, types) do
+          end
+        end
+      end
+      """
+      |> Code.string_to_quoted()
+
+    assert [
+             %Concept{context: ["Foo"], name: "Foo", note: "Foo concept"},
+             [
+               %Concept{
+                 context: ["Foo", "Bar"],
+                 fields: [
+                   %Field{
+                     name: "foo",
+                     type: %Literal{type: :anything},
+                     value: %Value{type: %Literal{type: :atom}, body: "nil"}
+                   },
+                   %Field{
+                     name: "bar",
+                     type: %Literal{type: :anything},
+                     value: %Value{type: %Literal{type: :atom}, body: "nil"}
+                   }
+                 ],
+                 name: "Bar",
+                 note: "Bar concept"
+               }
+             ],
+             [
+               %Implement{
+                 context: ["Foo", "Bar", "Baz"],
+                 name: "Baz",
+                 note: "impl Baz for Bar",
+                 functions: [
+                   %Function{
+                     body: %Call{
+                       name: "baz",
+                       arguments: [
+                         %Variable{body: "bar", type: %Alias{name: "Bar", path: ["Foo", "Bar"]}},
+                         %Variable{body: "types", type: %Literal{type: :anything}}
+                       ],
+                       type: %Literal{type: :anything}
+                     },
+                     impl: true
+                   }
+                 ],
+                 protocol: %Alias{name: "Baz", path: ["Foo", "Baz"]},
+                 subject: %Alias{name: "Bar", path: ["Foo", "Bar"]}
+               }
+             ]
            ] == Defmodule.parse(ast, [])
   end
 end

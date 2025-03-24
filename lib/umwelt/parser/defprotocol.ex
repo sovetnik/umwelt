@@ -10,7 +10,7 @@ defmodule Umwelt.Parser.Defprotocol do
   alias Umwelt.Parser
 
   def parse({:defprotocol, _meta, children}, context),
-    do: parse_children(children, [], context)
+    do: [parse_children(children, [], context)]
 
   defp parse_children([{:__aliases__, _, module}, [do: block]], _, context) do
     %Protocol{
@@ -23,12 +23,10 @@ defmodule Umwelt.Parser.Defprotocol do
   end
 
   defp add_signatures(proto, children) do
-    signatures =
-      children
-      |> Parser.Block.parse(proto.aliases, proto.context)
-      |> combine_signatures()
-
-    Map.put(proto, :signatures, signatures)
+    children
+    |> Parser.Block.parse(proto.aliases, proto.context)
+    |> combine_signatures()
+    |> then(&Map.put(proto, :signatures, &1))
   end
 
   defp combine_signatures(parsed) do
@@ -63,7 +61,6 @@ defmodule Umwelt.Parser.Defprotocol do
       %{moduledoc: moduledoc} -> moduledoc
       _ -> "#{to_string(List.last(module))} protocol"
     end)
-    |> Enum.reject(&is_nil/1)
     |> List.flatten()
     |> List.first()
   end

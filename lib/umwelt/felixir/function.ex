@@ -8,10 +8,16 @@ defmodule Umwelt.Felixir.Function do
           body: Call.t(),
           note: String.t(),
           private: boolean,
-          impl: any
+          impl: boolean
         }
 
-  defstruct note: "", body: nil, private: false, impl: nil
+  defstruct note: "", body: nil, private: false, impl: false
+
+  def merge(%Function{} = fun, %{body: body, note: note}) do
+    fun
+    |> Map.put(:note, note)
+    |> Map.put(:body, Argument.resolve(fun.body, body))
+  end
 
   defimpl Argument, for: __MODULE__ do
     def resolve(fun, nil), do: fun

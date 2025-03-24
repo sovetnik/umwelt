@@ -12,12 +12,11 @@ defmodule Umwelt.Parser.Sigil do
   defguard is_sigil(term) when term in @sigil_names
 
   def parse({sigil, [delimiter: delimiter, line: _], [value, mods]}, _aliases)
-      when is_sigil(sigil) do
-    %Sigil{
-      string: extract_value(value),
-      mod: to_string(sigil) <> delimiter <> to_string(mods)
-    }
-  end
+      when is_sigil(sigil),
+      do: %Sigil{
+        string: extract_value(value),
+        mod: to_string(sigil) <> delimiter <> to_string(mods)
+      }
 
   def parse(ast, _aliases) do
     Logger.warning("#{@log_message}/2\n #{inspect(ast)}")

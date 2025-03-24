@@ -331,7 +331,6 @@ defmodule Umwelt.Parser.DefTest do
                    }
                  }
                },
-               impl: nil,
                private: false
              } == Def.parse(ast, [], [])
     end
@@ -371,7 +370,6 @@ defmodule Umwelt.Parser.DefTest do
                    }
                  }
                },
-               impl: nil,
                private: false
              } == Def.parse(ast, [], [])
     end
@@ -490,8 +488,7 @@ defmodule Umwelt.Parser.DefTest do
                          ]
                        }
                      },
-                     private: false,
-                     impl: nil
+                     private: false
                    }
                  ]
                }
@@ -503,16 +500,16 @@ defmodule Umwelt.Parser.DefTest do
     test "matching arguments" do
       {:ok, ast} =
         ~S"""
-              defmodule Foo.Bar do
-                @moduledoc "Matching examples"
-                @doc "Head of fizzbuzz/2"
-                @spec fizzbuzz(list, integer) :: atom
-                def fizzbuzz(matches, number) 
-                def fizzbuzz([], number), do: number
-                def fizzbuzz([:fizz], number), do: :fizz
-                def fizzbuzz([:buzz], number), do: :buzz
-                def fizzbuzz([:fizz, :buzz], number), do: :fizzbuzz
-              end
+          defmodule Foo.Bar do
+            @moduledoc "Matching examples"
+            @doc "Head of fizzbuzz/2"
+            @spec fizzbuzz(list, integer) :: atom
+            def fizzbuzz(matches, number) 
+            def fizzbuzz([], number), do: number
+            def fizzbuzz([:fizz], number), do: :fizz
+            def fizzbuzz([:buzz], number), do: :buzz
+            def fizzbuzz([:fizz, :buzz], number), do: :fizzbuzz
+          end
         """
         |> Code.string_to_quoted()
 
@@ -586,6 +583,73 @@ defmodule Umwelt.Parser.DefTest do
                  ],
                  name: "Bar",
                  note: "Matching examples"
+               }
+             ] == Defmodule.parse(ast, [])
+    end
+
+    test "multiple inference types" do
+      {:ok, ast} =
+        ~S"""
+          defmodule Foo.Bar do
+            alias Foo.Baz
+
+            @spec specify(term :: First.t()) :: integer
+            def specify(%First{} = term), do: :first
+            @spec specify(term :: Second.t()) :: atom
+            def specify(%Second{}), do: :second
+            @spec specify(term :: Third.t()) :: Baz.t()
+            def specify(%Third{}), do: :third
+          end
+        """
+        |> Code.string_to_quoted()
+
+      assert [
+               %Concept{
+                 name: "Bar",
+                 aliases: [%Alias{name: "Baz", path: ["Foo", "Baz"]}],
+                 context: ["Foo", "Bar"],
+                 functions: [
+                   %Function{
+                     body: %Call{
+                       arguments: [
+                         %Variable{
+                           body: "term",
+                           type: %Alias{path: ["First"], name: "First"}
+                         }
+                       ],
+                       name: "specify",
+                       type: %Literal{type: :integer}
+                     }
+                   },
+                   %Function{
+                     body: %Call{
+                       arguments: [
+                         %Structure{
+                           type: %Alias{
+                             name: "Second",
+                             path: ["Second"]
+                           }
+                         }
+                       ],
+                       name: "specify",
+                       type: %Literal{type: :atom}
+                     }
+                   },
+                   %Function{
+                     body: %Call{
+                       arguments: [
+                         %Structure{
+                           type: %Alias{
+                             name: "Third",
+                             path: ["Third"]
+                           }
+                         }
+                       ],
+                       name: "specify",
+                       type: %Call{type: %Literal{type: :anything}, context: ["Baz"], name: "t"}
+                     }
+                   }
+                 ]
                }
              ] == Defmodule.parse(ast, [])
     end
