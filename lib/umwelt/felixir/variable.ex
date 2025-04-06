@@ -15,6 +15,9 @@ defmodule Umwelt.Felixir.Variable do
     def resolve(variable, %Call{} = call),
       do: Map.put(variable, :type, call)
 
+    def resolve(variable, %Literal{} = literal),
+      do: Map.put(variable, :type, literal)
+
     def resolve(variable, %Variable{type: type}),
       do: Map.put(variable, :type, type)
 

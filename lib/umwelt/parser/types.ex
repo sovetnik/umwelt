@@ -39,6 +39,9 @@ defmodule Umwelt.Parser.Types do
       %Call{name: name, type: type} = variable ->
         Map.put(variable, :type, types[name] || type)
 
+      %Literal{} = literal ->
+        literal
+
       %Operator{} = operator ->
         Operator.type_equation(operator)
 
@@ -67,7 +70,7 @@ defmodule Umwelt.Parser.Types do
 
   def maybe_literal(name), do: name |> String.to_atom() |> type_of()
 
-  def extract(block_children) do
+  def extract(block_children, aliases) do
     Enum.reduce([[%Type{}] | block_children], fn
       %{typedoc: [%Value{type: %Literal{type: :string}, body: body}]}, [head | rest] ->
         [Map.put(head, :doc, string_or(body, "Description of type")) | rest]
@@ -76,10 +79,10 @@ defmodule Umwelt.Parser.Types do
         [Map.put(head, :doc, string_or(value, "Description of type")) | rest]
 
       %{type: %Call{name: name, type: type}}, [head | rest] ->
-        [%Type{}, reduce(head, name, type) | rest]
+        [%Type{}, combine(head, name, type, aliases) | rest]
 
       %{type: %Variable{body: name, type: type}}, [head | rest] ->
-        [%Type{}, reduce(head, name, type) | rest]
+        [%Type{}, combine(head, name, type, aliases) | rest]
 
       _other, acc ->
         # Logger.warning("#{@log_message}_extract_types/1\n #{inspect(other, pretty: true)}")
@@ -89,6 +92,12 @@ defmodule Umwelt.Parser.Types do
     |> Enum.reverse()
   end
 
-  defp reduce(type, name, spec),
+  defp combine(type, name, %Alias{} = alias, aliases) do
+    type
+    |> Map.put(:name, name)
+    |> Map.put(:spec, Alias.choose(alias, aliases))
+  end
+
+  defp combine(type, name, spec, _aliases),
     do: type |> Map.put(:name, name) |> Map.put(:spec, spec)
 end

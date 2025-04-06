@@ -52,11 +52,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                            type: %Type{
                              name: "word",
                              doc: "A word from the dictionary",
-                             spec: %Call{
-                               name: "t",
-                               context: ["String"],
-                               type: %Literal{type: :anything}
-                             }
+                             spec: %Literal{type: :string}
                            }
                          }
                        ],
@@ -77,7 +73,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  %Type{
                    doc: "A word from the dictionary",
                    name: "word",
-                   spec: %Call{context: ["String"], name: "t"}
+                   spec: %Literal{type: :string}
                  }
                ]
              }
@@ -115,7 +111,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                            type: %Type{
                              doc: "A word from the dictionary",
                              name: "word",
-                             spec: %Call{name: "t", context: ["String"]}
+                             spec: %Literal{type: :string}
                            }
                          }
                        ],
@@ -135,11 +131,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                types: [
                  %Type{
                    doc: "A word from the dictionary",
-                   spec: %Call{
-                     context: ["String"],
-                     name: "t",
-                     type: %Literal{type: :anything}
-                   },
+                   spec: %Literal{type: :string},
                    name: "word"
                  }
                ]
@@ -178,7 +170,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                            type: %Type{
                              doc: "A word from the dictionary",
                              name: "word",
-                             spec: %Call{name: "t", context: ["String"]}
+                             spec: %Literal{type: :string}
                            }
                          }
                        ],
@@ -197,13 +189,9 @@ defmodule Umwelt.Parser.DefmoduleTest do
                ],
                types: [
                  %Type{
+                   name: "word",
                    doc: "A word from the dictionary",
-                   spec: %Call{
-                     context: ["String"],
-                     name: "t",
-                     type: %Literal{type: :anything}
-                   },
-                   name: "word"
+                   spec: %Literal{type: :string}
                  }
                ]
              }
@@ -217,6 +205,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
         defmodule Foo.Bar do
           @moduledoc "Felixir Structure"
           alias Foo.Bar.Baz
+          alias Foo.{Fizz, Buzz}
 
           @type buzz :: Buzz.t()
           @type fizz() :: Fizz.t()
@@ -244,34 +233,25 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  name: "Bar",
                  note: "Felixir Structure",
                  context: ["Foo", "Bar"],
-                 aliases: [%Alias{name: "Baz", path: ~w[Foo Bar Baz]}],
+                 aliases: [
+                   %Alias{name: "Baz", path: ["Foo", "Bar", "Baz"]},
+                   %Alias{name: "Fizz", path: ["Foo", "Fizz"]},
+                   %Alias{name: "Buzz", path: ["Foo", "Buzz"]}
+                 ],
                  fields: [
                    %Field{
                      name: "buzz",
-                     type: %Type{
-                       name: "buzz",
-                       spec: %Call{name: "t", type: %Literal{type: :anything}, context: ["Buzz"]}
-                     },
+                     type: %Type{name: "buzz", spec: %Alias{path: ["Foo", "Buzz"], name: "Buzz"}},
                      value: %Value{body: "buzzy", type: %Literal{type: :string}}
                    },
                    %Field{
                      name: "fizz",
-                     type: %Type{
-                       name: "fizz",
-                       spec: %Call{name: "t", type: %Literal{type: :anything}, context: ["Fizz"]}
-                     },
+                     type: %Type{name: "fizz", spec: %Alias{path: ["Foo", "Fizz"], name: "Fizz"}},
                      value: %Value{body: "fizzy", type: %Literal{type: :string}}
                    },
                    %Field{
                      name: "name",
-                     type: %Type{
-                       name: "word",
-                       spec: %Call{
-                         name: "t",
-                         type: %Literal{type: :anything},
-                         context: ["String"]
-                       }
-                     },
+                     type: %Type{name: "word", spec: %Literal{type: :string}},
                      value: %Value{body: "struct_name", type: %Literal{type: :string}}
                    },
                    %Field{
@@ -286,13 +266,9 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    }
                  ],
                  types: [
-                   %Type{name: "buzz", spec: %Call{context: ["Buzz"], name: "t"}},
-                   %Type{name: "fizz", spec: %Call{context: ["Fizz"], name: "t"}},
-                   %Type{
-                     doc: "just a word",
-                     name: "word",
-                     spec: %Call{context: ["String"], name: "t"}
-                   }
+                   %Type{name: "buzz", spec: %Alias{path: ["Foo", "Buzz"], name: "Buzz"}},
+                   %Type{name: "fizz", spec: %Alias{path: ["Foo", "Fizz"], name: "Fizz"}},
+                   %Type{doc: "just a word", name: "word", spec: %Literal{type: :string}}
                  ]
                }
              ] == Defmodule.parse(ast, [])
@@ -304,6 +280,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
       {:ok, ast} =
         """
         defmodule Foo do
+          alias Foo.{Bar, Baz}
           defstruct body: %Baz{}
 
           @type t :: %__MODULE__{
@@ -316,19 +293,23 @@ defmodule Umwelt.Parser.DefmoduleTest do
 
       assert [
                %Concept{
+                 name: "Foo",
                  context: ["Foo"],
+                 aliases: [
+                   %Umwelt.Felixir.Alias{name: "Bar", path: ["Foo", "Bar"]},
+                   %Umwelt.Felixir.Alias{name: "Baz", path: ["Foo", "Baz"]}
+                 ],
                  fields: [
                    %Field{
                      name: "body",
                      type: %Operator{
                        name: "alter",
-                       left: %Call{name: "t", context: ["Bar"]},
-                       right: %Call{name: "t", context: ["Baz"]}
+                       left: %Alias{name: "Bar", path: ["Foo", "Bar"]},
+                       right: %Alias{name: "Baz", path: ["Foo", "Baz"]}
                      },
-                     value: %Structure{type: %Alias{name: "Baz", path: ["Baz"]}}
+                     value: %Structure{type: %Alias{name: "Baz", path: ["Foo", "Baz"]}}
                    }
-                 ],
-                 name: "Foo"
+                 ]
                }
              ] == Defmodule.parse(ast, [])
     end
@@ -418,7 +399,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                    %Type{
                      doc: "Description of type",
                      name: "word",
-                     spec: %Call{context: ["String"], name: "t"}
+                     spec: %Literal{type: :string}
                    }
                  ]
                }
@@ -543,12 +524,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                  name: "Math",
                  context: ["Math"],
                  functions: [
-                   %Function{
-                     body: %Call{
-                       name: "some_function",
-                       type: %Literal{type: :anything}
-                     }
-                   }
+                   %Function{body: %Call{name: "some_function", type: %Literal{type: :anything}}}
                  ]
                }
              ] == Defmodule.parse(ast, [])

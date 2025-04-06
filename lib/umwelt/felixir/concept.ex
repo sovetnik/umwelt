@@ -4,7 +4,8 @@ defmodule Umwelt.Felixir.Concept do
   # require Logger
   # @log_message "Unknown AST skipped in Concept."
 
-  alias Umwelt.Felixir.{Attribute, Call}
+  alias Umwelt.Felixir.{Attribute, Call, Field}
+  alias Umwelt.Parser
 
   import Umwelt.Parser.Util, only: [string_or: 2]
 
@@ -32,44 +33,49 @@ defmodule Umwelt.Felixir.Concept do
             guards: [],
             types: []
 
-  def combine(block, module) when is_list(block) do
-    Enum.reduce(block, module, fn
-      %{moduledoc: [value]}, module ->
-        Map.put(module, :note, string_or(value, "Description of #{module.name}"))
+  def combine(block, concept, types) when is_list(block) do
+    Enum.reduce(block, concept, fn
+      %{moduledoc: [value]}, concept ->
+        Map.put(concept, :note, string_or(value, "Description of #{concept.name}"))
 
-      %{defstruct: fields}, module ->
-        Map.put(module, :fields, fields)
+      %{defstruct: fields}, concept ->
+        fields
+        |> add_types(types, concept.aliases, concept.context)
+        |> then(&Map.put(concept, :fields, &1))
 
-      %{defguard: value}, %{guards: attrs} = module ->
-        Map.put(module, :guards, [value | attrs])
+      %{defguard: value}, %{guards: attrs} = concept ->
+        Map.put(concept, :guards, [value | attrs])
 
-      %Attribute{} = value, %{attrs: attrs} = module ->
-        Map.put(module, :attrs, [value | attrs])
+      %Attribute{} = value, %{attrs: attrs} = concept ->
+        Map.put(concept, :attrs, [value | attrs])
 
-      %Call{} = value, %{calls: calls} = module ->
-        Map.put(module, :calls, [value | calls])
+      %Call{} = value, %{calls: calls} = concept ->
+        Map.put(concept, :calls, [value | calls])
 
       # doc and impl related to function and parsed in functions
-      %{typedoc: _}, module ->
-        module
+      %{typedoc: _}, concept ->
+        concept
 
-      %{doc: _}, module ->
-        module
+      %{doc: _}, concept ->
+        concept
 
-      %{impl: _}, module ->
-        module
+      %{impl: _}, concept ->
+        concept
 
-      %{spec: _}, module ->
-        module
+      %{spec: _}, concept ->
+        concept
 
-      children, module when is_list(children) ->
-        module
+      children, concept when is_list(children) ->
+        concept
 
-      _other, module ->
+      _other, concept ->
         # Logger.warning("#{@log_message}combine/2\n #{inspect(other, pretty: true)}")
-        module
+        concept
     end)
   end
 
-  def combine(block, module), do: combine([block], module)
+  defp add_types(fields, types, aliases, context) do
+    index = Parser.Struct.types(types, aliases, context)
+    Enum.map(fields, &Field.add_type(&1, index))
+  end
 end

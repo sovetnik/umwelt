@@ -1,7 +1,7 @@
 defmodule Umwelt.Parser.DefstructTest do
   use ExUnit.Case, async: true
 
-  alias Umwelt.Felixir.{Alias, Call, Concept, Field, Literal, Structure, Type, Value}
+  alias Umwelt.Felixir.{Alias, Concept, Field, Literal, Structure, Type, Value}
   alias Umwelt.Parser.{Defmodule, Defstruct}
 
   test "just a module with derive attr" do
@@ -101,58 +101,23 @@ defmodule Umwelt.Parser.DefstructTest do
                fields: [
                  %Field{
                    name: "buzz",
-                   type: %Type{
-                     name: "buzz",
-                     spec: %Call{
-                       name: "t",
-                       type: %Literal{type: :anything},
-                       context: ["Buzz"]
-                     }
-                   },
-                   value: %Value{
-                     body: "buzzy",
-                     type: %Literal{type: :string}
-                   }
+                   type: %Type{name: "buzz", spec: %Alias{path: ["Buzz"], name: "Buzz"}},
+                   value: %Value{body: "buzzy", type: %Literal{type: :string}}
                  },
                  %Field{
                    name: "fizz",
-                   type: %Type{
-                     name: "fizz",
-                     doc: "",
-                     spec: %Call{
-                       name: "t",
-                       type: %Literal{type: :anything},
-                       context: ["Fizz"]
-                     }
-                   },
-                   value: %Value{
-                     body: "fizzy",
-                     type: %Literal{type: :string}
-                   }
+                   type: %Type{name: "fizz", spec: %Alias{path: ["Fizz"], name: "Fizz"}},
+                   value: %Value{body: "fizzy", type: %Literal{type: :string}}
                  },
                  %Field{
                    name: "name",
-                   type: %Type{
-                     doc: "",
-                     name: "word",
-                     spec: %Call{
-                       name: "t",
-                       type: %Literal{type: :anything},
-                       context: ["String"]
-                     }
-                   },
-                   value: %Value{
-                     body: "struct_name",
-                     type: %Literal{type: :string}
-                   }
+                   type: %Type{name: "word", spec: %Literal{type: :string}},
+                   value: %Value{body: "struct_name", type: %Literal{type: :string}}
                  },
                  %Field{
                    name: "head",
                    type: %Alias{name: "Baz", path: ~w|Foo Bar Baz|},
-                   value: %Value{
-                     body: "nil",
-                     type: %Literal{type: :atom}
-                   }
+                   value: %Value{body: "nil", type: %Literal{type: :atom}}
                  },
                  %Field{
                    name: "sentence",
@@ -165,40 +130,13 @@ defmodule Umwelt.Parser.DefstructTest do
                  %Field{
                    name: "elements",
                    type: %Literal{type: :list},
-                   value: %Structure{
-                     elements: [],
-                     type: %Literal{type: :list}
-                   }
+                   value: %Structure{elements: [], type: %Literal{type: :list}}
                  }
                ],
                types: [
-                 %Type{
-                   name: "buzz",
-                   spec: %Call{
-                     name: "t",
-                     context: ["Buzz"],
-                     type: %Literal{type: :anything}
-                   },
-                   doc: ""
-                 },
-                 %Type{
-                   name: "fizz",
-                   spec: %Call{
-                     name: "t",
-                     context: ["Fizz"],
-                     type: %Literal{type: :anything}
-                   },
-                   doc: ""
-                 },
-                 %Type{
-                   name: "word",
-                   spec: %Call{
-                     name: "t",
-                     context: ["String"],
-                     type: %Literal{type: :anything}
-                   },
-                   doc: "just a word"
-                 }
+                 %Type{name: "buzz", spec: %Alias{path: ["Buzz"], name: "Buzz"}},
+                 %Type{name: "fizz", spec: %Alias{path: ["Fizz"], name: "Fizz"}},
+                 %Type{name: "word", spec: %Literal{type: :string}, doc: "just a word"}
                ]
              },
              [%Concept{context: ["Foo", "Bar", "Baz"], name: "Baz"}]

@@ -1,10 +1,7 @@
 defmodule Umwelt.Felixir.Sigil do
   @moduledoc "Felixir Sigil AST"
 
-  @type t() :: %__MODULE__{
-          string: String.t(),
-          mod: any
-        }
+  @type t() :: %__MODULE__{string: String.t(), mod: String.t()}
 
-  defstruct string: "", mod: nil
+  defstruct string: "", mod: ""
 end

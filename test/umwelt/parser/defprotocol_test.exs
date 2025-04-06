@@ -126,11 +126,7 @@ defmodule Umwelt.Parser.DefprotocolTest do
                        }
                      ],
                      name: "unparse",
-                     type: %Call{
-                       type: %Literal{type: :anything},
-                       context: ["Baz"],
-                       name: "t"
-                     }
+                     type: %Alias{path: ["Baz"], name: "Baz"}
                    },
                    note: "unparsing"
                  }

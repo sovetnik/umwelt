@@ -45,8 +45,8 @@ defmodule Umwelt.Parser.Defimpl do
       %{doc: [value]}, [head | rest] ->
         [Map.put(head, :note, string_or(value, "fun description")) | rest]
 
-      %Function{} = sign, [head | rest] ->
-        [%Function{}, Function.merge(sign, head) | rest]
+      %Function{} = fun, [head | rest] ->
+        [%Function{}, Function.merge(fun, head) | rest]
 
       _other, acc ->
         # Logger.warning("#{@log_message}combine_functions(/1\n #{inspect(other, pretty: true)}")

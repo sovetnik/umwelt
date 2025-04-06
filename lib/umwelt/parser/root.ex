@@ -5,14 +5,13 @@ defmodule Umwelt.Parser.Root do
   alias Umwelt.Parser
 
   def combine(block, module) do
-    types = Parser.Types.extract(block)
+    types = Parser.Types.extract(block, module.aliases)
 
     this_module =
       block
-      |> Concept.combine(module)
+      |> Concept.combine(module, types)
       |> Map.put(:functions, Parser.Functions.combine(block, types))
       |> Map.put(:types, Enum.reject(types, &match?(%Type{name: "t"}, &1)))
-      |> Parser.Defstruct.combine(types)
 
     [this_module | Enum.filter(block, &is_list/1)]
   end

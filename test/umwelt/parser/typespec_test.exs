@@ -32,7 +32,7 @@ defmodule Umwelt.Parser.TypespecTest do
                spec: %Call{
                  name: "function",
                  arguments: [%Variable{body: "num", type: %Literal{type: :integer}}],
-                 type: %Call{context: ["String"], arguments: [], name: "t"}
+                 type: %Literal{type: :string}
                }
              } == Typespec.parse(ast, [], [])
     end
@@ -79,7 +79,7 @@ defmodule Umwelt.Parser.TypespecTest do
 
       assert %Type{
                name: "word",
-               spec: %Call{name: "t", arguments: [], context: ["String"]}
+               spec: %Literal{type: :string}
              } == Typespec.parse(ast, [], [])
     end
 
@@ -95,13 +95,7 @@ defmodule Umwelt.Parser.TypespecTest do
                spec: %Call{
                  arguments: [
                    %Variable{type: %Literal{type: :anything}, body: "any"},
-                   %Call{
-                     name: "t",
-                     type: %Literal{type: :anything},
-                     context: ["String"],
-                     arguments: [],
-                     note: ""
-                   }
+                   %Literal{type: :string}
                  ],
                  context: [],
                  name: "validate",
@@ -111,13 +105,7 @@ defmodule Umwelt.Parser.TypespecTest do
                      type: %Literal{type: :tuple},
                      elements: [
                        %Value{body: "ok", type: %Literal{type: :atom}},
-                       %Call{
-                         name: "t",
-                         note: "",
-                         arguments: [],
-                         context: ["String"],
-                         type: %Literal{type: :anything}
-                       }
+                       %Literal{type: :string}
                      ]
                    },
                    name: "alter",
@@ -125,13 +113,7 @@ defmodule Umwelt.Parser.TypespecTest do
                      type: %Literal{type: :tuple},
                      elements: [
                        %Value{body: "error", type: %Literal{type: :atom}},
-                       %Call{
-                         name: "t",
-                         note: "",
-                         arguments: [],
-                         context: ["String"],
-                         type: %Literal{type: :anything}
-                       }
+                       %Literal{type: :string}
                      ]
                    }
                  }

@@ -8,6 +8,7 @@ defmodule Umwelt.Parser.DefTest do
     Function,
     Literal,
     Operator,
+    Sigil,
     Signature,
     Structure,
     Value,
@@ -454,6 +455,92 @@ defmodule Umwelt.Parser.DefTest do
              } == Def.parse(ast, [], [])
     end
 
+    test "parse with guard and complex match" do
+      {:ok, ast} =
+        ~S"""
+          defp apply_abstract(
+                 %{element: %Element{kind: kind}} = abstract,
+                 %{element: %Element{kind: "call"}} = node
+              )
+              when kind in ~w|concept external| do
+            abstract |> qualified_call_ast(node)
+          end
+        """
+        |> Code.string_to_quoted()
+
+      assert %Function{
+               body: %Operator{
+                 left: %Call{
+                   arguments: [
+                     %Operator{
+                       left: %Structure{
+                         type: %Literal{type: :map},
+                         elements: [
+                           %Structure{
+                             type: %Literal{type: :tuple},
+                             elements: [
+                               %Value{body: "element", type: %Literal{type: :atom}},
+                               %Structure{
+                                 type: %Alias{name: "Element", path: ["Element"]},
+                                 elements: [
+                                   %Structure{
+                                     type: %Literal{type: :tuple},
+                                     elements: [
+                                       %Value{body: "kind", type: %Literal{type: :atom}},
+                                       %Variable{body: "kind", type: %Literal{type: :anything}}
+                                     ]
+                                   }
+                                 ]
+                               }
+                             ]
+                           }
+                         ]
+                       },
+                       name: "match",
+                       right: %Variable{type: %Literal{type: :anything}, body: "abstract"}
+                     },
+                     %Operator{
+                       left: %Structure{
+                         type: %Literal{type: :map},
+                         elements: [
+                           %Structure{
+                             type: %Literal{type: :tuple},
+                             elements: [
+                               %Value{body: "element", type: %Literal{type: :atom}},
+                               %Structure{
+                                 type: %Alias{name: "Element", path: ["Element"]},
+                                 elements: [
+                                   %Structure{
+                                     type: %Literal{type: :tuple},
+                                     elements: [
+                                       %Value{body: "kind", type: %Literal{type: :atom}},
+                                       %Value{body: "call", type: %Literal{type: :string}}
+                                     ]
+                                   }
+                                 ]
+                               }
+                             ]
+                           }
+                         ]
+                       },
+                       name: "match",
+                       right: %Variable{body: "node", type: %Literal{type: :anything}}
+                     }
+                   ],
+                   name: "apply_abstract",
+                   type: %Literal{type: :anything}
+                 },
+                 name: "when",
+                 right: %Operator{
+                   left: %Variable{type: %Literal{type: :anything}, body: "kind"},
+                   name: "in",
+                   right: %Sigil{mod: "sigil_w|", string: "concept external"}
+                 }
+               },
+               private: true
+             } == Def.parse(ast, [], [])
+    end
+
     test "parse in module with guard and default value" do
       {:ok, ast} =
         ~S"""
@@ -646,7 +733,7 @@ defmodule Umwelt.Parser.DefTest do
                          }
                        ],
                        name: "specify",
-                       type: %Call{type: %Literal{type: :anything}, context: ["Baz"], name: "t"}
+                       type: %Alias{path: ["Baz"], name: "Baz"}
                      }
                    }
                  ]

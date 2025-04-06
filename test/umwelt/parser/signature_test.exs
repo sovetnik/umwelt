@@ -65,17 +65,10 @@ defmodule Umwelt.Parser.SignatureTest do
                      name: "type",
                      arguments: [
                        %Variable{body: "foo", type: %Literal{type: :anything}},
-                       %Variable{
-                         body: "bar",
-                         type: %Call{
-                           name: "t",
-                           context: ["String"],
-                           type: %Literal{type: :anything}
-                         }
-                       },
+                       %Variable{body: "bar", type: %Literal{type: :string}},
                        %Variable{body: "baz", type: %Literal{type: :map}}
                      ],
-                     type: %Call{name: "t", context: ["String"], type: %Literal{type: :anything}}
+                     type: %Literal{type: :string}
                    },
                    private: false
                  }

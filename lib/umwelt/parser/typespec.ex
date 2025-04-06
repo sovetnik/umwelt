@@ -6,28 +6,22 @@ defmodule Umwelt.Parser.Typespec do
 
   import Umwelt.Parser.Literal, only: [is_literal: 1]
 
+  def parse({term, _, children}, _aliases, _context)
+      when is_atom(term) and is_literal(term) and children in [nil, []],
+      do: Parser.Literal.type_of(term)
+
   def parse({:|, _, _} = ast, aliases, context),
     do: Parser.parse(ast, aliases, context)
 
-  def parse({:type, _, [value]}, aliases, context),
-    do: Parser.parse(value, aliases, context)
-
-  def parse({:spec, _, [value]}, aliases, context),
-    do: parse(value, aliases, context)
+  def parse({term, _, [value]}, aliases, context)
+      when term in ~w|type spec|a,
+      do: Parser.parse(value, aliases, context)
 
   def parse({:@, _, [{term, _, [{:"::", _, [left, right]}]}]}, aliases, context),
     do: parse([{term, [], [left, right]}], aliases, context)
 
   def parse({{:., _, [{:__aliases__, _, _}, _]}, _, []} = ast, aliases, context),
     do: Parser.parse(ast, aliases, context)
-
-  def parse({term, _, []}, _aliases, _context)
-      when is_atom(term) and is_literal(term),
-      do: Parser.Literal.type_of(term)
-
-  def parse({term, _, nil}, _aliases, _context)
-      when is_atom(term) and is_literal(term),
-      do: Parser.Literal.type_of(term)
 
   def parse({:"::", _, [left, {type, _, nil}]}, aliases, context) do
     left

@@ -4,13 +4,6 @@ defmodule Umwelt.Parser.Defstruct do
   alias Umwelt.Felixir.{Field, Literal, Value}
   alias Umwelt.Parser
 
-  def combine(%{fields: fields} = concept, types) do
-    types
-    |> Parser.Struct.types(concept.aliases, concept.context)
-    |> then(&add_types(fields, &1))
-    |> then(&Map.put(concept, :fields, &1))
-  end
-
   def parse({:defstruct, _, [{:@, _, [{name, _, nil}]}]}, _aliases, concept) do
     str_name = to_string(name)
 
@@ -43,13 +36,4 @@ defmodule Umwelt.Parser.Defstruct do
       type: %Literal{type: :anything},
       value: Parser.parse(value, aliases, context)
     }
-
-  defp add_types(fields, types) do
-    Enum.map(fields, fn %Field{name: field_name} = field ->
-      case types[String.to_atom(field_name)] do
-        nil -> field
-        type -> Map.put(field, :type, type)
-      end
-    end)
-  end
 end

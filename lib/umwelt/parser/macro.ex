@@ -1,7 +1,6 @@
 defmodule Umwelt.Parser.Macro do
-  @moduledoc "Parses various AST"
+  @moduledoc "Parses various AST, kinda router"
 
-  alias Umwelt.Felixir.Call
   alias Umwelt.Parser
 
   import Umwelt.Parser.Operator, only: [is_operator: 1]
@@ -91,12 +90,8 @@ defmodule Umwelt.Parser.Macro do
     do: %{unquoted: []}
 
   # simple call node
-  def parse({term, _, children} = ast, aliases, context)
-      when is_atom_macro(ast),
-      do: %Call{
-        context: context,
-        name: to_string(term),
-        arguments: Parser.parse_list(children, aliases, context),
-        type: Parser.Literal.type_of(:any)
-      }
+  def parse({term, _, _children} = ast, aliases, context)
+      when is_atom_macro(ast) and is_atom(term) do
+    Parser.Call.parse(ast, aliases, context)
+  end
 end

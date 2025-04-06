@@ -13,7 +13,8 @@ defmodule Umwelt.Parser.Functions do
   def combine(block_children, types) do
     index = Enum.into(types, %{}, &{&1.name, &1})
 
-    extract(block_children, index)
+    block_children
+    |> extract(index)
     |> Enum.map(&Types.specify(&1, index))
   end
 

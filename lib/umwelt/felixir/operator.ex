@@ -9,7 +9,7 @@ defmodule Umwelt.Felixir.Operator do
 
   defstruct name: "", left: nil, right: nil
 
-  alias Umwelt.Felixir.{Literal, Operator, Structure, Variable}
+  alias Umwelt.Felixir.{Call, Literal, Operator, Structure, Variable}
 
   def type_equation(
         %Operator{
@@ -43,6 +43,9 @@ defmodule Umwelt.Felixir.Operator do
           _other
         ),
         do: Map.put(variable, :type, type)
+
+    def resolve(%Operator{name: "when", left: %Call{} = call}, _),
+      do: call
 
     def resolve(%Operator{name: "default", left: variable}, %{type: type}),
       do: Map.put(variable, :type, type)
