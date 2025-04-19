@@ -37,6 +37,9 @@ defmodule Umwelt.Parser.Defimpl do
     Map.put(implement, :functions, functions)
   end
 
+  defp add_type_to_first_arg(%{body: %{arguments: []}} = function, _subj),
+    do: function
+
   defp add_type_to_first_arg(%{body: %{arguments: [var | args]}} = function, subj),
     do: put_in(function.body.arguments, [Map.put(var, :type, subj) | args])
 

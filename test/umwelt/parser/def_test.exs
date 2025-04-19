@@ -279,6 +279,39 @@ defmodule Umwelt.Parser.DefTest do
            } == Def.parse(ast, [], [])
   end
 
+  test "operator binary concat in argument" do
+    {:ok, ast} =
+      ~S"""
+        def extract(
+           "sigil_" <>
+             <<sigil::binary-size(1), delimiter::binary-size(1),
+               mods::binary>>
+         ) do
+        end
+      """
+      |> Code.string_to_quoted()
+
+    assert %Function{
+             body: %Call{
+               name: "extract",
+               arguments: [
+                 %Operator{
+                   name: "<>",
+                   left: %Value{
+                     type: %Literal{type: :string},
+                     body: "sigil_"
+                   },
+                   right: %Structure{
+                     type: %Literal{type: :bitstring},
+                     elements: []
+                   }
+                 }
+               ],
+               type: %Literal{type: :anything}
+             }
+           } == Def.parse(ast, [], [])
+  end
+
   describe "functions with guards" do
     test "parse with guards" do
       {:ok, ast} =
@@ -673,6 +706,93 @@ defmodule Umwelt.Parser.DefTest do
                }
              ] == Defmodule.parse(ast, [])
     end
+
+    #     test "multi clause with nil in args" do
+    #       {:ok, ast} =
+    #         ~S"""
+    #           defmodule Foo do
+    #             alias Foo.{Bar, Baz}
+
+    #             def foobar(nil, _), do: nil
+
+    #             def foobar(element_id, %Bar{} = baar),
+    #             do: :baar
+
+    #             def foobar(element_id, %Baz{} = baaz) when is_integer(element_id),
+    #             do: :baaz
+    #           end
+    #         """
+    #         |> Code.string_to_quoted()
+
+    #       assert [
+    #                %Concept{
+    #                  aliases: [
+    #                    %Alias{name: "Bar", path: ["Foo", "Bar"]},
+    #                    %Alias{name: "Baz", path: ["Foo", "Baz"]}
+    #                  ],
+    #                  context: ["Foo"],
+    #                  functions: [
+    #                    %Function{
+    #                      body: %Call{
+    #                        arguments: [
+    #                          %Value{body: "nil", type: %Literal{type: :atom}},
+    #                          %Variable{type: %Literal{type: :anything}, body: "_"}
+    #                        ],
+    #                        name: "foobar",
+    #                        type: %Literal{type: :anything}
+    #                      }
+    #                    },
+    #                    %Function{
+    #                      body: %Call{
+    #                        arguments: [
+    #                          %Variable{type: %Literal{type: :anything}, body: "element_id"},
+    #                          %Operator{
+    #                            name: "match",
+    #                            left: %Structure{type: %Alias{name: "Bar", path: ["Foo", "Bar"]}},
+    #                            right: %Variable{
+    #                              type: %Alias{name: "Bar", path: ["Foo", "Bar"]},
+    #                              body: "baar"
+    #                            }
+    #                          }
+    #                        ],
+    #                        name: "foobar",
+    #                        type: %Literal{type: :anything}
+    #                      }
+    #                    },
+    #                    %Function{
+    #                      body: %Operator{
+    #                        name: "when",
+    #                        left: %Call{
+    #                          name: "foobar",
+    #                          type: %Literal{type: :anything},
+    #                          context: ["Foo"],
+    #                          arguments: [
+    #                            %Variable{body: "element_id", type: %Literal{type: :anything}},
+    #                            %Operator{
+    #                              name: "match",
+    #                              left: %Structure{type: %Alias{name: "Baz", path: ["Foo", "Baz"]}},
+    #                              right: %Variable{
+    #                                body: "baaz",
+    #                                type: %Alias{name: "Baz", path: ["Foo", "Baz"]}
+    #                              }
+    #                            }
+    #                          ]
+    #                        },
+    #                        right: %Call{
+    #                          name: "is_integer",
+    #                          type: %Literal{type: :anything},
+    #                          context: ["Foo"],
+    #                          arguments: [
+    #                            %Variable{body: "element_id", type: %Literal{type: :anything}}
+    #                          ]
+    #                        }
+    #                      }
+    #                    }
+    #                  ],
+    #                  name: "Foo"
+    #                }
+    #              ] == Defmodule.parse(ast, [])
+    #     end
 
     test "multiple inference types" do
       {:ok, ast} =

@@ -33,6 +33,14 @@ defmodule Umwelt.Felixir.Concept do
             guards: [],
             types: []
 
+  def from_path(path) do
+    %__MODULE__{
+      name: List.last(path),
+      context: path,
+      note: "Description of #{List.last(path)} concept"
+    }
+  end
+
   def combine(block, concept, types) when is_list(block) do
     Enum.reduce(block, concept, fn
       %{moduledoc: [value]}, concept ->

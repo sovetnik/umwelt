@@ -12,7 +12,7 @@ defmodule Umwelt.Parser.DefimplTest do
 
   alias Umwelt.Parser.Defimpl
 
-  test "implementi of protocol" do
+  test "just implement" do
     {:ok, ast} =
       """
         defimpl Foo.Baz, for: Foo.Bar do
@@ -40,7 +40,7 @@ defmodule Umwelt.Parser.DefimplTest do
                      arguments: [
                        %Variable{
                          body: "bar",
-                         type: %Alias{name: "Bar", path: ~w|Foo Bar|}
+                         type: %Alias{name: "Bar", path: ["Foo", "Bar"]}
                        }
                      ]
                    }

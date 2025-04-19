@@ -74,7 +74,7 @@ defmodule Umwelt.Parser.RootTest do
                            arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
                            type: %Literal{type: :anything}
                          },
-                         impl: %Value{type: %Literal{type: :boolean}, body: "true"}
+                         impl: true
                        }
                      ]
                    }

@@ -15,7 +15,7 @@ defmodule Umwelt.Parser.Operator do
   alias Umwelt.Parser
 
   defguard is_special_operator(term)
-           when term in [:^, :., :=, :&, :"::", :|]
+           when term in [:^, :., :=, :&, :"::", :|, :<>]
 
   defguard is_comparison_operator(term)
            when term in [:==, :!=, :===, :!==, :<, :<=, :>, :>=]

@@ -14,4 +14,12 @@ defmodule Umwelt.Felixir.Protocol do
             aliases: [],
             signatures: [],
             context: []
+
+  def from_path(path) do
+    %__MODULE__{
+      name: List.last(path),
+      context: path,
+      note: "Description of #{List.last(path)} protocol"
+    }
+  end
 end

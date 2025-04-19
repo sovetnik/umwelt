@@ -1157,7 +1157,6 @@ defmodule Umwelt.Parser.DefmoduleTest do
             end
             defmodule Baz do
               @moduledoc "Baz description"
-              @impl true
               def bar(baz) do
                 :foo
               end
@@ -1194,7 +1193,7 @@ defmodule Umwelt.Parser.DefmoduleTest do
                          arguments: [%Variable{body: "baz", type: %Literal{type: :anything}}],
                          type: %Literal{type: :anything}
                        },
-                       impl: %Value{body: "true", type: %Literal{type: :boolean}}
+                       impl: false
                      }
                    ],
                    note: "Baz description"

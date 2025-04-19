@@ -5,7 +5,7 @@ defmodule Umwelt.Parser.Functions do
   # @log_message "Unknown AST skipped in Functions."
 
   alias Umwelt.Argument
-  alias Umwelt.Felixir.{Function, Operator, Signature}
+  alias Umwelt.Felixir.{Function, Operator, Signature, Value}
   alias Umwelt.Parser.Types
 
   import Umwelt.Parser.Util, only: [string_or: 2]
@@ -30,7 +30,7 @@ defmodule Umwelt.Parser.Functions do
         [Map.put(head, :note, string_or(value, "fun description")) | rest]
 
       %{impl: [value]}, [head | rest] ->
-        [Map.put(head, :impl, value) | rest]
+        [Map.put(head, :impl, clean_value(value)) | rest]
 
       %{spec: value} = element, [head | rest]
       when not is_struct(element) ->
@@ -64,4 +64,8 @@ defmodule Umwelt.Parser.Functions do
     |> Enum.reject(&match?(%{body: nil}, &1))
     |> Enum.reverse()
   end
+
+  defp clean_value(%Value{type: %{type: :boolean}, body: "true"}), do: true
+  defp clean_value(%Value{type: %{type: :boolean}, body: "false"}), do: false
+  defp clean_value(%Value{} = value), do: value
 end

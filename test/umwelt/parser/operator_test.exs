@@ -26,7 +26,7 @@ defmodule Umwelt.Parser.OperatorTest do
 
   describe "guards" do
     test "guard is_special_operator" do
-      [:^, :., :=, :&, :"::"]
+      [:^, :., :=, :&, :"::", :|, :<>]
       |> Enum.map(&assert is_special_operator(&1))
     end
 
