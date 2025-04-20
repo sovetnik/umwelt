@@ -1,29 +1,39 @@
 defmodule Umwelt.Parser.Defstruct do
   @moduledoc "Parses Struct definition AST"
 
+  alias Umwelt.Felixir.{Field, Literal, Value}
   alias Umwelt.Parser
 
-  def parse({:defstruct, _meta, [fields]}, aliases),
-    do: %{defstruct: parse_children(fields, aliases)}
+  def parse({:defstruct, _, [{:@, _, [{name, _, nil}]}]}, _aliases, concept) do
+    str_name = to_string(name)
 
-  defp parse_children(fields, aliases),
-    do: Enum.map(fields, &parse_field(&1, aliases))
+    [%{value: %{elements: elements}}] =
+      Enum.filter(concept.attrs, &match?(%{name: ^str_name}, &1))
 
-  def parse_field(field, aliases) when is_atom(field) do
-    %{
-      body: to_string(field),
-      kind: :Field,
-      type: %{kind: :Literal, type: :anything},
-      value: Parser.parse(nil, aliases)
-    }
+    %{defstruct: Enum.map(elements, &parse_field(&1, concept.aliases, concept.context))}
   end
 
-  def parse_field({field, value}, aliases) do
-    %{
-      body: to_string(field),
-      kind: :Field,
-      type: %{kind: :Literal, type: :anything},
-      value: Parser.parse(value, aliases)
+  def parse({:defstruct, _, [fields]}, aliases, context),
+    do: %{defstruct: Enum.map(fields, &parse_field(&1, aliases, context))}
+
+  defp parse_field(field, aliases, context) when is_atom(field),
+    do: %Field{
+      name: to_string(field),
+      type: %Literal{type: :anything},
+      value: Parser.parse(nil, aliases, context)
     }
-  end
+
+  defp parse_field(%Value{body: body}, aliases, context),
+    do: %Field{
+      name: body,
+      type: %Literal{type: :anything},
+      value: Parser.parse(nil, aliases, context)
+    }
+
+  defp parse_field({field, value}, aliases, context),
+    do: %Field{
+      name: to_string(field),
+      type: %Literal{type: :anything},
+      value: Parser.parse(value, aliases, context)
+    }
 end

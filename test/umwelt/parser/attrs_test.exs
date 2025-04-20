@@ -1,6 +1,7 @@
 defmodule Umwelt.Parser.AttrsTest do
   use ExUnit.Case, async: true
 
+  alias Umwelt.Felixir.{Attribute, Call, Literal, Structure, Value, Variable}
   alias Umwelt.Parser.Attrs
 
   test "parse module doc" do
@@ -10,8 +11,7 @@ defmodule Umwelt.Parser.AttrsTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{moduledoc: ["Calculator"]} ==
-             Attrs.parse(ast)
+    assert %{moduledoc: ["Calculator"]} == Attrs.parse(ast, [])
   end
 
   test "parse function doc" do
@@ -21,8 +21,7 @@ defmodule Umwelt.Parser.AttrsTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{doc: ["summarize two nums"]} ==
-             Attrs.parse(ast)
+    assert %{doc: ["summarize two nums"]} == Attrs.parse(ast, [])
   end
 
   test "parse function spec" do
@@ -33,16 +32,15 @@ defmodule Umwelt.Parser.AttrsTest do
       |> Code.string_to_quoted()
 
     assert %{
-             spec: %{
-               body: "foobar",
-               kind: :Call,
-               type: %{kind: :Literal, type: :boolean},
+             spec: %Call{
+               name: "foobar",
+               type: %Literal{type: :boolean},
                arguments: [
-                 %{type: %{kind: :Literal, type: :atom}, body: "fizz", kind: :Variable},
-                 %{type: %{kind: :Literal, type: :anything}, body: "buzz", kind: :Variable}
+                 %Variable{type: %Literal{type: :atom}, body: "fizz"},
+                 %Variable{type: %Literal{type: :anything}, body: "buzz"}
                ]
              }
-           } == Attrs.parse(ast)
+           } == Attrs.parse(ast, [], [])
   end
 
   test "parse attr with list" do
@@ -52,18 +50,16 @@ defmodule Umwelt.Parser.AttrsTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{
-             body: "attribute",
-             kind: :Attr,
-             value: %{
-               type: %{kind: :Structure, type: :list},
-               values: [
-                 %{type: %{kind: :Literal, type: :atom}, body: "foo", kind: :Value},
-                 %{type: %{kind: :Literal, type: :atom}, body: "bar", kind: :Value}
-               ],
-               kind: :Value
+    assert %Attribute{
+             name: "attribute",
+             value: %Structure{
+               type: %Literal{type: :list},
+               elements: [
+                 %Value{type: %Literal{type: :atom}, body: "foo"},
+                 %Value{type: %Literal{type: :atom}, body: "bar"}
+               ]
              }
-           } == Attrs.parse(ast)
+           } == Attrs.parse(ast, [])
   end
 
   test "parse attr with nil" do
@@ -73,11 +69,10 @@ defmodule Umwelt.Parser.AttrsTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{
-             body: "options_schema",
-             kind: :Attr,
-             value: %{kind: :Value, type: %{kind: :Literal, type: :atom}, body: "nil"}
-           } == Attrs.parse(ast)
+    assert %Attribute{
+             name: "options_schema",
+             value: %Value{type: %Literal{type: :atom}, body: "nil"}
+           } == Attrs.parse(ast, [])
   end
 
   test "parse attr with struct" do
@@ -87,23 +82,46 @@ defmodule Umwelt.Parser.AttrsTest do
       """
       |> Code.string_to_quoted()
 
-    assert %{
-             body: "attribute",
-             kind: :Attr,
-             value: %{
-               keyword: [
-                 %{
-                   kind: :Value,
-                   type: %{kind: :Structure, type: :tuple},
+    assert %Attribute{
+             name: "attribute",
+             value: %Structure{
+               elements: [
+                 %Structure{
+                   type: %Literal{type: :tuple},
                    elements: [
-                     %{type: %{kind: :Literal, type: :atom}, body: "foo", kind: :Value},
-                     %{type: %{kind: :Literal, type: :atom}, body: "bar", kind: :Value}
+                     %Value{type: %Literal{type: :atom}, body: "foo"},
+                     %Value{type: %Literal{type: :atom}, body: "bar"}
                    ]
                  }
                ],
-               kind: :Value,
-               type: %{kind: :Structure, type: :map}
+               type: %Literal{type: :map}
              }
-           } == Attrs.parse(ast)
+           } == Attrs.parse(ast, [])
+  end
+
+  describe "skipped" do
+    test "behaviour" do
+      {:ok, ast} =
+        "@behaviour Foo.Bar"
+        |> Code.string_to_quoted()
+
+      assert nil == Attrs.parse(ast, [])
+    end
+
+    test "opacue" do
+      {:ok, ast} =
+        "@opaque type_name :: type"
+        |> Code.string_to_quoted()
+
+      assert nil == Attrs.parse(ast, [])
+    end
+
+    test "typep" do
+      {:ok, ast} =
+        "@typep type_name :: type"
+        |> Code.string_to_quoted()
+
+      assert nil == Attrs.parse(ast, [])
+    end
   end
 end

@@ -11,10 +11,11 @@ defmodule Umwelt.Parser.Operator do
 
   require Logger
   @log_message "Unknown AST skipped in Operator.parse"
+  alias Umwelt.Felixir.{Operator, Unary}
   alias Umwelt.Parser
 
   defguard is_special_operator(term)
-           when term in [:^, :., :=, :&, :"::"]
+           when term in [:^, :., :=, :&, :"::", :|, :<>]
 
   defguard is_comparison_operator(term)
            when term in [:==, :!=, :===, :!==, :<, :<=, :>, :>=]
@@ -40,56 +41,35 @@ defmodule Umwelt.Parser.Operator do
                   is_strict_bool_operator(term)
 
   # compactize Kernel calls
-  def parse({{:., _, [{:__aliases__, _, [:Kernel]}, term]}, _, arguments}, aliases)
-      when is_atom(term),
-      do: Parser.parse({term, [], arguments}, aliases)
+  def parse({{:., _, _}, _, _} = ast, aliases, context),
+    do: Parser.Call.parse(ast, aliases, context)
 
-  # qualified call node
-  def parse({{:., _, [{:__aliases__, _, module}, term]}, _, arguments}, aliases)
-      when is_atom(term),
-      do: %{
-        body: to_string(term),
-        context: Enum.map(module, &to_string/1),
-        kind: :Call,
-        arguments: Parser.parse_list(arguments, aliases)
-      }
-
-  def parse(
-        {{:., [from_brackets: true, line: _], [Access, :get]}, [from_brackets: true, line: _],
-         [from, key]},
-        aliases
-      ),
-      do: %{
-        kind: :Access,
-        source: Parser.parse(from, aliases),
-        key: Parser.parse(key, aliases)
-      }
-
-  def parse({:=, _, [left, {name, _, nil}]}, aliases),
-    do: %{
-      body: to_string(name),
-      kind: :Match,
-      term: Parser.parse(left, aliases)
+  def parse({:\\, _, [left, right]}, aliases, context),
+    do: %Operator{
+      name: "default",
+      left: Parser.parse(left, aliases, context),
+      right: Parser.parse(right, aliases, context)
     }
 
-  def parse({:\\, _, [arg, []]}, aliases) do
-    arg
-    |> Parser.parse(aliases)
-    |> Map.put_new(:default, %{kind: :Value, type: Parser.Literal.type_of(:list)})
-  end
+  def parse({:=, _, [left, right]}, aliases, context),
+    do: %Operator{
+      name: "match",
+      left: Parser.parse(left, aliases, context),
+      right: Parser.parse(right, aliases, context)
+    }
 
-  def parse({:\\, _, [arg, default]}, aliases) do
-    arg
-    |> Parser.parse(aliases)
-    |> Map.put_new(:default, Parser.parse(default, aliases))
-  end
+  def parse({:in, _, [left, right]}, aliases, context) when is_list(right),
+    do: %Operator{
+      name: "membership",
+      left: Parser.parse(left, aliases, context),
+      right: Parser.parse_list(right, aliases, context)
+    }
 
-  def parse({:in, _, [left, right]}, aliases) when is_list(right),
-    do: %{
-      body: "membership",
-      kind: :Operator,
-      left: Parser.parse(left, aliases),
-      right: Parser.parse_list(right, aliases)
+  def parse({:|, _, [head, tail]}, aliases, context),
+    do: %Operator{
+      name: "alter",
+      left: Parser.parse(head, aliases, context),
+      right: Parser.parse(tail, aliases, context)
     }
 
   # def parse({:^, _, [left, {name, _, nil}]}, aliases),
@@ -106,31 +86,27 @@ defmodule Umwelt.Parser.Operator do
   #     term: Parser.parse(left, aliases)
   #   }
 
-  def parse({:"::", _, [left, {type, _, nil}]}, aliases) do
-    left
-    |> Parser.parse(aliases)
-    |> Map.put(:type, Parser.Literal.type_of(type))
-  end
+  def parse({:"::", _, _} = ast, aliases, context),
+    do: Parser.Typespec.parse(ast, aliases, context)
 
-  def parse({:"::", _, [left, right]}, aliases) do
-    left
-    |> Parser.parse(aliases)
-    |> Map.put(:type, Parser.parse(right, aliases))
-  end
-
-  def parse({term, _, [expr]}, aliases) when is_unary(term),
-    do: %{
-      body: to_string(term),
-      kind: :Operator,
-      expr: Parser.parse(expr, aliases)
+  def parse({term, _, [expr]}, aliases, context) when is_unary(term),
+    do: %Unary{
+      name: to_string(term),
+      expr: Parser.parse(expr, aliases, context)
     }
 
-  def parse({term, _, [left, right]}, aliases) when is_atom(term),
-    do: %{
-      body: to_string(term),
-      kind: :Operator,
-      left: Parser.maybe_list_parse(left, aliases),
-      right: Parser.maybe_list_parse(right, aliases)
+  def parse({:when, _, [left, right]}, aliases, context),
+    do: %Operator{
+      name: "when",
+      left: Parser.maybe_list_parse(left, aliases, context),
+      right: Parser.maybe_list_parse(right, aliases, context)
+    }
+
+  def parse({term, _, [left, right]}, aliases, context) when is_atom(term),
+    do: %Operator{
+      name: to_string(term),
+      left: Parser.maybe_list_parse(left, aliases, context),
+      right: Parser.maybe_list_parse(right, aliases, context)
     }
 
   def parse(ast, _aliases) do

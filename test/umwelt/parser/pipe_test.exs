@@ -1,8 +1,8 @@
 defmodule Umwelt.Parser.PipeTest do
   use ExUnit.Case, async: true
 
+  alias Umwelt.Felixir.{Literal, Pipe, Variable}
   alias Umwelt.Parser
-  alias Umwelt.Parser.Pipe
 
   import Umwelt.Parser.Pipe,
     only: [
@@ -33,32 +33,28 @@ defmodule Umwelt.Parser.PipeTest do
       {:ok, piped_ast} = Code.string_to_quoted("bar |> foo(baz)")
       {:ok, unpiped_ast} = Code.string_to_quoted("foo(bar, baz)")
 
-      assert Parser.parse(unpiped_ast, []) ==
-               Pipe.parse(piped_ast, [])
+      assert Parser.parse(unpiped_ast, [], []) ==
+               Parser.Pipe.parse(piped_ast, [], [])
     end
 
     test "literal list with head & tail" do
       {:ok, ast} = Code.string_to_quoted("head | tail")
 
-      assert %{
-               body: "|",
-               kind: :Pipe,
-               left: %{type: %{type: :anything, kind: :Literal}, body: "head", kind: :Variable},
-               right: [%{type: %{type: :anything, kind: :Literal}, body: "tail", kind: :Variable}]
-             } == Pipe.parse(ast, [])
+      assert %Pipe{
+               name: "|",
+               left: %Variable{type: %Literal{type: :anything}, body: "head"},
+               right: %Variable{type: %Literal{type: :anything}, body: "tail"}
+             } == Parser.Pipe.parse(ast, [], [])
     end
 
     test "other operator" do
       {:ok, ast} = Code.string_to_quoted("left <~> right")
 
-      assert %{
-               body: "<~>",
-               kind: :Pipe,
-               values: [
-                 %{type: %{kind: :Literal, type: :anything}, body: "left", kind: :Variable},
-                 %{type: %{kind: :Literal, type: :anything}, body: "right", kind: :Variable}
-               ]
-             } == Pipe.parse(ast, [])
+      assert %Pipe{
+               name: "<~>",
+               left: %Variable{type: %Literal{type: :anything}, body: "left"},
+               right: %Variable{type: %Literal{type: :anything}, body: "right"}
+             } == Parser.Pipe.parse(ast, [], [])
     end
   end
 end

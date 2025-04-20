@@ -1,6 +1,7 @@
 defmodule Umwelt.Parser.AliasesTest do
   use ExUnit.Case, async: true
 
+  alias Umwelt.Felixir.Alias
   alias Umwelt.Parser.Aliases
 
   describe "parse in context" do
@@ -11,7 +12,7 @@ defmodule Umwelt.Parser.AliasesTest do
         """
         |> Code.string_to_quoted()
 
-      assert %{kind: :Alias, name: "Bar", path: ["Foo", "Bar"]} == Aliases.parse(ast, [], ["Woo"])
+      assert %Alias{name: "Bar", path: ["Foo", "Bar"]} == Aliases.parse(ast, [], ["Woo"])
     end
 
     test "parse single named alias" do
@@ -21,7 +22,7 @@ defmodule Umwelt.Parser.AliasesTest do
         """
         |> Code.string_to_quoted()
 
-      assert %{kind: :Alias, name: "Cfg", path: ["Estructura", "Config"]} ==
+      assert %Alias{name: "Cfg", path: ["Estructura", "Config"]} ==
                Aliases.parse(ast, [], ["Woo"])
     end
 
@@ -33,8 +34,8 @@ defmodule Umwelt.Parser.AliasesTest do
         |> Code.string_to_quoted()
 
       assert [
-               %{name: "Bar", path: ["Foo", "Bar"], kind: :Alias},
-               %{name: "Baz", path: ["Foo", "Baz"], kind: :Alias}
+               %Alias{name: "Bar", path: ["Foo", "Bar"]},
+               %Alias{name: "Baz", path: ["Foo", "Baz"]}
              ] == Aliases.parse(ast, [], ["Woo"])
     end
 
@@ -46,8 +47,8 @@ defmodule Umwelt.Parser.AliasesTest do
         |> Code.string_to_quoted()
 
       assert [
-               %{name: "Bar", path: ["Woo", "Foo", "Bar"], kind: :Alias},
-               %{name: "Baz", path: ["Woo", "Foo", "Baz"], kind: :Alias}
+               %Alias{name: "Bar", path: ["Woo", "Foo", "Bar"]},
+               %Alias{name: "Baz", path: ["Woo", "Foo", "Baz"]}
              ] == Aliases.parse(ast, [], ["Woo"])
     end
   end
@@ -61,19 +62,19 @@ defmodule Umwelt.Parser.AliasesTest do
 
     test "aliases not match" do
       module = [:Foo, :Bar]
-      aliases = [%{kind: :Alias, name: "Baz", path: ["Bar", "Baz"]}]
+      aliases = [%Alias{name: "Baz", path: ["Bar", "Baz"]}]
       assert ["Foo", "Bar"] == Aliases.full_path(module, aliases, ["Woo"])
     end
 
     test "aliases match and module expanded" do
       module = [:Bar, :Baz]
-      aliases = [%{kind: :Alias, name: "Bar", path: ["Foo", "Bar"]}]
+      aliases = [%Alias{name: "Bar", path: ["Foo", "Bar"]}]
       assert ["Foo", "Bar", "Baz"] == Aliases.full_path(module, aliases, ["Woo"])
     end
 
     test "module expanded with context" do
       module = [{:__MODULE__, [], nil}, :Bar, :Baz]
-      aliases = [%{kind: :Alias, name: "Bar", path: ["Foo", "Bar"]}]
+      aliases = [%Alias{name: "Bar", path: ["Foo", "Bar"]}]
       assert ["Woo", "Bar", "Baz"] == Aliases.full_path(module, aliases, ["Woo"])
     end
   end
