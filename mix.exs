@@ -4,7 +4,7 @@ defmodule Umwelt.MixProject do
   def project do
     [
       app: :umwelt,
-      version: "0.3.0",
+      version: "0.3.1",
       elixir: "~> 1.17",
       compilers: [:leex, :yecc] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -36,7 +36,7 @@ defmodule Umwelt.MixProject do
       {:bypass, "~> 2.1", only: :test},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.29", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.38", only: :dev, runtime: false}
     ]
   end
 
