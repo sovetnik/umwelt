@@ -17,5 +17,8 @@ defmodule Umwelt.Felixir.Structure do
 
     def resolve(variable, %Variable{type: %Literal{type: :anything}}),
       do: variable
+
+    def resolve(variable, %Variable{type: type}),
+      do: Map.put(variable, :type, type)
   end
 end

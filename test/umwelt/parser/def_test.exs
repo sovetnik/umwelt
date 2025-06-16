@@ -117,6 +117,35 @@ defmodule Umwelt.Parser.DefTest do
            } == Def.parse(ast, [], [])
   end
 
+  test "keyword map arg" do
+    {:ok, ast} =
+      """
+      def identify(%{validation: key}), do: "validation.{key}"
+      """
+      |> Code.string_to_quoted()
+
+    assert %Function{
+             body: %Call{
+               arguments: [
+                 %Structure{
+                   elements: [
+                     %Structure{
+                       type: %Literal{type: :tuple},
+                       elements: [
+                         %Value{body: "validation", type: %Literal{type: :atom}},
+                         %Variable{body: "key", type: %Literal{type: :anything}}
+                       ]
+                     }
+                   ],
+                   type: %Literal{type: :map}
+                 }
+               ],
+               name: "identify",
+               type: %Literal{type: :anything}
+             }
+           } == Def.parse(ast, [], [])
+  end
+
   test "typed variable Bar.Baz" do
     {:ok, ast} = Code.string_to_quoted("def foo(%Bar.Baz{} = bar)")
 

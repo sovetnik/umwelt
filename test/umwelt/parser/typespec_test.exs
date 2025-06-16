@@ -56,6 +56,83 @@ defmodule Umwelt.Parser.TypespecTest do
                }
              } == Typespec.parse(ast, [], [])
     end
+
+    test "list in spec" do
+      {:ok, ast} =
+        """
+        @spec expand_paths([String.t()], String.t()) :: [{String.t(), String.t()}]
+        """
+        |> Code.string_to_quoted()
+
+      assert %{
+               spec: %Call{
+                 arguments: [
+                   %Structure{type: %Literal{type: :list}, elements: [%Literal{type: :string}]},
+                   %Literal{type: :string}
+                 ],
+                 name: "expand_paths",
+                 type: [
+                   %Structure{
+                     type: %Literal{type: :tuple},
+                     elements: [%Literal{type: :string}, %Literal{type: :string}]
+                   }
+                 ]
+               }
+             } == Typespec.parse(ast, [], [])
+    end
+
+    test "tuple in spec" do
+      {:ok, ast} =
+        """
+        @spec with_locale(String.t()) :: {String.t(), String.t()}
+        """
+        |> Code.string_to_quoted()
+
+      assert %{
+               spec: %Call{
+                 arguments: [
+                   %Literal{type: :string}
+                 ],
+                 context: [],
+                 name: "with_locale",
+                 note: "",
+                 type: %Structure{
+                   type: %Literal{
+                     type: :tuple
+                   },
+                   elements: [
+                     %Literal{type: :string},
+                     %Literal{type: :string}
+                   ]
+                 }
+               }
+             } == Typespec.parse(ast, [], [])
+    end
+
+    test "match nil in alter" do
+      {:ok, ast} =
+        """
+        @spec lookup(String.t(), map(), keyword(), String.t() | nil) :: String.t()
+        """
+        |> Code.string_to_quoted()
+
+      assert %{
+               spec: %Call{
+                 arguments: [
+                   %Literal{type: :string},
+                   %Call{name: "map", type: %Literal{type: :anything}},
+                   %Call{name: "keyword", type: %Literal{type: :anything}},
+                   %Operator{
+                     name: "alter",
+                     left: %Literal{type: :string},
+                     right: %Value{body: "nil", type: %Literal{type: :atom}}
+                   }
+                 ],
+                 name: "lookup",
+                 type: %Literal{type: :string}
+               }
+             } == Typespec.parse(ast, [], [])
+    end
   end
 
   describe "parse @type" do
