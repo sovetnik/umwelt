@@ -3,15 +3,10 @@ defmodule Umwelt.Parser.Util do
 
   def string_or(value, replace) do
     case value do
-      value when is_binary(value) ->
-        string =
-          value
-          |> String.split("\n")
-          |> List.first()
-
-        if String.length(string) < 255,
+      string when is_binary(string) ->
+        if String.length(string) in 1..255,
           do: string,
-          else: replace
+          else: "#{String.slice(string, 0..250)}..."
 
       _ ->
         replace

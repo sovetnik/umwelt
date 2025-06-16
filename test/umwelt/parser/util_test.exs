@@ -8,16 +8,16 @@ defmodule Umwelt.Parser.UtilTest do
   end
 
   test "multiline string" do
-    assert "boogie" ==
+    assert "boogie\nwoogie\n" ==
              """
              boogie
              woogie
              """
-             |> Util.string_or("bar")
+             |> Util.string_or("moogy")
   end
 
   test "long string" do
-    assert "bar" ==
+    assert "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus scelerisque urna quis nibh ornare, id pulvinar urna lobortis. Ut vel justo sit amet elit porta efficitur ac id ipsum. Pellentesque porta tempus odio, ut scelerisque metus condimentum ut...." ==
              """
              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus scelerisque urna quis nibh ornare, id pulvinar urna lobortis. Ut vel justo sit amet elit porta efficitur ac id ipsum. Pellentesque porta tempus odio, ut scelerisque metus condimentum ut. Suspendisse nec dolor odio. Ut facilisis viverra accumsan. Nulla quis nulla ut ante luctus rutrum. 
              """
