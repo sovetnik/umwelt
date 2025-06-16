@@ -11,6 +11,11 @@ defmodule Umwelt.Felixir.Operator do
 
   alias Umwelt.Felixir.{Call, Literal, Operator, Structure, Variable}
 
+  def type_equation(%Operator{name: "alter", left: left, right: %{type: right_type}} = op) do
+    left = Map.put(left, :type, right_type)
+    Map.put(op, :left, Map.put(left, :type, left))
+  end
+
   def type_equation(
         %Operator{
           name: "default",
@@ -48,6 +53,9 @@ defmodule Umwelt.Felixir.Operator do
       do: call
 
     def resolve(%Operator{name: "default", left: variable}, %{type: type}),
+      do: Map.put(variable, :type, type)
+
+    def resolve(%Operator{name: "default", left: variable, right: %{type: type}}, _),
       do: Map.put(variable, :type, type)
   end
 end

@@ -19,7 +19,7 @@ defmodule Umwelt.Parser.Functions do
   end
 
   # here we extract functions from list of parsed module children
-  def extract(block_children, index) do
+  defp extract(block_children, index) do
     Enum.reduce([[%Function{}] | block_children], fn
       %{moduledoc: _value} = element, acc
       when not is_struct(element) ->

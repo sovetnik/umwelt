@@ -37,7 +37,10 @@ defmodule Umwelt.Parser.Types do
   defp with_types(args, types) do
     Enum.map(args, fn
       %Call{name: name, type: type} = variable ->
-        Map.put(variable, :type, types[name] || type)
+        case maybe_literal(name) do
+          %Literal{type: :anything} -> Map.put(variable, :type, types[name] || type)
+          %Literal{} = literal -> %Variable{body: name, type: literal}
+        end
 
       %Literal{} = literal ->
         literal
